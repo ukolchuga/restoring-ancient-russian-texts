@@ -3,11 +3,8 @@ from transformers import pipeline
 MODEL_PATH = "./old_rus_bert_best/checkpoint-3600"
 
 
-fill_mask = pipeline(
-    "fill-mask",
-    model=MODEL_PATH,
-    tokenizer=MODEL_PATH
-)
+fill_mask = pipeline("fill-mask", model=MODEL_PATH, tokenizer=MODEL_PATH)
+
 
 def test_model(text):
     print(f"\n📖 Text: {text}")
@@ -17,11 +14,11 @@ def test_model(text):
 
 
 texts = [
-"поклоно ѿ онѳима ко [MASK]",
-"а посулов бояром и околничим не [MASK]",
-"за млтвѹ стхъ ѡць наших ги їсе хе сне бжїи [MASK] мѧ",
-"во имѧ ѿц҃а и [MASK] и ст҃го дх҃а",
-"господи [MASK] мѧ грѣшника"
+    "поклоно ѿ онѳима ко [MASK]",
+    "а посулов бояром и околничим не [MASK]",
+    "за млтвѹ стхъ ѡць наших ги їсе хе сне бжїи [MASK] мѧ",
+    "во имѧ ѿц҃а и [MASK] и ст҃го дх҃а",
+    "господи [MASK] мѧ грѣшника",
 ]
 for text in texts:
     test_model(text)

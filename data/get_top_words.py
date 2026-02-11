@@ -2,7 +2,7 @@ text_file = "final_dataset_clean.txt"
 
 word_freq = {}
 
-with open(text_file, 'r', encoding='utf-8') as f:
+with open(text_file, "r", encoding="utf-8") as f:
     for line in f:
         words = line.split()
         for word in words:

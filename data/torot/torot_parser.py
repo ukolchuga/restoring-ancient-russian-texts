@@ -11,7 +11,7 @@ def parse_conll_file(filepath):
     sentences = []
     current_sentence = []
 
-    with open(filepath, 'r', encoding='utf-8') as f:
+    with open(filepath, "r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
 
@@ -29,7 +29,7 @@ def parse_conll_file(filepath):
                 continue
 
             # Word - 2nd column
-            parts = line.split('\t')
+            parts = line.split("\t")
             if len(parts) > 1:
                 word = parts[1]
 
@@ -39,9 +39,6 @@ def parse_conll_file(filepath):
     if current_sentence:
         sentences.append(" ".join(current_sentence))
     return sentences
-
-
-
 
 
 all_files = glob.glob(os.path.join(DATA_DIR, "*.conll"))
@@ -56,11 +53,11 @@ for filepath in tqdm(all_files, desc="Parsing"):
         print(f"Error parsing {filepath}: {e}")
 
 print(f"Total valid sentences extracted: {len(valid_sentences)}")
-with open(OUTPUT_FILE, 'w', encoding='utf-8') as f_out:
+with open(OUTPUT_FILE, "w", encoding="utf-8") as f_out:
     for sent in valid_sentences:
         f_out.write(sent + "\n")
 
 print(f"Wrote output to {OUTPUT_FILE}")
-with open(OUTPUT_FILE, 'r', encoding='utf-8') as f:
+with open(OUTPUT_FILE, "r", encoding="utf-8") as f:
     for i in range(3):
         print(f.readline().strip())

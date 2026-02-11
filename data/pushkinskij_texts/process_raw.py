@@ -1,9 +1,9 @@
 import os
 
+
 def merge_manual_files_no_filter():
     input_folder = "raw_texts"
     output_file = "pushkinskij_full.txt"
-
 
     all_files = [f for f in os.listdir(input_folder) if f.endswith(".txt")]
 

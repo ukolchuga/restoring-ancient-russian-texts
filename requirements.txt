@@ -7,3 +7,5 @@ BeautifulSoup4
 
 pandas
 tqdm
+
+black
