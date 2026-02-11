@@ -11,15 +11,10 @@ def advanced_clean_text(text):
     if not isinstance(text, str):
         return ""
 
-    # 1. Удаляем невидимый мусор
     text = text.replace("\ufeff", "").replace("\u200b", "")
 
-    # 2. Удаляем PUA-символы (Private Use Area)
-    # Это уберет ваши \uf074, \uf13f, \uf2d1 и прочие артефакты шрифтов
     text = re.sub(r"[\ue000-\uf8ff]", "", text)
 
-    # 3. Нормализация гомоглифов (Латиница -> Кириллица)
-    # Превращаем "лже-русские" буквы в настоящие
     replacements = {
         "A": "А",
         "a": "а",
@@ -29,7 +24,7 @@ def advanced_clean_text(text):
         "K": "К",
         "k": "к",
         "M": "М",
-        "H": "Н",  # H латинская -> Н кириллическая
+        "H": "Н",
         "O": "О",
         "o": "о",
         "P": "Р",
@@ -37,19 +32,27 @@ def advanced_clean_text(text):
         "C": "С",
         "c": "с",
         "T": "Т",
-        "y": "у",  # y латинская -> у кириллическая
+        "y": "у",
         "X": "Х",
         "x": "х",
     }
     for lat, cyr in replacements.items():
         text = text.replace(lat, cyr)
 
-    # 4. Удаляем надстрочные знаки (титла, ударения, звательца)
-    # Диапазон \u0300-\u036f (диакритика) и \u0483-\u0489 (титла)
-    # Это превратит "сн҃а" в "сна", "цр҃ь" в "црь"
-    text = re.sub(r"[\u0300-\u036f\u0483-\u0489]", "", text)
 
-    # 5. Схлопываем множественные пробелы
+    text = re.sub(r"[\u0300-\u036f]", "", text)
+
+
+    abbrev_map = {
+        r"\bбг\b": "богъ",
+        r"\bгд\b": "господь",
+        r"\bсн\b": "сынъ",
+        r"\bхс\b": "христосъ",
+    }
+    for pattern, repl in abbrev_map.items():
+        text = re.sub(pattern, repl, text, flags=re.IGNORECASE)
+
+
     text = re.sub(r"\s+", " ", text).strip()
 
     return text
