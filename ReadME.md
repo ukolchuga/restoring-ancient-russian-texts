@@ -1,0 +1,1 @@
+## Old Russian Bert 3600 checkpoint: https://huggingface.co/AlexSychovUN/old-russian-bert
