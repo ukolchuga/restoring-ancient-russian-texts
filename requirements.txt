@@ -1,0 +1,9 @@
+torch
+transformers
+datasets
+
+requests
+BeautifulSoup4
+
+pandas
+tqdm
