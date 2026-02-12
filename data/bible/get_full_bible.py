@@ -87,7 +87,7 @@ def download_and_clean_ponomar_bible():
     total_lines = 0
 
     print(f"Downloading {len(books)} books:")
-
+    TITLO_RANGE = range(0x0483, 0x0488)
     with open(output_file, "w", encoding="utf-8") as f_out:
         for book in books:
             url = BASE_URL + book
@@ -100,19 +100,21 @@ def download_and_clean_ponomar_bible():
                     clean_lines = []
 
                     for line in text.split("\n"):
-                        # Getting rid of all metadata
                         line = re.sub(r"^\d+\s*\|\s*", "", line)
-                        # Getting rid of all types of comments
                         line = re.sub(r"\*\*.*?\*\*", "", line)
 
                         if not line.strip():
                             continue
 
                         nfd_form = unicodedata.normalize("NFD", line)
-                        clean_text = "".join(
-                            [c for c in nfd_form if unicodedata.category(c) != "Mn"]
-                        )
 
+                        clean_chars = []
+                        for c in nfd_form:
+
+                            if unicodedata.category(c) != "Mn" or ord(c) in TITLO_RANGE:
+                                clean_chars.append(c)
+
+                        clean_text = unicodedata.normalize("NFC", "".join(clean_chars))
                         clean_text = clean_text.strip()
 
                         if len(clean_text) > 5:
