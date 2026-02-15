@@ -11,10 +11,11 @@ def advanced_clean_text(text):
     if not isinstance(text, str):
         return ""
 
+    # 1. Мусор
     text = text.replace("\ufeff", "").replace("\u200b", "")
-
     text = re.sub(r"[\ue000-\uf8ff]", "", text)
 
+    # 2. Гомоглифы (ОНИ-ТО И СЛОМАЛИ ТЕГИ!)
     replacements = {
         "A": "А",
         "a": "а",
@@ -39,21 +40,42 @@ def advanced_clean_text(text):
     for lat, cyr in replacements.items():
         text = text.replace(lat, cyr)
 
-
+    # 3. Удаляем ударения, но ОСТАВЛЯЕМ титла
     text = re.sub(r"[\u0300-\u036f]", "", text)
 
-
+    # 4. ЧИНИМ СЛОВА (Только если титла нет!)
+    TITLO = r"[\u0483-\u0489]"
     abbrev_map = {
-        r"\bбг\b": "богъ",
-        r"\bгд\b": "господь",
-        r"\bсн\b": "сынъ",
-        r"\bхс\b": "христосъ",
+        rf"\bбг\b(?!{TITLO})": "богъ",
+        rf"\bгд\b(?!{TITLO})": "господь",
+        rf"\bсн\b(?!{TITLO})": "сынъ",
+        rf"\bхс\b(?!{TITLO})": "христосъ",
+        rf"\bгн\b(?!{TITLO})": "господинъ",
     }
     for pattern, repl in abbrev_map.items():
         text = re.sub(pattern, repl, text, flags=re.IGNORECASE)
 
-
+    # 5. Пробелы
     text = re.sub(r"\s+", " ", text).strip()
+
+    # --- ПАТЧ: ВОССТАНОВЛЕНИЕ ТЕГОВ ---
+    # Мы ищем "испорченные" кириллицей теги и возвращаем их в латиницу.
+    # Так как мы точно знаем, какие теги используем, проще всего сделать replace.
+
+    # [СТХ_СНURСН] -> [CTX_CHURCH]
+    text = text.replace("[СТХ_СНURСН]", "[CTX_CHURCH]")
+
+    # [СТХ_LЕGАL] -> [CTX_LEGAL] (L, G остались латиницей, E, A стали кириллицей)
+    text = text.replace("[СТХ_LЕGАL]", "[CTX_LEGAL]")
+
+    # [СТХ_DАILY] -> [CTX_DAILY] (D, I, L, Y латиница, A кириллица)
+    text = text.replace("[СТХ_DАILY]", "[CTX_DAILY]")
+
+    # [СТХ_ВООК] -> [CTX_BOOK] (B, O, O, K стали кириллицей)
+    text = text.replace("[СТХ_ВООК]", "[CTX_BOOK]")
+
+    # [UNК] -> [UNK] (K стала кириллицей)
+    text = text.replace("[UNК]", "[UNK]")
 
     return text
 
