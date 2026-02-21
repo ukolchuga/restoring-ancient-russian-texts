@@ -1,6 +1,7 @@
 import requests
 import re
 import unicodedata
+import csv
 
 
 def download_and_clean_ponomar_bible():
@@ -84,22 +85,31 @@ def download_and_clean_ponomar_bible():
     ]
 
     output_file = "bible_full_clean.txt"
-    total_lines = 0
+    csv_output_file = "bible_metadata.csv"
 
-    print(f"Downloading {len(books)} books:")
+    total_lines = 0
+    total_tokens = 0
+
+    print(f"🚀 Downloading {len(books)} books:\n")
     TITLO_RANGE = range(0x0483, 0x0488)
+
+    # Подготавливаем данные для CSV
+    csv_data = [["Book_Filename", "Lines", "Tokens"]]
+
     with open(output_file, "w", encoding="utf-8") as f_out:
         for book in books:
             url = BASE_URL + book
             try:
-                print(f"Downloading {book}...", end=" ")
+                print(f"Downloading {book:<15}...", end=" ")
                 response = requests.get(url)
 
                 if response.status_code == 200:
                     text = response.text
                     clean_lines = []
+                    file_tokens_count = 0
 
                     for line in text.split("\n"):
+                        # Убираем номера строк и выделения
                         line = re.sub(r"^\d+\s*\|\s*", "", line)
                         line = re.sub(r"\*\*.*?\*\*", "", line)
 
@@ -110,7 +120,7 @@ def download_and_clean_ponomar_bible():
 
                         clean_chars = []
                         for c in nfd_form:
-
+                            # Убираем диакритику, но сохраняем титла
                             if unicodedata.category(c) != "Mn" or ord(c) in TITLO_RANGE:
                                 clean_chars.append(c)
 
@@ -120,23 +130,48 @@ def download_and_clean_ponomar_bible():
                         if len(clean_text) > 5:
                             clean_lines.append(clean_text)
 
+                            # Подсчет токенов (слова + знаки препинания)
+                            tokens_in_line = len(re.findall(r"\w+|[^\w\s]", clean_text))
+                            file_tokens_count += tokens_in_line
+
+                    file_lines_count = len(clean_lines)
+
+                    # Записываем в общий файл с разделителем
                     f_out.write(f"\n\n--- {book} ---\n")
                     f_out.write("\n".join(clean_lines))
-                    total_lines += len(clean_lines)
-                    print(f"Ok ({len(clean_lines)} lines)")
+
+                    total_lines += file_lines_count
+                    total_tokens += file_tokens_count
+
+                    # Добавляем в массив для таблицы
+                    csv_data.append([book, file_lines_count, file_tokens_count])
+
+                    print(
+                        f"✅ Ok ({file_lines_count} lines, {file_tokens_count} tokens)"
+                    )
                 else:
-                    print(f"Error {response.status_code}")
+                    print(f"❌ Error {response.status_code}")
             except Exception as e:
-                print(f"Error: {e}")
+                print(f"⚠️ Error: {e}")
 
-    print(f"\nFine! The file is saved: {output_file}")
-    print(f"All lines: {total_lines}")
-    print("Example of the cleaned text:")
+    # Сохраняем статистику в CSV
+    with open(csv_output_file, "w", encoding="utf-8", newline="") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerows(csv_data)
 
+    print("\n" + "=" * 60)
+    print(f"🔥 ГОТОВО! Итоговый файл: {output_file}")
+    print(f"📊 Статистика сохранена в: {csv_output_file}")
+    print(f"Всего строк: {total_lines}")
+    print(f"Всего токенов (TOROT style): {total_tokens}")
+    print("=" * 60)
+
+    print("\nExample of the cleaned text:")
     with open(output_file, "r", encoding="utf-8") as f:
+        # Пропускаем первые 5 строк (там могут быть разделители и пустые строки)
         for _ in range(5):
             next(f)
-        print(f.readline())
+        print(f.readline().strip())
 
 
 if __name__ == "__main__":

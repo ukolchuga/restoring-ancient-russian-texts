@@ -1,0 +1,653 @@
+Filename,Original_Title,Language,Epoch,Area,Lines,Tokens
+001_Zografsko_Evangelie.txt,Zografsko Evangelie,Old Church Slavonic,Old Church Slavonic,"Zograph Monastery, Bulgaria",16,1345
+002_Slovo_za_veliki_Petăk.txt,Slovo za veliki Petăk,Old Church Slavonic,Old Church Slavonic,Bulgaria,16,1107
+003_Mariinsko_evangelie.txt,Mariinsko evangelie,Old Church Slavonic,Old Church Slavonic,Bulgaria or Macedonia,637,66857
+004_Sinajski_Psaltir.txt,Sinajski Psaltir,Old Church Slavonic,Old Church Slavonic,"Saint Catherine's Monastery, Sinai Peninsula, Egypt",3,274
+005_Suprasălski_sbornik.txt,Suprasălski sbornik,Old Church Slavonic,Old Church Slavonic,"Supraśl, Poland",999,125330
+006_Novgorod_service_book_marginalia.txt,Novgorod service book marginalia,Old Russian,Old Church Slavonic,,2,117
+007_Colophon_to_the_Ostromir_Codex.txt,Colophon to the Ostromir Codex,Old Russian,Church Slavonic,,3,244
+008_Mstislav_s_letter.txt,Mstislav’s letter,Old Russian,Church Slavonic,,2,188
+009_The_Primary_Chronicle_Codex_Laurentianus.txt,"The Primary Chronicle, Codex Laurentianus",Old Church Slavonic,Church Slavonic,"Lavra (Kyiv Pechersk Lavra), Ukraine",607,62372
+010_Pooučenie_na_pamjat_stouju_vr_chov_njuju_apostolou.txt,Pooučenie na pamjat' stouju vr'chov'njuju apostolou Petra i Pavla,Old Russian,Church Slavonic,Russia,12,402
+011_Zapovědaniě_o_prazd_nicěchă.txt,Zapovědaniě o prazd'nicěchă,Old Russian,Church Slavonic,Russia,15,681
+012_The_tale_of_Igor_s_campaign.txt,The tale of Igor’s campaign,Old East Slavic,Church Slavonic,,35,2800
+013_Slovo_pochvlal_no_na_pamjat_styima_i_prěslav_nyima.txt,Slovo pochvlal'no na pamjat' styima i prěslav'nyima oučitelema clověn'skou jazykou,Old Russian,Church Slavonic,Russia,125,3822
+014_Pooučenie_na_stǫjǫ_paschǫ.txt,Pooučenie na stǫjǫ paschǫ,Old Russian,Church Slavonic,Russia,14,698
+015_Poučenie_pred_pričastie.txt,Poučenie pred pričastie,Old Russian,Church Slavonic,Russia,33,839
+016_Pooučenie_na_stǫjǫ_paschǫ.txt,Pooučenie na stǫjǫ paschǫ,Old Russian,Church Slavonic,Russia,13,690
+017_Učitelno_evangelie.txt,Učitelno evangelie,Old Russian,Church Slavonic,Russia,6475,45885
+018_Varlaam_s_donation_charter_to_the_Xutyn_monastery.txt,Varlaam’s donation charter to the Xutyn monastery,Old Russian,Church Slavonic,,2,178
+019_Statute_of_Prince_Vladimir.txt,Statute of Prince Vladimir,Old Russian,Church Slavonic,,6,582
+020_Colophon_to_Mstislav_s_Gospel_book.txt,Colophon to Mstislav’s Gospel book,Old Russian,Church Slavonic,,4,327
+021_Kratăk_Zlatostruj.txt,Kratăk Zlatostruj,Old Russian,Church Slavonic,Russia,13667,122758
+022_The_First_Novgorod_Chronicle_Synodal_manuscript.txt,"The First Novgorod Chronicle, Synodal manuscript",Old Russian,Church Slavonic,,199,22560
+023_Novgorod_s_treaty_with_Grand_Prince_Jaroslav_Jaros.txt,"Novgorod’s treaty with Grand Prince Jaroslav Jaroslavich, 1266",Old Russian,Church Slavonic,,5,477
+024_Uspenskij_sbornik.txt,Uspenskij sbornik,Old Russian,Church Slavonic,,281,28294
+025_The_Kiev_Chronicle_Codex_Hypatianus.txt,"The Kiev Chronicle, Codex Hypatianus",Old Russian,Church Slavonic,"Kiev, Ukraine",7,625
+026_The_1229_Treaty_between_Smolensk_Riga_and_Gotland.txt,"The 1229 Treaty between Smolensk, Riga and Gotland (version A)",Old Russian,Church Slavonic,"Riga, Latvia",17,1475
+027_SLOVO_OUPATIJA_jefesăkago.txt,SLOVO OUPATIJA jefesăkago,Old Serbian,Church Slavonic,"Ephesus , Turkey",4,420
+028_Slovo_stgo_Polouta_Rim_skago_o_t_kovanii_danilově.txt,Slovo stgo Polouta Rim'skago o t'kovanii danilově,Old Serbian,Church Slavonic,"Rome , IT",4,309
+029_A_ce_t_kovanie_danilovo.txt,A ce t'kovanie danilovo,Old Serbian,Church Slavonic,,13,1293
+030_Viděnije_Danila_Propoka_o_crěch_i_poslědnich_dnech.txt,Viděnije Danila Propoka o crěch' i poslědnich' dnech' i o končině věka,Old Serbian,Church Slavonic,,18,1795
+031_Stago_Metodija_Jepiskoupa_Patr_skago_Oukazanie_ist.txt,Stago Metodija Jepiskoupa Patr'skago Oukazanie istoje o crěch' i o poslědnich' dnech' i lětchă,Old Serbian,Church Slavonic,"Patras, Greece",36,3302
+032_Stich_videnije_Danila_pr_o_rka.txt,Stich' videnije Danila pr(o)rka,Old Serbian,Church Slavonic,,6,484
+033_Viděnije_Isaie_Pro_r_ka_o_poslědnem_vrěmeni_č_to_c.txt,Viděnije Isaie Pro(r)ka o poslědnem' vrěmeni [č]to choščhet' byti rodou člo[v]čju poslědnemou kolěnou,Old Serbian,Church Slavonic,,14,1332
+034_Pan_dechovo_pr_o_rč_skoje_skazanie.txt,Pan'dechovo pr(o)rč'skoje skazanie,Old Serbian,Church Slavonic,,4,339
+035_Russkaja_Pravda.txt,Russkaja Pravda,Old Russian,Church Slavonic,,40,4293
+036_Missive_from_the_Archbishop_of_Riga_to_the_Prince.txt,"Missive from the Archbishop of Riga to the Prince of Smolensk, Old Church Slavonic Treebank",Old Russian,Church Slavonic,,2,183
+037_Birchbark_letters.txt,Birchbark letters,Old Russian,Church Slavonic,,20,1941
+038_Mesecă_oktjabr_fei_den_Pamjat_podrobnago_otza_ioan.txt,Mesecă oktjabr' fei den' Pamjat' podrobnago otza ioanna pustynnika,Middle Bulgarian,Church Slavonic,,373,3771
+039_Pochvalno_slovo_za_sv_Kiril.txt,Pochvalno slovo za sv. Kiril,Middle Bulgarian,Church Slavonic,Bulgaria,11,620
+040_Kanon_za_polagane_rizata_i_pojasa_na_Sv_Borodica.txt,Kanon za polagane rizata i pojasa na Sv. Borodica,Middle Bulgarian,Church Slavonic,Bulgaria,12,703
+041_Pochvala_na_prěstavlenie_prěstyja_bzja.txt,Pochvala na prěstavlenie prěstyja bzja,Old Serbian,Church Slavonic,Serbia,13,797
+042_Položenie_rizě_i_poěsou_prěstyja_bcja.txt,Položenie rizě i poěsou prěstyja bcja,Middle Bulgarian,Church Slavonic,Bulgaria,15,746
+043_Pochvala_na_prěstavlenie_vlačicja_našeja_bcja_i_pr.txt,Pochvala na prěstavlenie vlačicja našeja bcja i prisno dvy Marija,Old Serbian,Church Slavonic,"Ras, Serbia",27,922
+044_Prolog_i_Bogoslovie_Nebesa_ot_Isbor_na_zianieto_na.txt,Prolog i Bogoslovie (Nebesa) ot Isbor na zianieto na Joan Damaskin,Old Russian,Church Slavonic,Russia,1335,29564
+045_Шестоднев.txt,Шестоднев,Old Serbian,Church Slavonic,"Ras, Serbia",1331,33007
+046_šestodnev_čast_2.txt,šestodnev čast 2,Old Serbian,Church Slavonic,"Ras, Serbia",1331,33007
+047_Life_of_Sergij_of_Radonezh.txt,Life of Sergij of Radonezh,Old Russian,Church Slavonic,"Sergiyev Posad, Russia",228,22692
+048_Vita_Constantini.txt,Vita Constantini,Church Slavonic,Church Slavonic,"Hilandar Monastery, Mount Athos, Greece",11,885
+049_Vita_Methodii.txt,Vita Methodii,Church Slavonic,Church Slavonic,"Hilandar Monastery, Mount Athos, Greece",4,329
+050_Dušanova_kodifikacija_ZKJU_I_DZ_Sofijski_prepis.txt,"Dušanova kodifikacija (ZKJU I DZ), Sofijski prepis",Resavian,Church Slavonic,Sofia,373,12695
+051_Slova_na_avva_Dorotej.txt,Slova na avva Dorotej,Middle Bulgarian,Church Slavonic,Sofia,609,48713
+052_Slov_o_o_vi_sněch_iže_vidě_cr_šaik_iš_oče_blg_o_vi.txt,Slov(o) o vi sněch' iže vidě cr' šaik'iš' oče blg(o)vij,Resavian,Church Slavonic,,17,1669
+053_Borilov_sinodik.txt,Borilov sinodik,Middle Bulgarian,Church Slavonic,,722,13342
+054_Zadonščina.txt,Zadonščina,Old Russian,Church Slavonic,,28,2417
+055_Oustav_stgo_velikaago_i_văselenskago_iže_vă_Nikei.txt,Oustav' stgo velikaago i văselenskago iže vă Nikei vtorago săbora,Middle Bulgarian,Church Slavonic,"Nicaea, Turkey",66,1963
+056_Rešenie_na_săbora_na_patriarch_Mina.txt,Rešenie na săbora na patriarch Mina,Middle Bulgarian,Church Slavonic,,35,1548
+057_Molitva_na_postavlenie_cěsarja_fragment.txt,Molitva na postavlenie cěsarja (fragment),Middle Bulgarian,Church Slavonic,,13,274
+058_Tomos_unionis.txt,Tomos unionis,Middle Bulgarian,Church Slavonic,"Constantinople, Turkey",63,2309
+059_Mltva_na_postavlenie_kesara_se_že_i_na_postavlenie.txt,Mltva na postavlenie kesara se že i na postavlenie chranitelě polatě,Middle Bulgarian,Church Slavonic,,19,256
+060_Mlitvy_styǫ_pjatidesjatnicǫ.txt,Mlitvy styǫ pjatidesjatnicǫ,Middle Bulgarian,Church Slavonic,,45,2685
+061_čin_oum_veni_v_styi_veli_četvrtok.txt,čin' oum'veni v' styi veli četvrtok,Middle Bulgarian,Church Slavonic,"Turnovo, Bulgaria",34,3095
+062_Slovo_za_različnata_nepravda.txt,Slovo za različnata nepravda,Old Russian,Church Slavonic,Russia,61,907
+063_Poučenie_za_spasenieto_na_dušata.txt,Poučenie za spasenieto na dušata,Old Russian,Church Slavonic,Russia,153,2714
+064_Žitie_na_sv_Teodopa_Aleksanidrijska.txt,Žitie na sv. Teodopa Aleksanidrijska,Middle Bulgarian,Church Slavonic,Bulgaria,33,3819
+065_Triodna_čast_na_Patriaršeski_chomiliar_II.txt,Triodna čast na Patriaršeski chomiliar II,Middle Bulgarian,Church Slavonic,"Turnovo, Bulgaria",2124,35680
+066_Slovo_pochval_no_c_p_sano_klimentom_episkoupom_na.txt,Slovo pochval'no c'p'sano klimentom' episkoupom' na pamjat' blaženaego proroka Zacharija i o rod'stvě ioana kr'stiatelě,Old Russian,Church Slavonic,Russia,63,2409
+067_Pamjat_svjataego_Aleksiě_člověka_bžiě.txt,Pamjat' svjataego Aleksiě člověka bžiě,Middle Bulgarian,Church Slavonic,Bulgaria,17,1020
+068_Pachvala_prědv_naego_žitiě_Ilija_proroka.txt,Pachvala prědv'naego žitiě Ilija proroka,Old Serbian,Church Slavonic,"Ras, Serbia",32,1231
+069_Pochvala_stouemou_Klimenătou_patriarchou_Rim_skou.txt,Pochvala stouemou Klimenătou patriarchou Rim'skou,Old Russian,Church Slavonic,Moscow,26,1483
+070_Slovo_pochval_no_archanglou_Michailou_i_Gavriilou.txt,Slovo pochval'no archanglou Michailou i Gavriilou,Middle Bulgarian,Church Slavonic,Bulgaria,54,1719
+071_Pochvala_sbjatouemou_kurilou_Oučitelju_clověn_skou.txt,Pochvala sbjatouemou kurilou Oučitelju clověn'skou jazykou,Middle Bulgarian,Church Slavonic,Bulgaria,17,906
+072_Pooučenie_na_pamjat_stouju_vr_chov_njuju_apostolou.txt,Pooučenie na pamjat' stouju vr'chov'njuju apostolou Petra i Pav'la,Old Russian,Church Slavonic,Russia,11,401
+073_Slovo_na_cvětonos_nǫjǫ_nedělǫ.txt,Slovo na cvětonos'nǫjǫ nedělǫ,Middle Bulgarian,Church Slavonic,Bulgaria,56,1804
+074_Stgo_otca_metodiě_stchry_glas.txt,Stgo otca metodiě stchry glas,Old Serbian,Church Slavonic,"Ras, Serbia",192,1261
+075_Slovo_pochval_no_Noanou_Kr_stitelju.txt,Slovo pochval'no Noanou Kr'stitelju,Old Serbian,Church Slavonic,"Ras, Serbia",46,2201
+076_Žitie_i_žizn_prdpbiyǫ_matere_našę_paraskevi.txt,Žitie i žizn' prdpbiyǫ matere našę paraskevi,Middle Bulgarian,Church Slavonic,Bulgaria,244,4587
+077_Dioptra_na_Filip_Monotrop.txt,Dioptra na Filip Monotrop,Old Russian,Church Slavonic,Russia,3457,76643
+078_Germanov_sbornik_Čast_1_slovo_1-15.txt,Germanov sbornik Čast' 1 (slovo 1-15),Middle Bulgarian,Church Slavonic,Bulgaria,2842,20059
+079_Germanov_sbornik_Čast_2_slovo_16-28.txt,Germanov sbornik Čast' 2 (slovo 16-28),Middle Bulgarian,Church Slavonic,Bulgaria,2851,20882
+080_Germanov_sbornik_Čast_3_slovo_29-44.txt,Germanov sbornik Čast' 3 (slovo 29-44),Middle Bulgarian,Church Slavonic,Bulgaria,3319,24306
+081_Pověsti_o_isvěstovannyich_veščei_eže_o_kralechă_pr.txt,Pověsti o isvěstovannyich veščei eže o kralechă pričę,Middle Bulgarian,Church Slavonic,Bulgaria,382,8502
+082_Prěmǫdrago_manasia_i_l_topisca_c_branie_l_tno_1.txt,Prěmǫdrago manasia i l'topisca c'branie l'tno 1,Middle Bulgarian,Church Slavonic,Bulgaria,599,8261
+083_Prěmǫdrago_manasia_i_l_topisca_c_branie_l_tno_2-3.txt,Prěmǫdrago manasia i l'topisca c'branie l'tno 2-3,Middle Bulgarian,Church Slavonic,Bulgaria,1172,17616
+084_Prěmǫdrago_manasia_i_l_topisca_c_branie_l_tno_4-5.txt,Prěmǫdrago manasia i l'topisca c'branie l'tno 4-5,Middle Bulgarian,Church Slavonic,Bulgaria,1044,17441
+085_Prěmǫdrago_manasia_i_l_topisca_c_branie_l_tno_6-7.txt,Prěmǫdrago manasia i l'topisca c'branie l'tno 6-7,Middle Bulgarian,Church Slavonic,Bulgaria,950,17517
+086_Berlinski_sbornik.txt,Berlinski sbornik,Middle Bulgarian,Church Slavonic,Bulgaria,6519,49600
+087_Molitva_za_podpečatvane_neznamenovane_na_mladenec.txt,Molitva za podpečatvane/neznamenovane na mladenec na osmija den sled raždaneto i priemane na ime. Archaična versija,Old Russian,Church Slavonic,Russia,61,700
+088_Bož_stvnaa_služba_iže_v_svętych_Vasilia_Velikago.txt,Bož'stvnaa služba iže v svętych' Vasilia Velikago,Middle Bulgarian,Church Slavonic,Bulgaria,153,4000
+089_Bož_stvnaa_služba_svętych_liturgia_diakonskaa_kuri.txt,"Bož'stvnaa služba svętych' liturgia diakonskaa kuri Evevmia, patriarcha Tr'novskago",Middle Bulgarian,Church Slavonic,Bulgaria,429,5983
+090_Kur_Eveimia_patriarcha_molitva_na_kotoryǫęžde_liti.txt,Kur' Eveimia patriarcha molitva na kotoryǫęžde litię o cari,Middle Bulgarian,Church Slavonic,Bulgaria,4,205
+091_Pochvalnoe_cvętomou_Muchaulou_voinou_săpisanoe_Eve.txt,"Pochvalnoe cvętomou Muchaulou voinou, săpisanoe Eveimiem', pariarchom Trănovskym",Middle Bulgarian,Church Slavonic,Bulgaria,131,2789
+092_Molitvi_protiv_epidemii_-1_2_3_Iny_molitvy_pročita.txt,"Molitvi protiv epidemii -1,2,3. Iny molitvy, pročitaemyǫ vănegda bǫdet sămrătonosie",Middle Bulgarian,Church Slavonic,Bulgaria,39,1219
+093_Stgo_Isaie_pr_o_rka_o_buduši_ch_lětě_ch_i_o_crěm_s.txt,Stgo Isaie pr(o)rka o buduši(ch) lětě(ch) i o crěm' skazanie i o antichr(s)ta iže chošč(t) byti,Resavian,Church Slavonic,,22,2338
+094_The_list_of_the_Novgorodians_losses.txt,The list of the Novgorodians’ losses,Old Russian,Church Slavonic,,2,185
+095_S_bgom_počinaem_razoumnik_sie_je_s_oučite_l_v_sem.txt,S' bgom' počinaem' razoumnik' sie je(s) oučite(l) v'sem' clovom' ga ba i spa(s)a našego Iv(s) Cha (I red.),Resavian,Church Slavonic,,8,878
+096_Slovo_ga_naše_g_Isu_Cha_o_ne_m_kog_d_a_čto_sătvori.txt,Slovo ga naše(g) Isu Cha o ne(m) kog(d)a čto sătvoril' e(s) (I red. fragment),Middle Bulgarian,Church Slavonic,,3,349
+097_Chrismi_na_Lăv_Mădri.txt,Chrismi na Lăv Mădri,Middle Bulgarian,Church Slavonic,,30,2764
+098_Slovo_o_antichristě_o_č_blvi.txt,Slovo o antichristě o(č) blvi,Old Serbian,Church Slavonic,,13,1318
+099_Dialozi.txt,Dialozi,Old Russian,Church Slavonic,,7932,57472
+100_Pochvalno_slovo_za_Vrăbnica.txt,Pochvalno slovo za Vrăbnica,Old Russian,Church Slavonic,Russia,253,3108
+101_Slovo_o_stěi_troici_tvari_i_o_sǫdě.txt,Slovo o stěi troici tvari i o sǫdě,Old Russian,Church Slavonic,Russia,85,3602
+102_Slovo_o_stěi_troici_i_o_tvari_i_o_sǫdě.txt,Slovo o stěi troici i o tvari i o sǫdě,Old Russian,Church Slavonic,Russia,86,3602
+103_Pooučenie_o_prěč_st_nyich_tainachă.txt,Pooučenie o prěč'st'nyich tainachă,Old Russian,Church Slavonic,Russia,40,983
+104_Prěppdobnomu_i_bgonosnomu_otcu_ioannu_pustynožitel.txt,Prěppdobnomu i bgonosnomu otcu ioannu pustynožitelju pylskomu kanon'i pěvaemu vă sǫbotǫ,Middle Bulgarian,Church Slavonic,Bulgaria,1843,11979
+105_žitie_i_žizn_prpodbnaago_otca_našego_ilariona_epsk.txt,žitie i žizn' prpodbnaago otca našego ilariona epskpa moglenskago,Middle Bulgarian,Church Slavonic,Bulgaria,457,8255
+106_pochvalnoe_stym_velimym_iravnoapsto_nym_crem_Konst.txt,pochvalnoe stym' velimym' iravnoapsto'nym' crem' Konstantinou i Eleně,Middle Bulgarian,Church Slavonic,Bulgaria,441,11819
+107_Pochvalnoe_stoi_velikomici_nedli.txt,Pochvalnoe stoi velikomici nedli,Middle Bulgarian,Church Slavonic,Bulgaria,330,6474
+108_Druga_molitva_za_rodilka.txt,Druga molitva za rodilka,Old Russian,Church Slavonic,Russia,54,516
+109_Torožde_Eveimia_patriarcha_Trănov_skago_kă_sveščen.txt,"Torožde Eveimia patriarcha Trănov'skago, kă sveščenněišomu mitropolitu Ougrovlachiiskomou, kură An'eimou",Resavian,Church Slavonic,Serbia,119,2702
+110_Žitie_i_žizn_prěpodonyǫ_matere_našǫ_Filofei.txt,Žitie i žizn' prěpodonyǫ matere našǫ Filofei,Middle Bulgarian,Church Slavonic,Bulgaria,260,5700
+111_Eveimia_patriarcha_Trănov_skago_kă_Nikodimou_svešč.txt,"Eveimia patriarcha Trănov'skago, kă Nikodimou, sveščennoinokou iže vă Tismeně",Resavian,Church Slavonic,Serbia,215,4402
+112_Bož_stvnaa_slouž_ba_prěždesvęnnaa.txt,Bož(')stvnaa slouž'ba prěždesvęnnaa,Middle Bulgarian,Church Slavonic,Bulgaria,158,2998
+113_Torožde_Eveimia_patriarcha_Trănov_skago_poslanie_k.txt,"Torožde Eveimia, patriarcha Trănov'skago, poslanie kă Kvprianou mnichou",Resavian,Church Slavonic,Serbia,177,3211
+114_Bož_st_vnaa_služba_iže_vă_svętychă_otca_naševo_Iva.txt,"Bož'st'vnaa služba iže vă svętychă otca naševo Ivanna Zlatoustago, archieposkopa Kostantině grada",Middle Bulgarian,Church Slavonic,Bulgaria,183,3807
+115_Torožde_molitvy_vă_načalo_indikty_byvšu_i_togda_că.txt,"Torožde molitvy vă načalo indikty, byvšu i togda cămrătokosiu",Middle Bulgarian,Church Slavonic,Bulgaria,40,1066
+116_Blagodarim_tę_gospodi_bože_našă_o_văsěch_ichže_ot.txt,"Blagodarim tę, gospodi, bože našă, o văsěch, ichže ot věka",Middle Bulgarian,Church Slavonic,Bulgaria,6,317
+117_Togožde_molitva_za_bezdăždia.txt,Togožde molitva za bezdăždia,Middle Bulgarian,Church Slavonic,Bulgaria,9,252
+118_Pochvalno_slovo_za_Ioan_episcop_Polivotski.txt,"Pochvalno slovo za Ioan, episcop Polivotski",Middle Bulgarian,Church Slavonic,Bulgaria,227,6012
+119_Afanasij_Nikitin_s_journey_beyond_three_seas.txt,Afanasij Nikitin’s journey beyond three seas,Old Russian,Church Slavonic,,69,7176
+120_The_tale_of_Dracula.txt,The tale of Dracula,Old Russian,Church Slavonic,,26,2468
+121_The_tale_of_Luka_Kolocskij.txt,The tale of Luka Kolocskij,Old Russian,Church Slavonic,,11,899
+122_Missive_from_Prince_Ivan_of_Pskov_1463_1465.txt,"Missive from Prince Ivan of Pskov, 1463–1465",Old Russian,Church Slavonic,,4,353
+123_Služba_na_carica_Teofana.txt,Služba na carica Teofana,Resavian,Church Slavonic,Serbia,150,4510
+124_Domostroj.txt,Domostroj,Old Russian,Church Slavonic,,247,24148
+125_Slovo_o_Sivilě_I_red.txt,Slovo o Sivilě (I red.),New Bulgarian,Church Slavonic,,12,1265
+126_Oukaz_za_ga_našego_IsCha_II_red.txt,Oukaz' za ga našego IsCha (II red.),New Bulgarian,Church Slavonic,,8,1056
+127_Slavjanska_versija_na_chronikata_na_Georgi_Sinkel.txt,Slavjanska versija na chronikata na Georgi Sinkel,Old Russian,Church Slavonic,"Constantinople, Turkey",6358,65024
+128_The_taking_of_Pskov.txt,The taking of Pskov,Old Russian,Church Slavonic,,27,2287
+129_V_pros_Epifanija_narečen_naa_v_mniš_cěm_činou_Euti.txt,V'pros' Epifanija narečen'naa v' mniš'cěm' činou Eutichii i byvšemu patriarchou Konstantdina grada k' osveščen'nomou An'dreju za Christa Ourodivaago i vsako bouistvo ověščavša o Kon'stan'dině gradě,Resavian,Church Slavonic,,42,3441
+130_Service_for_St_Ivan_of_Rila.txt,Service for St. Ivan of Rila,Resavian,Church Slavonic,"Rila Monastery, Bulgaria",1770,14258
+131_Slovo_za_posta_i_za_molitvata.txt,Slovo za posta i za molitvata,Old Russian,Church Slavonic,Russia,267,2751
+132_Slovo_za_tozi_vremenen_život.txt,Slovo za tozi vremenen život,Old Russian,Church Slavonic,Russia,50,799
+133_Pochvala_styichă_m_mǫčenikă.txt,Pochvala styichă m mǫčenikă,Old Serbian,Church Slavonic,"Ras, Serbia",25,1248
+134_Molitva_za_rodilka_sled_raždaneto.txt,Molitva za rodilka sled raždaneto,Middle Bulgarian,Church Slavonic,Bulgaria,37,378
+135_The_tale_of_the_fall_of_Constantinople.txt,The tale of the fall of Constantinople,Old Russian,Church Slavonic,,105,10385
+136_Molitva_za_văcărkovlenie_na_novorodeno_na_40-ja_de.txt,Molitva za văcărkovlenie na novorodeno na 40-ja den,Middle Bulgarian,Church Slavonic,Bulgaria,58,652
+137_Oukaz_Kako_S_vr_ši_G_naš_Iv_c_Chs.txt,Oukaz' Kako S'vr'ši G' naš' Iv(c) Chs,Resavian,Church Slavonic,Serbia,10,1227
+138_Pově_s_prědivna_ispl_njen_strastei_i_tretěnia_i_ta.txt,Pově(s) prědivna ispl'njen' strastei i tretěnia i tain'stvo velie R(ž) okri b' ugodn'ikoo(m) svoi(m) O mimoš'(d)ši(ch) i grědoušč(ch) iže v' st'i(ch) oca našego mefodia epp(c)kupa papar'skagoo skazanie istin'noe o cri(ch) i poslědnich' lěte(ch),Resavian,Church Slavonic,Serbia,4,413
+139_Văprosă_Nikodimov.txt,Văprosă Nikodimov,Old Church Slavonic,Church Slavonic,Bulgaria,41,867
+140_Trojanski_Damaskin.txt,Trojanski Damaskin,New Bulgarian,Church Slavonic,"Damascus, Syria",8568,107042
+141_Materials_for_the_history_of_the_schism.txt,Materials for the history of the schism,Old Russian,Church Slavonic,,22,1814
+142_Vesti-Kuranty.txt,Vesti-Kuranty,Old Russian,Church Slavonic,,14,1131
+143_Ckazanie_Isaie_pr_o_ka_kako_v_zne_c_n_b_i_c_agglo.txt,Ckazanie Isaie pr(o)ka kako v'zne(c)n' b'i(c) agglo(m) do zgo nb(c)'i,Resavian,Church Slavonic,,21,2458
+144_Mc_okovmpii_imat_dni_la_dn_imat_sča_ai_a_nošč_gi_v.txt,"Mc' okovmpii imat dni la dn' imat sča ai a' nošč', gi vă fi den' pamet prěpodobnago otca našego ioanna poust'inižitelja ryl'skago",Resavian,Church Slavonic,"Rila Monastery, Bulgaria",1594,11264
+145_Čjudesa_stgo_Nikolia.txt,Čjudesa stgo Nikolia,Resavian,Church Slavonic,"Resava, Serbia",793,9649
+146_Slovo_Kako_zače_se_samovila.txt,Slovo Kako zače se samovila,Resavian,Church Slavonic,"Resava, Serbia",4,334
+147_Skazanie_iz_javljenno_o_pi_smene.txt,Skazanie iz'javljenno o'pi'smene,Resavian,Church Slavonic,Serbia,2542,46899
+148_Tikveški_sbornik.txt,Tikveški sbornik,Resavian,Church Slavonic,Serbia,4330,37327
+149_Uka_z_za_ga_nšego_is_cha_kako_by_s_msca_martia.txt,Uka(z) za ga nšego is'cha kako by(s) msca martia,Resavian,Church Slavonic,Serbia,10,1064
+150_Skazanie_kako_č_s_ti_ezy_k.txt,Skazanie kako č'(s)ti ezy(k),Resavian,Church Slavonic,Serbia,5,407
+151_Loveški_damaskin.txt,Loveški damaskin,New Bulgarian,Church Slavonic,Bulgaria,3300,62543
+152_Oustav_bož_stvennyę_služby_svętago_apostola_Iakova.txt,"Oustav' bož(')stvennyę služby svętago apostola Iakova, brata gospodnę",Old Russian,Church Slavonic,Russia,328,6787
+153_Testament_of_Ivan_Jurievich_Grjaznoj.txt,Testament of Ivan Jurievich Grjaznoj,Old Russian,Church Slavonic,,5,466
+154_Mitarstva_na_dušata_na_Blažena_Teodora.txt,Mitarstva na dušata /na Blažena Teodora,Church Slavonic,New Church Slavonic,,87,4557
+155_Correspondence_of_Peter_the_Great.txt,Correspondence of Peter the Great,Old Russian,New Church Slavonic,,2,94
+156_Istorija_Slavjanob_lgarska.txt,Istorija Slavjanob'lgarska,New Bulgarian,New Church Slavonic,Bulgaria,6721,70291
+157_Kiev_Missal.txt,Kiev Missal,Old Church Slavonic,Old Church Slavonic,,5,413
+158_Razumnik-ukaz_II_red_fragment.txt,Razumnik-ukaz (II red. fragment),New Bulgarian,Church Slavonic,,2,151
+159_Žitie_na_sv_Teodora_Aleksandrijska.txt,Žitie na sv. Teodora Aleksandrijska,Middle Bulgarian,Church Slavonic,Bulgaria,33,3819
+160_Beležki_na_b_lgarskite_knižovnici_X-XVIII_veka.txt,Beležki na b'lgarskite knižovnici X-XVIII veka,Middle Bulgarian,Church Slavonic,,2177,31231
+161_Trebnik_Grigorovič_32.txt,Trebnik Grigorovič 32,Middle Bulgarian,Church Slavonic,,343,3849
+162_Kanonă_Glasă_i_pěsn_a.txt,Kanonă Glasă i pěsn' a,Middle Bulgarian,Church Slavonic,,14,791
+163_Pooučenie_na_blagověščenie_stěi_bci.txt,Pooučenie na blagověščenie stěi bci,Old Church Slavonic,Church Slavonic,,39,964
+164_Pooučenie_na_blagověščenie_stěi_bci.txt,Pooučenie na blagověščenie stěi bci,Old Russian,Church Slavonic,Russia,38,938
+165_Služba_za_părvomăčenik_Stefan_i_za_Stefan_i_papa_R.txt,Služba za părvomăčenik Stefan i za Stefan i papa Rimski,Middle Bulgarian,Old Church Slavonic,Bulgaria,21,1138
+166_Slovo_stgo_Polouta_Rim_skago_o_tl_kovanii_danilově.txt,Slovo stgo Polouta Rim'skago o tl'kovanii danilově,Old Serbian,Church Slavonic,Serbia,4,307
+167_Žitie_skazano_o_prěmudtosti_akirievě_kako_oučaše_s.txt,Žitie skazano o prěmudtosti akirievě kako oučaše sestričikja svoe anadana,Resavian,Church Slavonic,Serbia,16,1767
+168_Slovo_o_adamě_i_o_evvě_o_sačela_do_s_vr_šenie_ouka.txt,Slovo o adamě i o evvě o sačela do s'vr'šenie oukaz' oče bl(c)vi,Resavian,Church Slavonic,Serbia,27,2969
+169_Slovo_o_pradednago_avraama_o_č_bl_c_vi.txt,Slovo o pradednago avraama o(č) bl(c)vi,Resavian,Church Slavonic,Serbia,8,887
+170_molitva_za_babuvala_akuširala_žena.txt,molitva za babuvala (akuširala) žena,Middle Bulgarian,Church Slavonic,Bulgaria,26,173
+171_molitva_za_babuvala_akuširala_žena.txt,molitva za babuvala (akuširala) žena,Middle Bulgarian,Church Slavonic,Bulgaria,26,173
+172_Slovo_o_stei_troici_kako_go_s_ti_avram.txt,Slovo o stei troici kako go(s)ti avram',Resavian,Church Slavonic,Serbia,6,581
+173_o_velikie_petki_prěz_godi.txt,(o) velikie petki prěz' godi,Resavian,Church Slavonic,Serbia,5,642
+174_Blacho-bălgarski_gramoti.txt,Blacho-bălgarski gramoti,Middle Bulgarian,Church Slavonic,Bulgaria,1990,49615
+175_Părvo_slovo_protiv_arianite.txt,Părvo slovo protiv arianite,Old Church Slavonic,Old Church Slavonic,Bulgaria,25,418
+176_Charter_of_Prince_Jurij_Svjatoslavich_of_Smolensk.txt,"Charter of Prince Jurij Svjatoslavich of Smolensk on the alliance with Poland and Lithuania, 1386",Old Russian,Church Slavonic,,4,379
+177_Žitie_prepodnogo_Aleksandra_Svirskogo.txt,Žitie prepodnogo Aleksandra Svirskogo,Middle Russian,Church Slavonic,"Novgorod, Russia",223,25960
+178_Žitie_prepodobnogo_Antonija_Sijskogo.txt,Žitie prepodobnogo Antonija Sijskogo,Middle Russian,Church Slavonic,Russia,375,39363
+179_Žitie_prepodobnogo_Grigorija_Pel_šemskogo.txt,Žitie prepodobnogo Grigorija Pel'šemskogo,Middle Russian,Church Slavonic,Russia,83,9000
+180_Žitie_Dimitrija_Priluckogo.txt,Žitie Dimitrija Priluckogo,Middle Russian,Church Slavonic,"Vologda, Russia",59,6067
+181_Žitie_prepodobnogo_Dionisija_Glušickogo.txt,Žitie prepodobnogo Dionisija Glušickogo,Middle Russian,Church Slavonic,"Vologda, Russia",111,12346
+182_Žitie_prepodobnogo_Dionisija_Glušickogo_pochvala.txt,Žitie prepodobnogo Dionisija Glušickogo (pochvala),Middle Russian,Church Slavonic,"Vologda, Russia",15,1577
+183_Žitie_prepodobnogo_Kirilla_Novoezerskogo.txt,Žitie prepodobnogo Kirilla Novoezerskogo,Middle Russian,Church Slavonic,"Vologda, Russia",99,10432
+184_Žitie_prepodobnogo_Kornilija_Komel_skogo.txt,Žitie prepodobnogo Kornilija Komel'skogo,Middle Russian,Church Slavonic,"Vologda, Russia",118,12264
+185_Žitie_prepodobnogo_Kornilija_Komel_skogo_Pochvala.txt,Žitie prepodobnogo Kornilija Komel'skogo (Pochvala),Middle Russian,Church Slavonic,"Vologda, Russia",38,3966
+186_Žitie_prepodobnogo_Pavla_Obnorskogo_žitie.txt,Žitie prepodobnogo Pavla Obnorskogo (žitie),Middle Russian,Church Slavonic,Russia,92,9605
+187_Žitie_prepodobnogo_Pavla_Obnorskogo_chudesa.txt,Žitie prepodobnogo Pavla Obnorskogo (chudesa),Middle Russian,Church Slavonic,"Vologda, Russia",83,8624
+188_Žitie_prepodobnogo_Sergija_Nuromskogo.txt,Žitie prepodobnogo Sergija Nuromskogo,Middle Russian,Church Slavonic,"Vologda, Russia",144,15033
+189_Gramota_Novgoroda_Ljubeku_s_trebovaniem_vozvrata_t.txt,"Gramota Novgoroda Ljubeku s trebovaniem vozvrata tovarov, nagrablennych morskimi razbojnikami u novgorodcev. Gramoty Velikogo Novgoroda i Pskova",Middle Russian,Church Slavonic,Novgorod,11,194
+190_Dogovornaja_gramota_Velikogo_Novgoroda_i_Pskova_s.txt,Dogovornaja gramota Velikogo Novgoroda i Pskova s episkopom Jur’evskim o peremirii na 30 let. Gramoty Velikogo Novgoroda i Pskova,Middle Russian,Church Slavonic,Russia,49,1454
+191_Otkupnaja_gramota_Jakima_Gureeva_i_Matveja_Petrova.txt,Otkupnaja gramota Jakima Gureeva i Matveja Petrova u namestnika Grigorija Vasil’eviča na sud v Obonež’e. Gramoty Velikogo Novgoroda i Pskova,Middle Russian,Church Slavonic,Russia,8,181
+192_Gramota_velikogo_knjazja_Dmitrija_Ivanoviča_Andrej.txt,Gramota velikogo knjazja Dmitrija Ivanoviča Andreju Frjazinu o požalovanii ego Pečeroju v kormlenie. Gramoty Velikogo Novgoroda i Pskova,Middle Russian,Church Slavonic,Russia,3,92
+193_Kupčaja_popa_Petra_u_Trofima_Haritona_i_Dementija.txt,"Kupčaja popa Petra u Trofima, Haritona i Dementija na navolok na reke Ljavle. Gramoty Velikogo Novgoroda i Pskova",Middle Russian,Church Slavonic,Russia,6,90
+194_Kupčaja_novgorodskogo_posadnika_Dmitrija_Vasil_evi.txt,"Kupčaja novgorodskogo posadnika Dmitrija Vasil’eviča u Hovry Vasil’evoj dočeri Tojvutovoj na učastki v rekah Vyge, Shue, Kemi i na Kil’boostrove. Gramoty Velikogo Novgoroda i Pskova ",Middle Russian,Church Slavonic,Russia,6,205
+195_Obodnaja_meževaja_zemljam_velikogo_knjazja_i_monas.txt,"Obodnaja meževaja zemljam velikogo knjazja i monastyrej Jur’eva, Vjažickogo, Paleostrovskogo i Muromskogo v pogostach Shal’skom i Nikol’skom Pudožskom i v volostkach tech že pogostov. Gramoty Velikogo Novgoroda i Pskova",Middle Russian,Church Slavonic,Russia,37,1156
+196_Žalovannaja_gramota_vvoznaja_i_nesudimaja_p_Filare.txt,"Žalovannaja gramota, vvoznaja i nesudimaja, p. Filareta K. A. i O. A. Surminym na pomest’e ich otca v sc. Bunkove s derevnjami i pustošami, v Sotskoj vol., Kostromskogo u. // Akty feodal’nogo zemlevladenija i chozjajstva",Middle Russian,Church Slavonic,Russia,19,537
+197_Carskaja_gramota_kungurskomu_voevode_Fedoru_Suchot.txt,Carskaja gramota kungurskomu voevode Fedoru Suchotinu ob okazanii sodejstvija gostinoj sotne Alekseju Ušakovu v sbore tamožennyh i kabackich pošlin. Kungurskie akty XVII veka,Middle Russian,Church Slavonic,"Kungur, Russia",20,739
+198_Otpiski_v_Moskvu_kungurskogo_voevody_Alekseja_Kali.txt,Otpiski v Moskvu kungurskogo voevody Alekseja Kalitina. Kungurskie akty XVII veka,Middle Russian,Church Slavonic,"Kungur, Russia",266,7755
+199_I_F_Strešnev_V_V_Golicynu_Moskovskaja_delovaja_i_b.txt,I. F. Strešnev V. V. Golicynu. Moskovskaja delovaja i bytovaja pis’mennost’ XVII veka,Middle Russian,Church Slavonic,"Moscow, Russia",10,144
+200_I_F_Strešnev_V_V_Golicynu_Moskovskaja_delovaja_i_b.txt,I. F. Strešnev V. V. Golicynu. Moskovskaja delovaja i bytovaja pis’mennost’ XVII veka,Middle Russian,Church Slavonic,"Moscow, Russia",8,122
+201_T_I_Golicyna_V_V_Golicynu_Moskovskaja_delovaja_i_b.txt,T. I. Golicyna V. V. Golicynu. Moskovskaja delovaja i bytovaja pis’mennost’ XVII veka,Middle Russian,Church Slavonic,"Moscow, Russia",13,282
+202_T_I_Golicyna_V_V_Golicynu_Moskovskaja_delovaja_i_b.txt,T. I. Golicyna V. V. Golicynu. Moskovskaja delovaja i bytovaja pis’mennost’ XVII veka,Middle Russian,Church Slavonic,"Moscow, Russia",7,156
+203_Čelobit_e_L_va_Andreeva_Mikulina_ob_otpuskе_ego_v.txt,"Čelobit’e L’va Andreeva Mikulina ob otpuskе ego v derevnju «dlja sbora so služboj». Akty Moskovskogo gosudarstva, izdannye imp. Akademiej nauk",Middle Russian,Church Slavonic,"Moscow, Russia",10,235
+204_Simeon_Polockij_Komidija_pritči_o_bludnem_syne_Rus.txt,Simeon Polockij. Komidija pritči o bludnem syne. Russkaja dramaturgija poslednej četverti XVII i načala XVIII v. ,Middle Russian,Church Slavonic,Russia,3779,81079
+205_Stepennaja_kniga_Kniga_Stepennaja_carskogo_rodoslo.txt,Stepennaja kniga («Kniga Stepennaja carskogo rodoslovija»). 2-ja stepen’ [Jaroslav Vladimirovič Mudryj] // PSRL. T. 21,Middle Russian,Church Slavonic,Russia,88,1755
+206_Kupčaja_popa_Petra_u_Trofima_Kharitona_i_Dementija.txt,"Kupčaja popa Petra u Trofima, Kharitona i Dementija na navolok na reke Ljavle // Gramoty Velikogo Novgoroda i Pskov",Middle Russian,Church Slavonic,Russia,6,112
+207_Carskaja_gramota_kungurskomu_voevode_Alekseju_Kali.txt,"Carskaja gramota kungurskomu voevode Alekseju Kalitinu o predostavlenii zemskim starostam i celoval’nikam sbora streleckich, obročnych i drugich deneg i o nevmešatel’stve v rasporjaženija po označennym sboram voevod",Middle Russian,Church Slavonic,Russia,72,3327
+208_Carskaja_gramota_kungurskomu_voevode_Alekseju_Kali.txt,"Carskaja gramota kungurskomu voevode Alekseju Kalitinu o predostavlenii zemskim starostam i celoval’nikam sbora streleckich, obročnych i drugich deneg i o nevmešatel’stve v rasporjaženija po označennym sboram voevod",Middle Russian,Church Slavonic,Russia,519,12252
+209_Delo_o_duėli_v_Moskve_seržantov_Petra_Fal_ka_i_Tom.txt,Delo o duėli v Moskve seržantov Petra Fal’ka i Tomasa Grel’sa,Middle Russian,Church Slavonic,Russia,519,12252
+210_Dokončanie_velikogo_knjazja_Vasilija_Vasil_eviča_s.txt,"Dokončanie velikogo knjazja Vasilija Vasil’eviča s velikim knjazem rjazanskim Ivanom Fedorovičem. Gramota v. kn. Vasilija Vasil’eviča v. kn. Ivanu Fedoroviču // Duchovnye i dogovornye gramoty, № 47",Middle Russian,Church Slavonic,Russia,95,2288
+211_L_Aničkov_V_T_Vyndomskomu_Gramotki.txt,L. Aničkov V.T. Vyndomskomu // Gramotki,Middle Russian,Church Slavonic,Russia,80,1184
+212_Челобитная_посадских_людей_Вязьмы_об_обложении_их.txt,Челобитная посадских людей Вязьмы об обложении их посильным сошным окладом по дозору писцов С. И. Воейкова и Д. Прокофьева,Middle Russian,Church Slavonic,Russia,39,1258
+213_Ivan_Groznyj_Poslanie_pol_skomu_korolju_Stefanu_Ba.txt,Ivan Groznyj. Poslanie pol’skomu korolju Stefanu Batoriju 1579 goda // Biblioteka literatury Drevnej Rusi,Middle Russian,Church Slavonic,Russia,52,1416
+214_Novgorodskaja_povest_o_pochode_Ivana_III_Vasil_evi.txt,Novgorodskaja povest’ o pochode Ivana III Vasil’eviča na Novgorod // Biblioteka literatury Drevnej Rusi,Middle Russian,Church Slavonic,Russia,49,981
+215_Nakaz_Afanasiju_Filippoviču_Paškovu_na_voevodstvo.txt,Nakaz Afanasiju Filippoviču Paškovu na voevodstvo v Daurskoj zemle,Middle Russian,Church Slavonic,Russia,48,1377
+216_Dogovornye_gramoty_Novgoroda_s_tverskim_velikim_kn.txt,Dogovornye gramoty Novgoroda s tverskim velikim knjazem Michailom Jaroslavičem. Gramota tverskaja // Gramoty Velikogo Novgoroda i Pskova,Middle Russian,Church Slavonic,Russia,60,854
+217_Poslanie_mitropolita_Simona_velikoknjažeskomu_name.txt,"Poslanie mitropolita Simona velikoknjažeskomu namestniku Velikoj Permi knjazju Matveju Michajloviču, vsem mirjanam i duchovenstvu Velikoj Permi s predpisaniem strogo sobljudatʹ christianskuju obrjadnostʹ, ne poklonjatʹsja jazyčeskomu idolu Vojpelju i prekratitʹ zaključenie brakov po tatarskomu obyčaju levirata // Archiv feodalʹnych zemelʹ XIV–XVI vv.",Middle Russian,Church Slavonic,Russia,29,904
+218_A_Dement_ev_Otpiska_prikazčika_s_Pavlovskogo_Zveni.txt,A. Dement’ev. Otpiska prikazčika s. Pavlovskogo (Zvenigorod. u.) A. Dement’eva B. I. Morozovu o pobege krest’jan der. Piskova M. Titova i A. Vasil’eva i ob otkaze slug echat’ za nimi v pogonju // Akty chozjajstva B. I. Morozova,Middle Russian,Church Slavonic,Russia,13,195
+219_I_Perfil_ev_Čelobitnye_krest_jan_s_Gorodnja_Tver_u.txt,"I. Perfil′ev. Čelobitnye krest′jan s. Gorodnja (Tver. u.) I. Perfil′eva s tov. o dače im na obrok 8 des. zemli, rasčiščennoj I. Brylkinym, i o razrešenii im rasčistit′ les otdel′no ot mira // Akty chozjajstva B. I. Morozova",Middle Russian,Church Slavonic,Russia,10,171
+220_Pamjat_B_I_Morozova_I_Rachmangulu_o_vysylke_v_Mosk.txt,Pamjat′ B. I. Morozova I. Rachmangulu o vysylke v Moskvu lošadej iz s. Pavlovskogo (Zvenigorod. u.) // Akty chozjajstva B. I. Morozova,Middle Russian,Church Slavonic,Russia,7,110
+221_Otpiska_M_Andreeva_iz_s_Kotel_nikov_Moskov_u_mosko.txt,Otpiska M. Andreeva iz s. Kotel′nikov (Moskov. u.) moskovskomu prikazčiku S. N. Kiselevu o trudnostjach rasčistki lesa v bolotach bliz pus. Kazarinova,Middle Russian,Church Slavonic,Russia,14,255
+222_Otpiska_prikazčika_s_Lotošina_Tver_u_I_Brylkina_mo.txt,Otpiska prikazčika s. Lotošina (Tver. u.) I. Brylkina moskovskomu prikazčiku S. N. Kiselevu s zaprosom o meste dlja vypasa lošadej // Akty chozjajstva B. I. Morozova,Middle Russian,Church Slavonic,Russia,24,315
+223_Otpiska_prikazčika_s_Pavlovskogo_Zvenigorod_u_A_De.txt,Otpiska prikazčika s. Pavlovskogo (Zvenigorod. u.) A. Dement′eva B. I. Morozovu o posylke v Moskvu krest′janina Okul′ki Dement′eva s čelobitnoj o prieme ego v votčinu // Akty chozjajstva B. I. Morozova,Middle Russian,Church Slavonic,Russia,6,119
+224_Otpiska_prikazčika_s_Pavlovskogo_Zvenigorod_u_A_De.txt,Otpiska prikazčika s. Pavlovskogo (Zvenigorod. u.) A. Dement′eva B. I. Morozovu o posadke i privivke plodovych derev′ev v s. Pavlovskom i v Onufrieve monastyre // Акты хозяйства Б. И. Морозова,Middle Russian,Church Slavonic,Russia,27,412
+225_Otpiska_prikazčika_s_Pavlovskogo_Zvenigorod_u_A_De.txt,"Otpiska prikazčika s. Pavlovskogo (Zvenigorod. u.) A. Dement′eva B. I. Morozovu s zaprosom po povodu perenjatogo plota vdovy T. Naščokinoj, razrušivšego most // Akty chozjajstva B. I. Morozova",Middle Russian,Church Slavonic,Russia,23,376
+226_Pamjat_B_I_Morozova_prikazčiku_s_Edimonova_Tver_u.txt,Pamjat′ B. I. Morozova prikazčiku s. Edimonova (Tver. u.) S. Gol′covu o vydače skudnym krest′janam chleba na semena po ich čelobit′ju // Akty chozjajstva B. I. Morozova,Middle Russian,Church Slavonic,Russia,5,77
+227_Otpiska_prikazčika_s_Pavlovskogo_Zvenigorod_u_V_Gn.txt,Otpiska prikazčika s. Pavlovskogo (Zvenigorod. u.) V. Gnezdova i K. Nagaeva B. I. Morozovu s doneseniem o chode rasčiški lesa v Pluškine i s zaprosom o meste dal′nejšich rabot // Akty chozjajstva B. I. Morozova,Middle Russian,Church Slavonic,Russia,10,141
+228_Pamjat_B_I_Morozova_prikazčiku_s_Kotel_nikov_Mosko.txt,Pamjat′ B. I. Morozova prikazčiku s. Kotel′nikov (Moskov. u.) V. Gnezdovu o vydače K. Nagaevu po ego trebovaniju ovsa // Akty chozjajstva B. I. Morozova,Middle Russian,Church Slavonic,Russia,2,30
+229_Gramota_B_I_Morozova_prikazčiku_s_Gorodnja_Tver_u.txt,"Gramota B. I. Morozova prikazčiku s. Gorodnja (Tver. u.) S. Gol′covu o zaseve rasčiščennoj I. Brylkinym zemli, ob otvode 3 des. zemli novomu krest′janinu K. Stefanovu, ob uchode za lošad′mi i pr // Akty chozjajstva B. I. Morozova",Middle Russian,Church Slavonic,Russia,12,195
+230_Pamjat_B_I_Morozova_prikazčiku_s_Kotel_nikov_Mosko.txt,Pamjat′ B. I. Morozova prikazčiku s. Kotel′nikov (Moskov. u.) V. Gnezdovu s ukazanijami po rasčistke lesa u pus. Kazarinovoj i Glinkovoj // Akty chozjajstva B. I. Morozova,Middle Russian,Church Slavonic,Russia,6,60
+231_Otpiska_prikazčika_s_Pavlovskogo_Zvenigorod_u_A_De.txt,"Otpiska prikazčika s. Pavlovskogo (Zvenigorod. u.) A. Dement′eva B. I. Morozovu o polučenii ryby, prislannoj iz Moskvy s L. Afanas′evym // Akty chozjajstva B. I. Morozova",Middle Russian,Church Slavonic,Russia,27,274
+232_Gramota_B_I_Morozova_prikazčiku_s_Gorodnja_Tver_u.txt,"Gramota B. I. Morozova prikazčiku s. Gorodnja (Tver. u.) S. Gol′covu s otkazom na čelobit′e krest′jan, I. Perfil′eva s tov., i s rasporjaženiem o zaseve bojarskimi semenami zemli, rasčiščennoj I. Brylkinym, i ob otvode lesa dlja rasčištki vsem krest′janam s. Gorodnja // Akty chozjajstva B. I. Morozova",Middle Russian,Church Slavonic,Russia,10,268
+233_Otpiska_prikazčika_s_Kotel_nikov_Moskov_u_V_Gnezdo.txt,Otpiska prikazčika s. Kotel′nikov (Moskov. u.) V. Gnezdova B. I. Morozovu o chode posadki i privivki plodovych derev′ev // Akty chozjajstva B. I. Morozova,Middle Russian,Church Slavonic,Russia,10,180
+234_Otpiska_prikazčika_s_Pavlovskogo_Zvenigorod_u_A_De.txt,Otpiska prikazčika s. Pavlovskogo (Zvenigorod. u.) A. Dement′eva B. I. Morozovu o perevode v konjuchi trubačej S. Luk′janova i Ja. Maršalka // Akty chozjajstva B. I. Morozova,Middle Russian,Church Slavonic,Russia,10,210
+235_Otpiski_1_prikazčika_s_Pavlovskogo_Zvenigorod_u_A.txt,Otpiski 1) prikazčika s. Pavlovskogo (Zvenigorod. u.) A. Dement′eva B. I. Morozovu i 2) Petra Dmitrieva moskovskomu prikazčiku S. N. Kiselevu — o dostavke v Pavlovskoe živych leščej i sostojanii ich // Akty chozjajstva B. I. Morozova,Middle Russian,Church Slavonic,Russia,11,190
+236_A_Dement_ev_Dve_otpiski_prikazčika_s_Pavlovskogo_Z.txt,"A. Dement′ev. Dve otpiski prikazčika s. Pavlovskogo (Zvenigorod. u.) A. Dement′eva v Moskvu B. I. Morozovu i prikazčiku S. N. Kiselevu o pribytii delovych ljudej, o chode rabot po rasčiške lesa, ob ozorstve i neposlušanii delovych ljudej // Akty chozjajstva B. I. Morozova",Middle Russian,Church Slavonic,Russia,30,444
+237_Ochotničij_zagovor_Russkie_zagovory.txt,Ochotničij zagovor // Russkie zagovory,Middle Russian,Church Slavonic,Russia,10,454
+238_Zagovor_ot_gryži_Russkie_zagovory.txt,Zagovor ot gryži // Russkie zagovory,Middle Russian,Church Slavonic,Russia,7,114
+239_Vvoznaja_gramota_ot_imeni_voevod_bojar_kn_Dmitrija.txt,"Vvoznaja gramota (ot imeni voevod bojar kn. Dmitrija Timofeeviča Trubeckogo i Ivana Martinoviča Zaruckogo) Sjujuš mirze Isupoviču na pomest′e ego otca i brat′ev ss. Bogorodickoe, Nikolskoe, Pongilo i dr. v Romanovskom u. s usloviem soderžanija služilych tatar // M. V. Moiseev. K istorii zemlevladenija roda Jusupovych v načale XVII veka",Middle Russian,Church Slavonic,Russia,16,537
+240_Vojskovaja_otpiska_o_perechode_nekotorych_nagajski.txt,"Vojskovaja otpiska o perechode nekotorych nagajskich murz v cholopstvo gosudarja, o predstojaščem pochode turok i krymcev pod Azov vesnoju i o neobchodimosti ispravit′ ukreplenija v Azove (fragment 2) // Russkaja istoričeskaja biblioteka. T. XVIII. Donskie dela",Middle Russian,Church Slavonic,Russia,272,7042
+241_Otpiska_prikazčika_s_Pavlovskogo_Zvenigorod_u_A_De.txt,Otpiska prikazčika s. Pavlovskogo (Zvenigorod. u.) A. Dement′eva B. I. Morozovu o priežde mastera rudnika Michaila i o ego rabote // Akty chozjajstva B. I. Morozova,Middle Russian,Church Slavonic,Russia,16,270
+242_Official_grant_of_fishing_rights_from_Metropolitan.txt,Official grant of fishing rights from Metropolitan Simon to the Kuz'ma Monastery,Middle Russian,Church Slavonic,Russia,11,259
+243_Sentence_without_trial_signed_by_the_grand_prince.txt,"Sentence without trial, signed by the grand prince’s diak Vasilij Kulešin",Middle Russian,Church Slavonic,Russia,8,295
+244_Legal_protection_granted_by_Prince_Mikhail_Andreev.txt,Legal protection granted by Prince Mikhail Andreevich to the Metropolitan Monastery of the Great Resurrection,Middle Russian,Church Slavonic,Russia,5,170
+245_Charter_of_grant_issued_by_Vasily_III_Ivanovich_fo.txt,Charter of grant issued by Vasily III Ivanovich for the Monastery of the Holy Resurrection at Belozersk in Cherepovets.,Middle Russian,Church Slavonic,Russia,7,200
+246_Copy_of_the_charter_of_Tsar_Fyodor_I_Ivanovich_to.txt,Copy of the charter of Tsar Fyodor I Ivanovich to the Monastery of the Mother of God of Saint Joseph,Middle Russian,Church Slavonic,Russia,1065,26723
+247_Magical-religious_prayer.txt,Magical-religious prayer,Middle Russian,Church Slavonic,Russia,17,359
+248_Magical-religious_prayer_2.txt,Magical-religious prayer 2,Middle Russian,Church Slavonic,Russia,3,71
+249_Magical-religious_prayer_3.txt,Magical-religious prayer 3,Middle Russian,Church Slavonic,Russia,2,67
+250_Bezobrazov_1_017.txt,Bezobrazov_1_017,Middle Russian,Church Slavonic,Russia,21,428
+251_Bezobrazov_1_018.txt,Bezobrazov_1_018,Middle Russian,Church Slavonic,Russia,21,373
+252_Bezobrazov_1_019.txt,Bezobrazov_1_019,Middle Russian,Church Slavonic,Russia,36,516
+253_Bezobrazov_1_020.txt,Bezobrazov_1_020,Middle Russian,Church Slavonic,Russia,21,263
+254_Bezobrazov_1_021.txt,Bezobrazov_1_021,Middle Russian,Church Slavonic,Russia,29,451
+255_Bezobrazov_1_022.txt,Bezobrazov_1_022,Middle Russian,Church Slavonic,Russia,13,169
+256_Bezobrazov_1_023.txt,Bezobrazov_1_023,Middle Russian,Church Slavonic,Russia,34,979
+257_Bezobrazov_1_024.txt,Bezobrazov_1_024,Middle Russian,Church Slavonic,Russia,5,59
+258_Bezobrazov_1_025.txt,Bezobrazov_1_025,Middle Russian,Church Slavonic,Russia,8,109
+259_Bezobrazov_1_026.txt,Bezobrazov_1_026,Middle Russian,Church Slavonic,Russia,5,69
+260_Bezobrazov_1_027.txt,Bezobrazov_1_027,Middle Russian,Church Slavonic,Russia,3,33
+261_Bezobrazov_1_028.txt,Bezobrazov_1_028,Middle Russian,Church Slavonic,Russia,8,171
+262_Bezobrazov_1_029.txt,Bezobrazov_1_029,Middle Russian,Church Slavonic,Russia,7,80
+263_Bezobrazov_1_030.txt,Bezobrazov_1_030,Middle Russian,Church Slavonic,Russia,3,75
+264_Bezobrazov_1_031.txt,Bezobrazov_1_031,Middle Russian,Church Slavonic,Russia,15,313
+265_Bezobrazov_1_032.txt,Bezobrazov_1_032,Middle Russian,Church Slavonic,Russia,7,107
+266_Bezobrazov_1_033.txt,Bezobrazov_1_033,Middle Russian,Church Slavonic,Russia,8,111
+267_Bezobrazov_1_034.txt,Bezobrazov_1_034,Middle Russian,Church Slavonic,Russia,65,923
+268_Bezobrazov_1_035.txt,Bezobrazov_1_035,Middle Russian,Church Slavonic,Russia,5,98
+269_Bezobrazov_1_036.txt,Bezobrazov_1_036,Middle Russian,Church Slavonic,Russia,15,237
+270_Bezobrazov_1_037.txt,Bezobrazov_1_037,Middle Russian,Church Slavonic,Russia,12,111
+271_Bezobrazov_1_038.txt,Bezobrazov_1_038,Middle Russian,Church Slavonic,Russia,2,70
+272_Bezobrazov_1_039.txt,Bezobrazov_1_039,Middle Russian,Church Slavonic,Russia,2,56
+273_Bezobrazov_1_040.txt,Bezobrazov_1_040,Middle Russian,Church Slavonic,Russia,5,42
+274_Bezobrazov_1_041.txt,Bezobrazov_1_041,Middle Russian,Church Slavonic,Russia,4,69
+275_Bezobrazov_1_042.txt,Bezobrazov_1_042,Middle Russian,Church Slavonic,Russia,5,88
+276_Bezobrazov_1_043.txt,Bezobrazov_1_043,Middle Russian,Church Slavonic,Russia,5,140
+277_Bezobrazov_1_044.txt,Bezobrazov_1_044,Middle Russian,Church Slavonic,Russia,9,119
+278_Bezobrazov_1_045.txt,Bezobrazov_1_045,Middle Russian,Church Slavonic,Russia,26,438
+279_Bezobrazov_1_046.txt,Bezobrazov_1_046,Middle Russian,Church Slavonic,Russia,177,2819
+280_Bezobrazov_1_001.txt,Bezobrazov_1_001,Middle Russian,Church Slavonic,Russia,2,55
+281_Bezobrazov_1_002.txt,Bezobrazov_1_002,Middle Russian,Church Slavonic,Russia,6,46
+282_Bezobrazov_1_003.txt,Bezobrazov_1_003,Middle Russian,Church Slavonic,Russia,46,613
+283_Bezobrazov_1_004.txt,Bezobrazov_1_004,Middle Russian,Church Slavonic,Russia,6,86
+284_Bezobrazov_1_005.txt,Bezobrazov_1_005,Middle Russian,Church Slavonic,Russia,10,164
+285_Bezobrazov_1_006.txt,Bezobrazov_1_006,Middle Russian,Church Slavonic,Russia,19,324
+286_Bezobrazov_1_007.txt,Bezobrazov_1_007,Middle Russian,Church Slavonic,Russia,14,199
+287_Bezobrazov_1_009.txt,Bezobrazov_1_009,Middle Russian,Church Slavonic,Russia,5,65
+288_Bezobrazov_1_010.txt,Bezobrazov_1_010,Middle Russian,Church Slavonic,Russia,5,60
+289_Bezobrazov_1_011.txt,Bezobrazov_1_011,Middle Russian,Church Slavonic,Russia,10,135
+290_Bezobrazov_1_012.txt,Bezobrazov_1_012,Middle Russian,Church Slavonic,Russia,5,121
+291_Bezobrazov_1_013.txt,Bezobrazov_1_013,Middle Russian,Church Slavonic,Russia,10,150
+292_Bezobrazov_1_014.txt,Bezobrazov_1_014,Middle Russian,Church Slavonic,Russia,18,176
+293_Bezobrazov_1_015.txt,Bezobrazov_1_015,Middle Russian,Church Slavonic,Russia,2,54
+294_Bezobrazov_1_016.txt,Bezobrazov_1_016,Middle Russian,Church Slavonic,Russia,6,75
+295_Polotsk_letters_135.txt,Polotsk letters 135,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,23,379
+296_Polotsk_letters_138.txt,Polotsk letters 138,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,7,115
+297_Polotsk_letters_139.txt,Polotsk letters 139,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,5,76
+298_Polotsk_letters_140.txt,Polotsk letters 140,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,5,103
+299_Polotsk_letters_141.txt,Polotsk letters 141,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,9,166
+300_Polotsk_letters_143.txt,Polotsk letters 143,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,7,153
+301_Polotsk_letters_144.txt,Polotsk letters 144,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,10,183
+302_Polotsk_letters_145.txt,Polotsk letters 145,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,4,93
+303_Polotsk_letters_146.txt,Polotsk letters 146,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,11,317
+304_Polotsk_letters_147.txt,Polotsk letters 147,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,5,123
+305_Polotsk_letters_148.txt,Polotsk letters 148,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,8,158
+306_Polotsk_letters_149.txt,Polotsk letters 149,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,10,142
+307_Polotsk_letters_155.txt,Polotsk letters 155,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,7,199
+308_Polotsk_letters_156.txt,Polotsk letters 156,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,13,207
+309_Polotsk_letters_158.txt,Polotsk letters 158,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,18,379
+310_Polotsk_letters_159.txt,Polotsk letters 159,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,5,90
+311_Polotsk_letters_160.txt,Polotsk letters 160,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,6,140
+312_Polotsk_letters_161.txt,Polotsk letters 161,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,16,500
+313_Polotsk_letters_162.txt,Polotsk letters 162,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,6,153
+314_Polotsk_letters_163.txt,Polotsk letters 163,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,13,339
+315_Polotsk_letters_164.txt,Polotsk letters 164,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,12,191
+316_Polotsk_letters_165.txt,Polotsk letters 165,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,5,100
+317_Polotsk_letters_166.txt,Polotsk letters 166,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,12,286
+318_Polotsk_letters_167.txt,Polotsk letters 167,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,6,164
+319_Polotsk_letters_168.txt,Polotsk letters 168,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,9,193
+320_Polotsk_letters_169.txt,Polotsk letters 169,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,10,141
+321_Polotsk_letters_170.txt,Polotsk letters 170,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,16,285
+322_Polotsk_letters_171.txt,Polotsk letters 171,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,31,597
+323_Polotsk_letters_176.txt,Polotsk letters 176,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,8,198
+324_Polotsk_letters_177.txt,Polotsk letters 177,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,16,273
+325_Polotsk_letters_178.txt,Polotsk letters 178,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,3,72
+326_Polotsk_letters_180.txt,Polotsk letters 180,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,21,414
+327_Polotsk_letters_181.txt,Polotsk letters 181,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,4,100
+328_Polotsk_letters_182.txt,Polotsk letters 182,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,4,86
+329_Polotsk_letters_185.txt,Polotsk letters 185,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,7,172
+330_Polotsk_letters_186.txt,Polotsk letters 186,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,15,297
+331_Polotsk_letters_187.txt,Polotsk letters 187,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,10,279
+332_Polotsk_letters_188.txt,Polotsk letters 188,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,24,385
+333_Polotsk_letters_189.txt,Polotsk letters 189,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,8,262
+334_Polotsk_letters_190.txt,Polotsk letters 190,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,6,131
+335_Polotsk_letters_191.txt,Polotsk letters 191,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,9,185
+336_Polotsk_letters_192.txt,Polotsk letters 192,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,9,207
+337_Polotsk_letters_194.txt,Polotsk letters 194,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,10,140
+338_Polotsk_letters_195.txt,Polotsk letters 195,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,9,172
+339_Polotsk_letters_196.txt,Polotsk letters 196,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,5,154
+340_Polotsk_letters_198.txt,Polotsk letters 198,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,7,173
+341_Polotsk_letters_199.txt,Polotsk letters 199,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,5,150
+342_Polotsk_letters_200.txt,Polotsk letters 200,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,10,400
+343_Polotsk_letters_201.txt,Polotsk letters 201,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,7,164
+344_Polotsk_letters_202.txt,Polotsk letters 202,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,7,332
+345_Polotsk_letters_203.txt,Polotsk letters 203,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,3,62
+346_Polotsk_letters_204.txt,Polotsk letters 204,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,6,160
+347_Polotsk_letters_206.txt,Polotsk letters 206,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,8,228
+348_Polotsk_letters_207.txt,Polotsk letters 207,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,8,215
+349_Polotsk_letters_208.txt,Polotsk letters 208,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,8,276
+350_Polotsk_letters_209.txt,Polotsk letters 209,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,9,218
+351_Polotsk_letters_210.txt,Polotsk letters 210,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,8,129
+352_Polotsk_letters_211.txt,Polotsk letters 211,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,13,285
+353_Polotsk_letters_212.txt,Polotsk letters 212,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,9,207
+354_Polotsk_letters_213.txt,Polotsk letters 213,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,15,303
+355_Polotsk_letters_214.txt,Polotsk letters 214,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,9,207
+356_Polotsk_letters_215.txt,Polotsk letters 215,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,7,167
+357_Polotsk_letters_216.txt,Polotsk letters 216,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,12,390
+358_Polotsk_letters_217.txt,Polotsk letters 217,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,11,246
+359_Polotsk_letters_218.txt,Polotsk letters 218,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,5,120
+360_Polotsk_letters_219.txt,Polotsk letters 219,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,10,167
+361_Polotsk_letters_223.txt,Polotsk letters 223,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,4,66
+362_Polotsk_letters_224.txt,Polotsk letters 224,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,8,197
+363_Polotsk_letters_225.txt,Polotsk letters 225,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,6,134
+364_Polotsk_letters_226-1.txt,Polotsk letters 226-1,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,27,874
+365_Polotsk_letters_226.txt,Polotsk letters 226,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,27,864
+366_Polotsk_letters_232.txt,Polotsk letters 232,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,10,193
+367_Polotsk_letters_233.txt,Polotsk letters 233,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,10,226
+368_Polotsk_letters_234.txt,Polotsk letters 234,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,7,147
+369_Polotsk_letters_236.txt,Polotsk letters 236,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,10,181
+370_Polotsk_letters_237.txt,Polotsk letters 237,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,15,396
+371_Polotsk_letters_238.txt,Polotsk letters 238,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,29,478
+372_Polotsk_letters_239.txt,Polotsk letters 239,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,23,442
+373_Polotsk_letters_240.txt,Polotsk letters 240,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,39,820
+374_Polotsk_letters_241.txt,Polotsk letters 241,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,5,127
+375_Polotsk_letters_242.txt,Polotsk letters 242,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,4,97
+376_Polotsk_letters_243.txt,Polotsk letters 243,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,7,168
+377_Polotsk_letters_246.txt,Polotsk letters 246,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,10,335
+378_Polotsk_letters_247.txt,Polotsk letters 247,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,12,350
+379_Polotsk_letters_248.txt,Polotsk letters 248,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,9,185
+380_Polotsk_letters_249.txt,Polotsk letters 249,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,14,375
+381_Polotsk_letters_251.txt,Polotsk letters 251,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,10,156
+382_Polotsk_letters_252.txt,Polotsk letters 252,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,6,116
+383_Polotsk_letters_254.txt,Polotsk letters 254,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,8,163
+384_Polotsk_letters_254a.txt,Polotsk letters 254a,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,17,471
+385_Polotsk_letters_255.txt,Polotsk letters 255,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,7,199
+386_Polotsk_letters_257.txt,Polotsk letters 257,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,11,171
+387_Polotsk_letters_258.txt,Polotsk letters 258,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,18,320
+388_Polotsk_letters_259.txt,Polotsk letters 259,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,12,258
+389_Polotsk_letters_260.txt,Polotsk letters 260,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,11,360
+390_Polotsk_letters_263.txt,Polotsk letters 263,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,2,22
+391_Polotsk_letters_264.txt,Polotsk letters 264,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,12,233
+392_Polotsk_letters_265.txt,Polotsk letters 265,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,23,687
+393_Polotsk_letters_266.txt,Polotsk letters 266,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,14,392
+394_Polotsk_letters_267.txt,Polotsk letters 267,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,28,560
+395_Polotsk_letters_268.txt,Polotsk letters 268,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,3,53
+396_Polotsk_letters_271a.txt,Polotsk letters 271a,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,9,195
+397_Polotsk_letters_272.txt,Polotsk letters 272,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,4,90
+398_Polotsk_letters_277.txt,Polotsk letters 277,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,23,426
+399_Polotsk_letters_314.txt,Polotsk letters 314,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,11,250
+400_Polotsk_letters_315.txt,Polotsk letters 315,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,7,159
+401_Polotsk_letters_316.txt,Polotsk letters 316,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,10,381
+402_Polotsk_letters_317.txt,Polotsk letters 317,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,9,230
+403_Polotsk_letters_318.txt,Polotsk letters 318,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,13,310
+404_Polotsk_letters_319.txt,Polotsk letters 319,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,9,212
+405_Polotsk_letters_320.txt,Polotsk letters 320,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,6,163
+406_Polotsk_letters_321.txt,Polotsk letters 321,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,7,258
+407_Polotsk_letters_322.txt,Polotsk letters 322,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,11,238
+408_Polotsk_letters_323.txt,Polotsk letters 323,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,7,143
+409_Polotsk_letters_324.txt,Polotsk letters 324,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,8,194
+410_Polotsk_letters_337.txt,Polotsk letters 337,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,6,92
+411_Polotsk_letters_338.txt,Polotsk letters 338,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,9,273
+412_Polotsk_letters_339.txt,Polotsk letters 339,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,16,326
+413_Polotsk_letters_339a.txt,Polotsk letters 339a,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,20,474
+414_Polotsk_letters_341.txt,Polotsk letters 341,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,8,219
+415_Polotsk_letters_342.txt,Polotsk letters 342,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,11,276
+416_Polotsk_letters_343.txt,Polotsk letters 343,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,20,680
+417_Polotsk_letters_344.txt,Polotsk letters 344,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,29,1151
+418_Polotsk_letters_346.txt,Polotsk letters 346,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,10,230
+419_Polotsk_letters_347.txt,Polotsk letters 347,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,11,226
+420_Polotsk_letters_348.txt,Polotsk letters 348,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,14,421
+421_Polotsk_letters_349.txt,Polotsk letters 349,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,64,1546
+422_Polotsk_letters_350.txt,Polotsk letters 350,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,15,418
+423_Polotsk_letters_351.txt,Polotsk letters 351,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,8,227
+424_Polotsk_letters_352.txt,Polotsk letters 352,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,12,285
+425_Polotsk_letters_353.txt,Polotsk letters 353,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,20,411
+426_Polotsk_letters_354.txt,Polotsk letters 354,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,31,1130
+427_Polotsk_letters_355.txt,Polotsk letters 355,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,7,155
+428_Polotsk_letters_358.txt,Polotsk letters 358,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,18,735
+429_Polotsk_letters_359.txt,Polotsk letters 359,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,9,248
+430_Polotsk_letters_360.txt,Polotsk letters 360,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,12,389
+431_Polotsk_letters_363.txt,Polotsk letters 363,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,5,141
+432_Polotsk_letters_364.txt,Polotsk letters 364,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,20,782
+433_Polotsk_letters_366.txt,Polotsk letters 366,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,8,98
+434_Polotsk_letters_366a.txt,Polotsk letters 366a,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,8,185
+435_Polotsk_letters_367.txt,Polotsk letters 367,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,22,692
+436_Polotsk_letters_368.txt,Polotsk letters 368,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,6,142
+437_Polotsk_letters_375.txt,Polotsk letters 375,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,10,322
+438_Polotsk_letters_376.txt,Polotsk letters 376,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,7,106
+439_Polotsk_letters_378.txt,Polotsk letters 378,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,20,652
+440_Polotsk_letters_379.txt,Polotsk letters 379,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,20,719
+441_Polotsk_letters_380.txt,Polotsk letters 380,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,20,738
+442_Polotsk_letters_381.txt,Polotsk letters 381,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,27,802
+443_Polotsk_letters_382.txt,Polotsk letters 382,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,28,682
+444_Polotsk_letters_383.txt,Polotsk letters 383,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,11,305
+445_Polotsk_letters_383a.txt,Polotsk letters 383a,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,6,317
+446_Polotsk_letters_385.txt,Polotsk letters 385,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,8,239
+447_Polotsk_letters_389.txt,Polotsk letters 389,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,10,281
+448_Polotsk_letters_390.txt,Polotsk letters 390,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,14,360
+449_Polotsk_letters_391.txt,Polotsk letters 391,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,10,343
+450_Polotsk_letters_392.txt,Polotsk letters 392,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,6,151
+451_Polotsk_letters_395.txt,Polotsk letters 395,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,13,392
+452_Polotsk_letters_397.txt,Polotsk letters 397,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,19,710
+453_Polotsk_letters_398.txt,Polotsk letters 398,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,21,779
+454_Polotsk_letters_399.txt,Polotsk letters 399,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,16,418
+455_Polotsk_letters_400.txt,Polotsk letters 400,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,12,526
+456_Polotsk_letters_401.txt,Polotsk letters 401,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,4,163
+457_Polotsk_letters_402.txt,Polotsk letters 402,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,8,192
+458_Polotsk_letters_402b.txt,Polotsk letters 402b,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,1,19
+459_Polotsk_letters_4011.txt,Polotsk letters 4011,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,14,440
+460_Polotsk_letters_413.txt,Polotsk letters 413,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,5,132
+461_Polotsk_letters_413a.txt,Polotsk letters 413a,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,9,81
+462_Polotsk_letters_414.txt,Polotsk letters 414,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,2,33
+463_Polotsk_letters_414a.txt,Polotsk letters 414a,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,1,9
+464_Polotsk_letters_414b.txt,Polotsk letters 414b,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,3,54
+465_Polotsk_letters_416.txt,Polotsk letters 416,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,3,142
+466_Polotsk_letters_418.txt,Polotsk letters 418,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,17,424
+467_Polotsk_letters_419.txt,Polotsk letters 419,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,12,143
+468_Polotsk_letters_420.txt,Polotsk letters 420,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,6,242
+469_Polotsk_letters_421.txt,Polotsk letters 421,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,7,242
+470_Polotsk_letters_422.txt,Polotsk letters 422,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,11,336
+471_Polotsk_letters_423.txt,Polotsk letters 423,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,28,1167
+472_Polotsk_letters_423a.txt,Polotsk letters 423a,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,3,44
+473_Polotsk_letters_424.txt,Polotsk letters 424,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,8,196
+474_Polotsk_letters_425.txt,Polotsk letters 425,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,4,115
+475_Polotsk_letters_426.txt,Polotsk letters 426,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,11,466
+476_Polotsk_letters_427.txt,Polotsk letters 427,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,8,336
+477_Polotsk_letters_428.txt,Polotsk letters 428,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,8,222
+478_Polotsk_letters_429.txt,Polotsk letters 429,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,15,605
+479_Polotsk_letters_431.txt,Polotsk letters 431,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,8,371
+480_Polotsk_letters_432.txt,Polotsk letters 432,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,4,88
+481_Polotsk_letters_433.txt,Polotsk letters 433,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,7,256
+482_Polotsk_letters_434.txt,Polotsk letters 434,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,7,165
+483_Polotsk_letters_434a.txt,Polotsk letters 434a,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,9,149
+484_Polotsk_letters_434b.txt,Polotsk letters 434b,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,3,40
+485_Polotsk_letters_434v.txt,Polotsk letters 434v,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,1,13
+486_Polotsk_letters_435a.txt,Polotsk letters 435a,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,2,13
+487_Polotsk_letters_435b.txt,Polotsk letters 435b,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,2,24
+488_Polotsk_letters_435g.txt,Polotsk letters 435g,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,13,174
+489_Polotsk_letters_435v.txt,Polotsk letters 435v,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,20,167
+490_Polotsk_letters_436.txt,Polotsk letters 436,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,9,178
+491_Polotsk_letters_437.txt,Polotsk letters 437,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,16,378
+492_Polotsk_letters_438.txt,Polotsk letters 438,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,11,331
+493_Polotsk_letters_439.txt,Polotsk letters 439,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,7,205
+494_Polotsk_letters_440.txt,Polotsk letters 440,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,14,405
+495_Polotsk_letters_441.txt,Polotsk letters 441,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,19,600
+496_Polotsk_letters_442.txt,Polotsk letters 442,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,6,239
+497_Polotsk_letters_442a.txt,Polotsk letters 442a,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,2,17
+498_Polotsk_letters_442b.txt,Polotsk letters 442b,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,1,8
+499_Polotsk_letters_442v.txt,Polotsk letters 442v,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,3,27
+500_Polotsk_letters_443a.txt,Polotsk letters 443a,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,3,23
+501_Polotsk_letters_443b.txt,Polotsk letters 443b,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,1,6
+502_Polotsk_letters_444.txt,Polotsk letters 444,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,13,518
+503_Polotsk_letters_445.txt,Polotsk letters 445,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,9,195
+504_Polotsk_letters_446.txt,Polotsk letters 446,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,13,574
+505_Polotsk_letters_447.txt,Polotsk letters 447,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,7,182
+506_Polotsk_letters_448.txt,Polotsk letters 448,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,7,244
+507_Polotsk_letters_449.txt,Polotsk letters 449,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,11,341
+508_Polotsk_letters_450.txt,Polotsk letters 450,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,13,278
+509_Polotsk_letters_451.txt,Polotsk letters 451,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,11,504
+510_Polotsk_letters_452.txt,Polotsk letters 452,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,13,302
+511_Polotsk_letters_452a.txt,Polotsk letters 452a,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,1,5
+512_Polotsk_letters_452b.txt,Polotsk letters 452b,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,2,18
+513_Polotsk_letters_452v.txt,Polotsk letters 452v,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,1,9
+514_Polotsk_letters_455.txt,Polotsk letters 455,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,11,269
+515_Polotsk_letters_456.txt,Polotsk letters 456,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,9,257
+516_Polotsk_letters_457.txt,Polotsk letters 457,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,9,282
+517_Polotsk_letters_457a.txt,Polotsk letters 457a,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,1,10
+518_Polotsk_letters_457b.txt,Polotsk letters 457b,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,2,16
+519_Polotsk_letters_458.txt,Polotsk letters 458,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,6,201
+520_Polotsk_letters_458a.txt,Polotsk letters 458a,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,3,21
+521_Polotsk_letters_458b.txt,Polotsk letters 458b,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,3,24
+522_Polotsk_letters_458d.txt,Polotsk letters 458d,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,3,17
+523_Polotsk_letters_458g.txt,Polotsk letters 458g,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,2,18
+524_Polotsk_letters_458v.txt,Polotsk letters 458v,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,1,14
+525_Polotsk_letters_459.txt,Polotsk letters 459,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,83,2436
+526_Polotsk_letters_460.txt,Polotsk letters 460,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,14,592
+527_Polotsk_letters_460a.txt,Polotsk letters 460a,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,2,17
+528_Polotsk_letters_460b.txt,Polotsk letters 460b,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,1,6
+529_Polotsk_letters_460d.txt,Polotsk letters 460d,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,2,15
+530_Polotsk_letters_460g.txt,Polotsk letters 460g,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,1,10
+531_Polotsk_letters_460v.txt,Polotsk letters 460v,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,1,7
+532_Polotsk_letters_461.txt,Polotsk letters 461,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,15,450
+533_Polotsk_letters_461a.txt,Polotsk letters 461a,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,11,386
+534_Polotsk_letters_462.txt,Polotsk letters 462,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,6,133
+535_Polotsk_letters_462a.txt,Polotsk letters 462a,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,16,604
+536_Polotsk_letters_462b.txt,Polotsk letters 462b,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,10,132
+537_Polotsk_letters_464a.txt,Polotsk letters 464a,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,24,651
+538_Polotsk_letters_465.txt,Polotsk letters 465,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,12,310
+539_Polotsk_letters_466.txt,Polotsk letters 466,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,16,467
+540_Polotsk_letters_467.txt,Polotsk letters 467,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,12,393
+541_Polotsk_letters_468.txt,Polotsk letters 468,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,16,523
+542_Polotsk_letters_470.txt,Polotsk letters 470,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,12,314
+543_Polotsk_letters_471.txt,Polotsk letters 471,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,11,280
+544_Polotsk_letters_472.txt,Polotsk letters 472,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,8,169
+545_Polotsk_letters_473.txt,Polotsk letters 473,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,16,717
+546_Polotsk_letters_474.txt,Polotsk letters 474,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,111,3200
+547_Polotsk_letters_475.txt,Polotsk letters 475,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,15,525
+548_Polotsk_letters_476.txt,Polotsk letters 476,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,82,2154
+549_Polotsk_letters_477.txt,Polotsk letters 477,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,13,502
+550_Polotsk_letters_478.txt,Polotsk letters 478,Old East Slavic - bielorussian alphabet,Ruthenian,Belarus,12,462
+551_Ratushna_Kniga_1986_-_00.txt,Ratushna Kniga 1986 - 00,Old East Slavic - ukrainian alphabet,Ruthenian,Ukraine,4,71
+552_Ratushna_Kniga_1986_-_01.txt,Ratushna Kniga 1986 - 01,Old East Slavic - ukrainian alphabet,Ruthenian,Ukraine,17,392
+553_Ratushna_Kniga_1986_-_02.txt,Ratushna Kniga 1986 - 02,Old East Slavic - ukrainian alphabet,Ruthenian,Ukraine,10,247
+554_Ratushna_Kniga_1986_-_03.txt,Ratushna Kniga 1986 - 03,Old East Slavic - ukrainian alphabet,Ruthenian,Ukraine,7,273
+555_Ratushna_Kniga_1986_-_04.txt,Ratushna Kniga 1986 - 04,Old East Slavic - ukrainian alphabet,Ruthenian,Ukraine,11,311
+556_Ratushna_Kniga_1986_-_05.txt,Ratushna Kniga 1986 - 05,Old East Slavic - ukrainian alphabet,Ruthenian,Ukraine,15,367
+557_Ratushna_Kniga_1986_-_06.txt,Ratushna Kniga 1986 - 06,Old East Slavic - ukrainian alphabet,Ruthenian,Ukraine,13,359
+558_Ratushna_Kniga_1986_-_07.txt,Ratushna Kniga 1986 - 07,Old East Slavic - ukrainian alphabet,Ruthenian,Ukraine,17,480
+559_Ratushna_Kniga_1986_-_08.txt,Ratushna Kniga 1986 - 08,Old East Slavic - ukrainian alphabet,Ruthenian,Ukraine,13,380
+560_Ratushna_Kniga_1986_-_09.txt,Ratushna Kniga 1986 - 09,Old East Slavic - ukrainian alphabet,Ruthenian,Ukraine,11,257
+561_Ratushna_Kniga_1986_-_10.txt,Ratushna Kniga 1986 - 10,Old East Slavic - ukrainian alphabet,Ruthenian,Ukraine,18,677
+562_The_Zudechiv_delimitation_charter_of_1413.txt,The Zudechiv delimitation charter of 1413,Old East Slavic - ukrainian alphabet,Ruthenian,Ukraine,13,505
+563_Postanova_Petra-voevodi_i_bojars_koi_radi_1456_r_p.txt,Postanova Petra-voevodi i bojars'koi radi 1456 r. pro viplatu daniniturcam (cultanovi Mechemmedovi II),Old East Slavic - ukrainian alphabet,Ruthenian,Ukraine,17,616
+564_Stefan_voevoda_1473_r_nadae_zemlju_manastirevi_na.txt,Stefan voevoda 1473 r. nadae zemlju manastirevi na Moldavnci,Old East Slavic - ukrainian alphabet,Ruthenian,Ukraine,231,4305
+565_Zudečivs_ka_rozgranična_gramota_1413_roku.txt,Zudečivs'ka rozgranična gramota 1413 roku,Old East Slavic - ukrainian alphabet,Ruthenian,Ukraine,31,531
+566_Požalovanie_Luckomu_zemjaninu_panu_Olizaru_Šilovič.txt,"Požalovanie Luckomu zemjaninu, panu Olizaru Šiloviču: Serpinikă, Ljubča, Gorochova, Gubina, Markovičej v Luckomă povětě i Podlescevă, Dorosiča i Povorska — v Mel'nickoj volosti, să ich ugod'jami",Old East Slavic - belarusian alphabet,Ruthenian,Belarus,13,373
+567_Požalovanie_panu_Nemirě_Rezanoviču_iměnij_Litovyžă.txt,"Požalovanie panu Nemirě Rezanoviču iměnij Litovyžă, Torgovica, Červišča, Stvoloviči să ichă ugod’jami",Old East Slavic - belarusian alphabet,Ruthenian,Belarus,16,294
+568_Požalovanie_panu_Nemirě_Rezanoviču_iměnija_ego_bra.txt,"Požalovanie panu Nemirě Rezanoviču iměnija ego brata Micka -Zemno, Dubno, Markovă Stavă, Sernă, Mostišină, să ichă ugod’jami",Old East Slavic - belarusian alphabet,Ruthenian,Belarus,407,3612
+569_Polotsk_Letters_68.txt,Polotsk Letters 68,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,4,133
+570_Polotsk_Letters_71.txt,Polotsk Letters 71,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,6,131
+571_Polotsk_Letters_74.txt,Polotsk Letters 74,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,7,97
+572_Polotsk_Letters_75.txt,Polotsk Letters 75,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,8,128
+573_Polotsk_Letters_77.txt,Polotsk Letters 77,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,3,17
+574_Polotsk_Letters_78.txt,Polotsk Letters 78,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,2,15
+575_Polotsk_Letters_79.txt,Polotsk Letters 79,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,1,13
+576_Polotsk_Letters_80.txt,Polotsk Letters 80,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,3,23
+577_Polotsk_Letters_81.txt,Polotsk Letters 81,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,1,16
+578_Polotsk_Letters_97.txt,Polotsk Letters 97,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,5,84
+579_Polotsk_Letters_98-1.txt,Polotsk Letters 98-1,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,1,12
+580_Polotsk_Letters_98.txt,Polotsk Letters 98,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,10,154
+581_Polotsk_Letters_101.txt,Polotsk Letters 101,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,19,273
+582_Polotsk_Letters_102.txt,Polotsk Letters 102,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,12,165
+583_Polotsk_Letters_104.txt,Polotsk Letters 104,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,6,58
+584_Polotsk_Letters_105.txt,Polotsk Letters 105,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,18,271
+585_Polotsk_Letters_107.txt,Polotsk Letters 107,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,18,319
+586_Polotsk_Letters_108.txt,Polotsk Letters 108,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,19,321
+587_Polotsk_Letters_109.txt,Polotsk Letters 109,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,4,55
+588_Polotsk_Letters_110.txt,Polotsk Letters 110,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,12,187
+589_Polotsk_Letters_111.txt,Polotsk Letters 111,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,14,217
+590_Polotsk_Letters_112.txt,Polotsk Letters 112,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,8,122
+591_Polotsk_Letters_113.txt,Polotsk Letters 113,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,7,110
+592_Polotsk_Letters_117.txt,Polotsk Letters 117,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,5,86
+593_Polotsk_Letters_118.txt,Polotsk Letters 118,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,20,402
+594_Polotsk_Letters_121.txt,Polotsk Letters 121,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,38,581
+595_Polotsk_Letters_122.txt,Polotsk Letters 122,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,5,114
+596_Polotsk_Letters_123.txt,Polotsk Letters 123,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,3,84
+597_Polotsk_Letters_124.txt,Polotsk Letters 124,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,9,132
+598_Polotsk_Letters_125.txt,Polotsk Letters 125,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,7,133
+599_Polotsk_Letters_126.txt,Polotsk Letters 126,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,9,200
+600_Polotsk_Letters_127.txt,Polotsk Letters 127,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,8,172
+601_Polotsk_Letters_128.txt,Polotsk Letters 128,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,7,158
+602_Polotsk_Letters_129.txt,Polotsk Letters 129,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,16,187
+603_Polotsk_Letters_130.txt,Polotsk Letters 130,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,5,72
+604_Polotsk_Letters_131.txt,Polotsk Letters 131,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,17,428
+605_Polotsk_Letters_133.txt,Polotsk Letters 133,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,3,43
+606_Polotsk_Letters_132.txt,Polotsk Letters 132,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,3,28
+607_Polotsk_Letters_134.txt,Polotsk Letters 134,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,16,217
+608_Polotsk_Letters_1.txt,Polotsk Letters 1,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,10,277
+609_Polotsk_Letters_2.txt,Polotsk Letters 2,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,14,178
+610_Polotsk_Letters_3.txt,Polotsk Letters 3,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,11,158
+611_Polotsk_Letters_4.txt,Polotsk Letters 4,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,3,60
+612_Polotsk_Letters_5.txt,Polotsk Letters 5,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,3,85
+613_Polotsk_Letters_5pril.txt,Polotsk Letters 5pril,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,9,219
+614_Polotsk_Letters_8.txt,Polotsk Letters 8,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,12,218
+615_Polotsk_Letters_10.txt,Polotsk Letters 10,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,3,54
+616_Polotsk_Letters_11.txt,Polotsk Letters 11,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,7,193
+617_Polotsk_Letters_15.txt,Polotsk Letters 15,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,4,58
+618_Polotsk_Letters_16.txt,Polotsk Letters 16,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,53,1090
+619_Polotsk_Letters_32.txt,Polotsk Letters 32,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,7,91
+620_Polotsk_Letters_39.txt,Polotsk Letters 39,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,6,154
+621_Polotsk_Letters_40.txt,Polotsk Letters 40,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,16,237
+622_Polotsk_Letters_44.txt,Polotsk Letters 44,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,7,118
+623_Polotsk_Letters_48.txt,Polotsk Letters 48,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,21,313
+624_Polotsk_Letters_49.txt,Polotsk Letters 49,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,21,379
+625_Polotsk_Letters_52.txt,Polotsk Letters 52,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,27,495
+626_Polotsk_Letters_53.txt,Polotsk Letters 53,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,2,57
+627_Polotsk_Letters_54.txt,Polotsk Letters 54,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,23,553
+628_Polotsk_Letters_55.txt,Polotsk Letters 55,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,23,566
+629_Polotsk_Letters_57.txt,Polotsk Letters 57,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,8,207
+630_Polotsk_Letters_58.txt,Polotsk Letters 58,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,6,83
+631_Polotsk_Letters_62.txt,Polotsk Letters 62,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,7,90
+632_Polotsk_Letters_63.txt,Polotsk Letters 63,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,8,81
+633_Polotsk_Letters_65.txt,Polotsk Letters 65,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,3,88
+634_Polotsk_Letters_66.txt,Polotsk Letters 66,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,3,74
+635_Polotsk_Letters_67.txt,Polotsk Letters 67,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,25,333
+636_Drugij_Volyns_kij_statut_Velykogo_knjaživstva_Lyto.txt,Drugij (Volyns’kij) statut Velykogo knjaživstva Lytovs’kogo 1566 roku. Roždělă 4-j o sud’jachă i o suděchă,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,21,896
+637_Tretij_statut_Velikogo_knjažestva_Litovskogo_1588.txt,Tretij statut Velikogo knjažestva Litovskogo 1588 goda. Roždělă 4-j o sud’jachă i o suděchă,Old East Slavic - belarusian alphabet,Ruthenian,Belarus,28,1311
+638_Obraščenie_podkanclera_VKL_L_va_Sapegi_k_soslovija.txt,Obraščenie podkanclera VKL L’va Sapegi k soslovijam Velikogo knjažestva Litovskogo po slučaju prinjatija Statuta VKL (1588 g.),Old East Slavic - belarusian alphabet,Ruthenian,Belarus,18,861
+639_The_Life_of_Avvakum.txt,The Life of Avvakum,Old Russian,Church Slavonic,,241,24636
+640_Žitie_Aleksandra_Kuštskogo.txt,Žitie Aleksandra Kuštskogo,Church Slavonic,Church Slavonic,,376,6013
+641_Žitie_Aleksandra_Kuštskogo_i_Evfimija_Sjanžemskogo.txt,Žitie Aleksandra Kuštskogo i Evfimija Sjanžemskogo,New Church Slavonic,New Church Slavonic,,60,2869
+642_Žitie_Andreja_Totemskogo.txt,Žitie Andreja Totemskogo,New Church Slavonic,New Church Slavonic,,78,2680
+643_Žitie_Arsenija_Komel_skogo.txt,Žitie Arsenija Komel'skogo,New Church Slavonic,New Church Slavonic,,77,6165
+644_Žitie_Gerasima_Vologodskogo.txt,Žitie Gerasima Vologodskogo,New Church Slavonic,New Church Slavonic,,83,4657
+645_Žitie_Ignatija_Lomskogo.txt,Žitie Ignatija Lomskogo,New Church Slavonic,New Church Slavonic,,129,7168
+646_Žitie_Ignatija_Vologodskogo.txt,Žitie Ignatija Vologodskogo,New Church Slavonic,New Church Slavonic,,30,2467
+647_Žitie_Innokentija_Komel_skogo.txt,Žitie Innokentija Komel'skogo,New Church Slavonic,New Church Slavonic,,19,1572
+648_Žitie_Kassiana_Ugličskogo.txt,Žitie Kassiana Ugličskogo,Church Slavonic,Church Slavonic,,46,2845
+649_Žitie_Stefana_Komel_skogo.txt,Žitie Stefana Komel'skogo,Church Slavonic,Church Slavonic,,47,4058
+650_Žitie_Feodosija_Totemskogo.txt,Žitie Feodosija Totemskogo,New Church Slavonic,New Church Slavonic,,151,5792
+651_Žitie_Vassiana_Tiksnenskogo_žitie_i_čudesa_1_8.txt,Žitie Vassiana Tiksnenskogo (žitie i čudesa 1–8),New Church Slavonic,New Church Slavonic,,122,3205
+652_Житие_Вассиана_Тиксненского_чудеса_9_29.txt,Житие Вассиана Тиксненского (чудеса 9–29),New Church Slavonic,New Church Slavonic,,22,1938

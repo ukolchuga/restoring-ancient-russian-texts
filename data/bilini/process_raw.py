@@ -1,9 +1,11 @@
 import re
 import os
+import csv
 
 # ПАРАМЕТРЫ
-INPUT_FOLDER = "raw_texts"
-OUTPUT_FILE = "ultimate_ancient_rus_corpus.txt"
+INPUT_FOLDER = "raw_texts"  # Папка с исходными txt былин
+OUTPUT_FILE = "ultimate_ancient_rus_corpus.txt"  # Итоговый файл
+CSV_OUTPUT_FILE = "byliny_metadata.csv"  # Файл со статистикой для Google Таблиц
 
 
 def clean_ancient_travelogue(content):
@@ -53,10 +55,12 @@ def main():
     files = sorted([f for f in os.listdir(INPUT_FOLDER) if f.endswith(".txt")])
 
     print(f"🚀 Начинаем обработку {len(files)} файлов...\n")
-    print(f"{'Название файла':<40} | {'Строк':<10}")
-    print("-" * 55)
 
-    total_sum = 0
+    # Подготавливаем данные для CSV
+    csv_data = [["Filename", "Lines", "Tokens"]]
+
+    total_sum_lines = 0
+    total_sum_tokens = 0
 
     for filename in files:
         path = os.path.join(INPUT_FOLDER, filename)
@@ -65,13 +69,25 @@ def main():
                 content = f.read()
 
             sentences = clean_ancient_travelogue(content)
-            file_count = len(sentences)
+            file_lines_count = len(sentences)
+            file_tokens_count = 0
 
             for s in sentences:
                 all_files_lines.append(s)
 
-            print(f"{filename:<40} | {file_count:<10}")
-            total_sum += file_count
+                # Подсчет токенов (слова + знаки препинания)
+                tokens_in_line = len(re.findall(r"\w+|[^\w\s]", s))
+                file_tokens_count += tokens_in_line
+
+            # Выводим инфу в консоль и добавляем в таблицу
+            if file_lines_count > 0:
+                print(
+                    f"✅ {filename[:40]:<42} | Строк: {file_lines_count:<5} | Токенов: {file_tokens_count}"
+                )
+                csv_data.append([filename, file_lines_count, file_tokens_count])
+
+            total_sum_lines += file_lines_count
+            total_sum_tokens += file_tokens_count
 
         except Exception as e:
             print(f"⚠️ Ошибка в {filename}: {e}")
@@ -80,8 +96,17 @@ def main():
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         f.write("\n".join(all_files_lines))
 
-    print("-" * 55)
-    print(f"✅ Сборка завершена. Всего строк в корпусе: {total_sum}")
+    # Сохраняем аналитику в CSV
+    with open(CSV_OUTPUT_FILE, "w", encoding="utf-8", newline="") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerows(csv_data)
+
+    print("\n" + "=" * 55)
+    print(f"✅ Сборка завершена. Итоговый файл: {OUTPUT_FILE}")
+    print(f"📊 Статистика сохранена в: {CSV_OUTPUT_FILE}")
+    print(f"Всего строк в корпусе: {total_sum_lines}")
+    print(f"Всего токенов (TOROT style): {total_sum_tokens}")
+    print("=" * 55)
 
 
 if __name__ == "__main__":

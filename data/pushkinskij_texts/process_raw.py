@@ -1,9 +1,11 @@
 import os
 import re
+import csv
 
 # ПАРАМЕТРЫ
 INPUT_FOLDER = "raw_texts"  # Папка с исходными txt
 OUTPUT_FILE = "pushkinskij_full.txt"  # Куда сохраняем результат
+CSV_OUTPUT_FILE = "pushkinskij_metadata.csv"  # Файл для Google Таблиц
 
 
 def split_long_line(text, max_len=500):
@@ -88,10 +90,15 @@ def main():
         print(f"❌ Ошибка: Папка {INPUT_FOLDER} не найдена.")
         return
 
-    all_files = [f for f in os.listdir(INPUT_FOLDER) if f.endswith(".txt")]
+    # Сортируем файлы для порядка в таблице
+    all_files = sorted([f for f in os.listdir(INPUT_FOLDER) if f.endswith(".txt")])
     print(f"📂 Найдено файлов: {len(all_files)}")
 
+    # Подготавливаем данные для CSV
+    csv_data = [["Filename", "Lines", "Tokens"]]
+
     total_lines = 0
+    total_words = 0
 
     with open(OUTPUT_FILE, "w", encoding="utf-8") as outfile:
         for filename in all_files:
@@ -105,22 +112,44 @@ def main():
                 sentences = re.split(r"(?<=[.!?|;:])\s+", raw_content)
 
                 file_lines_count = 0
+                file_words_count = 0
                 for sent in sentences:
                     clean_line = clean_ancient_text(sent)
                     for chunk in split_long_line(clean_line):
                         if len(chunk) > 15:
+                            # Проверяем, что нет латиницы
                             if not re.search(r"[a-zA-Z]", chunk):
                                 outfile.write(f"{chunk}\n")
                                 file_lines_count += 1
 
-                print(f"✅ {filename}: сохранено {file_lines_count} строк.")
+                                # Считаем токены ТОЛЬКО для тех строк, которые реально пошли в файл
+                                words_in_chunk = len(re.findall(r"\w+|[^\w\s]", chunk))
+                                file_words_count += words_in_chunk
+
+                # Выводим инфу в консоль и добавляем в таблицу
+                if file_lines_count > 0:
+                    print(
+                        f"✅ {filename[:40]:<42} | Строк: {file_lines_count:<5} | Токенов: {file_words_count}"
+                    )
+                    csv_data.append([filename, file_lines_count, file_words_count])
+
                 total_lines += file_lines_count
+                total_words += file_words_count
 
             except Exception as e:
                 print(f"⚠️ Ошибка при чтении {filename}: {e}")
 
-    print(f"\n🔥 ГОТОВО! Итоговый файл: {OUTPUT_FILE}")
+    # Сохраняем в CSV
+    with open(CSV_OUTPUT_FILE, "w", encoding="utf-8", newline="") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerows(csv_data)
+
+    print("\n" + "=" * 50)
+    print(f"🔥 ГОТОВО! Итоговый файл: {OUTPUT_FILE}")
+    print(f"📊 Статистика сохранена в: {CSV_OUTPUT_FILE}")
     print(f"Всего строк для обучения: {total_lines}")
+    print(f"Всего слов/знаков препинания: {total_words}")
+    print("=" * 50)
 
 
 if __name__ == "__main__":
