@@ -39,6 +39,7 @@ def main():
         "[CTX_LIT]",
         "[CTX_LEGAL]",
         "[CTX_CHURCH]",
+        "[CTX_SCIENCE]",
     ]
 
     print(f"🧠 Начинаем обучение токенизатора на файле {CORPUS_FILE}...")
