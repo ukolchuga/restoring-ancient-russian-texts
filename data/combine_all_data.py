@@ -7,6 +7,7 @@ from transformers import BertTokenizerFast
 TOKENIZER_DIR = "../ancient_rus_tokenizer"
 
 SOURCES_CONFIG = [
+    # Daily
     {
         "type": "file",
         "path": "birch_bark/gramoty_clean.txt",
@@ -14,11 +15,19 @@ SOURCES_CONFIG = [
         "weight": 40,
     },
     {
-        "type": "file",
-        "path": "bilini/ultimate_ancient_rus_corpus.txt",
-        "tag": "[CTX_EPIC]",
-        "weight": 5,
+        "type": "folder",
+        "path": "json_data/diacu_DAILY",
+        "tag": "[CTX_DAILY]",
+        "weight": 15,
     },
+    {"type": "folder", "path": "torot/torot_DAILY", "tag": "[CTX_DAILY]", "weight": 15},
+    {
+        "type": "folder",
+        "path": "pushkinskij_texts/clean_texts/DAILY",
+        "tag": "[CTX_DAILY]",
+        "weight": 15,
+    },
+    # Church
     {
         "type": "file",
         "path": "bible/bible_full_clean.txt",
@@ -31,64 +40,76 @@ SOURCES_CONFIG = [
         "tag": "[CTX_CHURCH]",
         "weight": 1,
     },
-    {"type": "folder", "path": "json_data/diacu_LIT", "tag": "[CTX_LIT]", "weight": 2},
-    {
-        "type": "folder",
-        "path": "json_data/diacu_DAILY",
-        "tag": "[CTX_DAILY]",
-        "weight": 15,
-    },
-    {
-        "type": "folder",
-        "path": "json_data/diacu_LEGAL",
-        "tag": "[CTX_LEGAL]",
-        "weight": 1,
-    },
     {
         "type": "folder",
         "path": "torot/torot_CHURCH",
         "tag": "[CTX_CHURCH]",
         "weight": 1,
     },
-    {"type": "folder", "path": "torot/torot_LIT", "tag": "[CTX_LIT]", "weight": 3},
-    {"type": "folder", "path": "torot/torot_DAILY", "tag": "[CTX_DAILY]", "weight": 15},
-    {"type": "folder", "path": "torot/torot_LEGAL", "tag": "[CTX_LEGAL]", "weight": 10},
     {
         "type": "folder",
         "path": "pushkinskij_texts/clean_texts/CHURCH",
         "tag": "[CTX_CHURCH]",
-        "weight": 1,  # Много текста, вес небольшой
+        "weight": 1,
     },
+    # Literature
+    {
+        "type": "folder",
+        "path": "json_data/diacu_LIT",
+        "tag": "[CTX_LIT]",
+        "weight": 3,
+    },  # Было 2
+    {
+        "type": "folder",
+        "path": "torot/torot_LIT",
+        "tag": "[CTX_LIT]",
+        "weight": 5,
+    },  # Было 3
     {
         "type": "folder",
         "path": "pushkinskij_texts/clean_texts/LIT",
         "tag": "[CTX_LIT]",
-        "weight": 2,
-    },
+        "weight": 4,
+    },  # Было 2
+    # Legal
     {
         "type": "folder",
-        "path": "pushkinskij_texts/clean_texts/DAILY",
-        "tag": "[CTX_DAILY]",
-        "weight": 15,  # Быт усиливаем!
-    },
+        "path": "json_data/diacu_LEGAL",
+        "tag": "[CTX_LEGAL]",
+        "weight": 2,
+    },  # Было 1
+    {
+        "type": "folder",
+        "path": "torot/torot_LEGAL",
+        "tag": "[CTX_LEGAL]",
+        "weight": 20,
+    },  # Было 10
     {
         "type": "folder",
         "path": "pushkinskij_texts/clean_texts/LEGAL",
         "tag": "[CTX_LEGAL]",
-        "weight": 5,
-    },
+        "weight": 10,
+    },  # Было 5
+    # Epic
+    {
+        "type": "file",
+        "path": "bilini/ultimate_ancient_rus_corpus.txt",
+        "tag": "[CTX_EPIC]",
+        "weight": 10,
+    },  # Было 5
     {
         "type": "folder",
         "path": "pushkinskij_texts/clean_texts/EPIC",
         "tag": "[CTX_EPIC]",
-        "weight": 4,  # Сказки и эпос
-    },
+        "weight": 10,
+    },  # Было 4
+    # Science
     {
         "type": "folder",
         "path": "pushkinskij_texts/clean_texts/SCIENCE",
         "tag": "[CTX_SCIENCE]",
-        "weight": 10,  # Науки мало, поэтому вес высокий, чтобы модель её запомнила
-    },
+        "weight": 50,
+    },  # Было 10
 ]
 
 OUTPUT_FILE = "final_ancient_rus_dataset.txt"
