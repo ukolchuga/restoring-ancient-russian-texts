@@ -1,9 +1,9 @@
 import os
 from tokenizers import BertWordPieceTokenizer
 
-# ПАРАМЕТРЫ
+
 CORPUS_FILE = "data/ancient_rus_ready_for_bert.txt"
-VOCAB_SIZE = 30000  # Стандартный размер словаря для BERT
+VOCAB_SIZE = 30000
 SAVE_DIR = "ancient_rus_tokenizer"
 
 
@@ -14,7 +14,6 @@ def main():
 
     print("⏳ Инициализация WordPiece токенизатора...")
 
-    # КРИТИЧЕСКИ ВАЖНЫЕ НАСТРОЙКИ:
     # clean_text=False -> мы уже сами всё идеально почистили
     # strip_accents=False -> ЗАПРЕЩАЕМ удалять титла!
     # lowercase=False -> мы уже сделали Sentence case (Первая буква заглавная)
@@ -25,9 +24,6 @@ def main():
         lowercase=False,
     )
 
-    # Определяем спецтокены.
-    # Сюда ОКУРАТНО вписываем все теги, которые мы добавили при сэмплировании,
-    # чтобы токенизатор воспринимал их как единое целое, а не резал на скобки и буквы.
     special_tokens = [
         "[PAD]",
         "[UNK]",
@@ -64,11 +60,9 @@ def main():
     print("Внутри лежат файлы 'vocab.txt' (твой уникальный словарь)")
     print("=" * 50)
 
-    # Небольшой тест, чтобы проверить, как он работает
     print("\n🔍 ТЕСТИРОВАНИЕ:")
     test_text = "[CTX_DAILY] Поклонъ ѿ бориса ко настасии съ бг҃омъ."
 
-    # Загружаем через интерфейс Transformers для наглядности
     from transformers import BertTokenizerFast
 
     fast_tokenizer = BertTokenizerFast.from_pretrained(
