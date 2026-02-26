@@ -1,0 +1,13 @@
+category,filename,tokens
+DAILY,drevnirusskiy_bit.txt,133
+DAILY,epigraph_daily_records.txt,1230
+DAILY,starorus_daily_1400_1650.txt,13008
+DAILY,starorus_daily_1651_1700.txt,14215
+LEGAL,starorus_legal_1400_1500.txt,11006
+LEGAL,starorus_legal_1501_1550.txt,17058
+LEGAL,starorus_legal_1551_1580.txt,19600
+LEGAL,starorus_legal_1581_1600.txt,22926
+SCIENCE,oldrus_science_1000_1400.txt,171
+SCIENCE,starorus_science_1400_1700.txt,458
+LIT,drevnirusskiy_literature_folklore.txt,1123
+LIT,starorus_lit_folklore_1400_1700.txt,6506
