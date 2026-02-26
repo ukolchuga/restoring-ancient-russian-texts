@@ -28,6 +28,7 @@ def main():
         "[CTX_LIT]",
         "[CTX_EPIC]",
         "[CTX_SCIENCE]",
+        "[UNK]",
     ]
 
     print(f"🧠 Начинаем обучение токенизатора на файле {CORPUS_FILE}...")
@@ -69,6 +70,7 @@ def main():
             "[CTX_LIT]",
             "[CTX_EPIC]",
             "[CTX_SCIENCE]",
+            "[UNK]",
         ]
     }
     fast_tokenizer.add_special_tokens(special_tokens_dict)
