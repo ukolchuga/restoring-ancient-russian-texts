@@ -3,7 +3,7 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 import time
 load_dotenv()
-
+#put your api key in .env file
 API_KEY = os.getenv("GEMINI_API_KEY")
 
 if not API_KEY:
@@ -40,7 +40,7 @@ def main():
             with open(OUTPUT_FILE, 'a', encoding='utf-8') as f_out:
                 f_out.write(cleaned_chunk + "\n")
             print(f"Done, cleaned rows saved in {OUTPUT_FILE}")
-
+#works, but too long, consider lowering waiting time, but be careful of TooManyRequests error
         time.sleep(10)
 
 
