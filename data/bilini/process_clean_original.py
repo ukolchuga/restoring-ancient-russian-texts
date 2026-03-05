@@ -76,9 +76,9 @@ def build_dataset_and_metadata(input_folder, output_txt, output_csv, gap_tag="[G
 
 
 if __name__ == "__main__":
-    INPUT_FOLDER = "clean_original"
-    OUTPUT_TXT = "dobrynya_byliny_corpus.txt"
-    OUTPUT_CSV = "dobrynya_metadata.csv"
+    INPUT_FOLDER = "clean_original_novoya_zapis"
+    OUTPUT_TXT = "clean_original_novoya_zapis.txt"
+    OUTPUT_CSV = "clean_original_novoya_zapis_metadata.csv"
     GAP_TAG = "[GAP]"
 
     build_dataset_and_metadata(INPUT_FOLDER, OUTPUT_TXT, OUTPUT_CSV, gap_tag=GAP_TAG)
