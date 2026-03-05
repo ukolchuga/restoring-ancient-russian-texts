@@ -27,9 +27,9 @@ def unified_clean_pipeline(text):
     # 2. РАСКРЫВАЕМ ВОССТАНОВЛЕННЫЕ БУКВЫ
     text = re.sub(r"[\[\]\(\)]", "", text)
 
-    # 3. ПРЕВРАЩАЕМ ПРОПУСКИ В [UNK]
-    text = re.sub(r"[-‐‑–—−]{2,}", " [UNK] ", text)
-    text = re.sub(r"\.{3}|…|·-·", " [UNK] ", text)
+    # 3. ПРЕВРАЩАЕМ ПРОПУСКИ В [GAP]
+    text = re.sub(r"[-‐‑–—−]{2,}", " [GAP] ", text)
+    text = re.sub(r"\.{3}|…|·-·", " [GAP] ", text)
 
     # 4. СКЛЕИВАЕМ РАЗОРВАННЫЕ СЛОВА
     pattern = r"(\w)\s*[-‐‑–—−]\s*(\w)"
@@ -37,7 +37,7 @@ def unified_clean_pipeline(text):
         text = re.sub(pattern, r"\1\2", text)
 
     # 5. НОРМАЛИЗАЦИЯ И СХЛОПЫВАНИЕ
-    text = re.sub(r"(\s*\[UNK\]\s*)+", " [UNK] ", text)
+    text = re.sub(r"(\s*\[UNK\]\s*)+", " [GAP] ", text)
     text = re.sub(r"\s+", " ", text).strip()
 
     # 🔥 Убрано жесткое приклеивание [CTX_DAILY]
@@ -45,7 +45,7 @@ def unified_clean_pipeline(text):
 
 
 def count_tokens(text):
-    # Считает [UNK], слова и пунктуацию как отдельные токены
+    # Считает [GAP], слова и пунктуацию как отдельные токены
     return len(re.findall(r"\[UNK\]|\w+|[^\w\s]", text))
 
 
