@@ -3,7 +3,7 @@ from tokenizers import BertWordPieceTokenizer
 
 
 CORPUS_FILE = "data/ancient_rus_ready_for_bert.txt"
-VOCAB_SIZE = 30000
+VOCAB_SIZE = 50000
 SAVE_DIR = "ancient_rus_tokenizer"
 
 
@@ -30,6 +30,7 @@ def main():
         "[CLS]",
         "[SEP]",
         "[MASK]",
+        "[GAP]",
         "[CTX_DAILY]",
         "[CTX_EPIC]",
         "[CTX_LIT]",
@@ -61,7 +62,11 @@ def main():
     print("=" * 50)
 
     print("\n🔍 ТЕСТИРОВАНИЕ:")
-    test_text = "[CTX_DAILY] Поклонъ ѿ бориса ко настасии съ бг҃омъ."
+    test_texts = [
+        "[CTX_DAILY] Поклонъ ѿ бориса [GAP] настасии съ бг҃омъ.",
+        "[CTX_SCIENCE] И царь самодержецъ повелѣлъ шанцы копати.",
+        "[CTX_CHURCH] Преподобноисповѣдникъ моляшеся непрестанно.",
+    ]
 
     from transformers import BertTokenizerFast
 
@@ -69,9 +74,31 @@ def main():
         SAVE_DIR, strip_accents=False, lowercase=False
     )
 
-    encoded = fast_tokenizer.tokenize(test_text)
-    print(f"Текст: {test_text}")
-    print(f"Токены: {encoded}")
+    special_tokens_dict = {
+        "additional_special_tokens": [
+            "[CTX_DAILY]",
+            "[CTX_EPIC]",
+            "[CTX_LIT]",
+            "[CTX_LEGAL]",
+            "[CTX_CHURCH]",
+            "[CTX_SCIENCE]",
+            "[GAP]",
+        ]
+    }
+    fast_tokenizer.add_special_tokens(special_tokens_dict)
+
+    for i, text in enumerate(test_texts, 1):
+        print(f"\n--- Тест {i} ---")
+        print(f"Оригинал: {text}")
+
+        # Токенизация (разбивка на подслова)
+        tokens = fast_tokenizer.tokenize(text)
+        print(f"Токены:   {tokens}")
+
+        # Обрати внимание, что у WordPiece подслова начинаются с ##
+        encoded_ids = fast_tokenizer.encode(text)
+        decoded_text = fast_tokenizer.decode(encoded_ids)
+        print(f"Декодинг: {decoded_text}")
 
 
 if __name__ == "__main__":

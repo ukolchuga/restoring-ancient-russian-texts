@@ -3,7 +3,7 @@ from tokenizers import ByteLevelBPETokenizer
 from transformers import RobertaTokenizerFast
 
 CORPUS_FILE = "data/ancient_rus_ready_for_bert.txt"
-VOCAB_SIZE = 15000
+VOCAB_SIZE = 50000
 SAVE_DIR = "ancient_rus_tokenizer_BPE"
 
 
@@ -28,7 +28,7 @@ def main():
         "[CTX_LIT]",
         "[CTX_EPIC]",
         "[CTX_SCIENCE]",
-        "[UNK]",
+        "[GAP]",
     ]
 
     print(f"🧠 Начинаем обучение токенизатора на файле {CORPUS_FILE}...")
@@ -54,7 +54,11 @@ def main():
     print("=" * 50)
 
     print("\n🔍 ТЕСТИРОВАНИЕ:")
-    test_text = "[CTX_DAILY] Поклонъ ѿ бориса ко настасии съ бг҃омъ."
+    test_texts = [
+        "[CTX_DAILY] Поклонъ ѿ бориса [GAP] настасии съ бг҃омъ.",
+        "[CTX_SCIENCE] И царь самодержецъ повелѣлъ шанцы копати.",
+        "[CTX_CHURCH] Преподобноисповѣдникъ моляшеся непрестанно.",
+    ]
 
     # Загружаем через интерфейс Transformers (clean_up_tokenization_spaces убирает варнинг)
     fast_tokenizer = RobertaTokenizerFast.from_pretrained(
@@ -70,23 +74,23 @@ def main():
             "[CTX_LIT]",
             "[CTX_EPIC]",
             "[CTX_SCIENCE]",
-            "[UNK]",
+            "[GAP]",
         ]
     }
     fast_tokenizer.add_special_tokens(special_tokens_dict)
 
-    # Смотрим, как текст разбивается на ID
-    encoded_ids = fast_tokenizer.encode(test_text)
-    print(f"Исходный текст: {test_text}")
-    print(f"ID токенов для нейросети: {encoded_ids}")
+    for i, text in enumerate(test_texts, 1):
+        print(f"\n--- Тест {i} ---")
+        print(f"Оригинал: {text}")
 
-    # Смотрим, как токены (даже байтовые) собираются обратно в идеальный русский текст
-    decoded_text = fast_tokenizer.decode(encoded_ids)
-    print(f"Декод обратно: {decoded_text}")
+        # Токенизация (разбивка на подслова)
+        tokens = fast_tokenizer.tokenize(text)
+        print(f"Токены:   {tokens}")
 
-    # Проверка, что тег не разорвало:
-    tokens = fast_tokenizer.tokenize(test_text)
-    print(f"Сырые токены: {tokens[:5]} ...")
+        # Кодирование и декодирование
+        encoded_ids = fast_tokenizer.encode(text)
+        decoded_text = fast_tokenizer.decode(encoded_ids)
+        print(f"Декодинг: {decoded_text}")
 
 
 if __name__ == "__main__":

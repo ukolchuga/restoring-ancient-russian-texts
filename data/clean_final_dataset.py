@@ -32,7 +32,7 @@ def safe_clean_text(line):
     text = re.sub(r"[\u0300-\u036f]", "", text)
 
     # 4. БЕЗОПАСНАЯ ЗАМЕНА ЛАТИНИЦЫ НА КИРИЛЛИЦУ
-    text = text.replace("[UNK]", "___999999___")
+    text = text.replace("[GAP]", "___999999___")
 
     replacements = {
         "A": "А",
@@ -58,7 +58,7 @@ def safe_clean_text(line):
     for lat, cyr in replacements.items():
         text = text.replace(lat, cyr)
 
-    text = text.replace("___999999___", "[UNK]")
+    text = text.replace("___999999___", "[GAP]")
 
     # 5. РАЗВЕРТЫВАНИЕ ПОТЕРЯННЫХ ТИТЛ
     TITLO = r"[\u0483-\u0489]"
