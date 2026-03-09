@@ -1,0 +1,22 @@
+[project]
+name = "restoring-ancient-russian-texts"
+version = "0.1.0"
+description = "Restoring old russian texts from 11 to 17 century (Masked language modelling)"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [
+    { name = "Alex", email = "alexandersychev2005@gmail.com" },
+    { name = "Yura", email = "Ecsport00@gmail.com"}
+]
+
+dependencies = [
+    "datasets>=2.19.0",
+    "huggingface-hub",
+    "tokenizers>=0.19.1",
+    "torch",
+    "transformers>=4.44.2",
+]
+
+[tool.uv]
+package = false
+
