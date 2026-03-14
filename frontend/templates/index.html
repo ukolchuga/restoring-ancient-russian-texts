@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOBRYNYA | AI Epigraphy Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        birch: '#F9F4E8', charcoal: '#2C2825', cinnabar: '#D13426',
+                        limetree: '#D4A373', chainmail: '#A3A3A3', gold: '#DAA520'
+                    },
+                    fontFamily: { 'body': ['"Inter"', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        .highlight-restored { color: #D13426; font-weight: 600; background-color: #F9F4E8; padding: 0 4px; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-white font-body text-charcoal min-h-screen flex flex-col">
+
+    <header class="border-b border-gray-200 py-4">
+        <div class="max-w-6xl mx-auto px-4 flex items-center justify-between">
+            <div class="flex items-center">
+                <img src="/static/logo.png" alt="DOBRYNYA Logo" class="h-16 object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <h1 style="display:none;" class="text-3xl font-bold tracking-widest text-charcoal"><span class="text-cinnabar">D</span>OBRYNYA</h1>
+            </div>
+            <div class="flex items-center space-x-6">
+                <div class="text-sm text-chainmail font-medium uppercase tracking-widest hidden md:block" data-i18n="subtitle">
+                    AI Epigraphy Tool
+                </div>
+                <select id="langSwitcher" onchange="changeLanguage(this.value)" class="bg-gray-50 border border-gray-200 text-charcoal text-sm rounded-md focus:ring-cinnabar focus:border-cinnabar block p-2 outline-none">
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="ru">🇷🇺 RU</option>
+                    <option value="pl">🇵🇱 PL</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-6xl mx-auto px-4 py-10 w-full grid grid-cols-1 lg:grid-cols-2 gap-12">
+        
+        <div class="space-y-6">
+            <div>
+                <h2 class="text-2xl font-semibold mb-4" data-i18n="title">Use Dobrynya for your research</h2>
+                <div class="text-sm text-charcoal/80 bg-birch/50 p-4 rounded-lg border border-limetree/20 space-y-2 leading-relaxed">
+                    <p data-i18n="desc1">Enter ancient text to restore missing characters:</p>
+                    <ul class="list-disc list-inside space-y-1 ml-2">
+                        <li data-i18n="desc2">Use an <strong>asterisk (*)</strong> for each hidden <strong>token (syllable or short word)</strong>.</li>
+                        <li data-i18n="desc3">If the missing word is long, use multiple asterisks (e.g. <code>**</code> or <code>***</code>).</li>
+                        <li data-i18n="desc4">Use a <strong>dash (-)</strong> for completely unreadable sections <code>[GAP]</code>.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                    <div class="flex-1">
+                        <label class="block text-xs font-semibold text-chainmail uppercase tracking-wider mb-1" data-i18n="cat_label">Text Category</label>
+                        <select id="category" class="w-full bg-birch border border-limetree/30 rounded-md py-2 px-3 text-sm focus:outline-none focus:border-limetree transition-colors"></select>
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-xs font-semibold text-chainmail uppercase tracking-wider mb-1" data-i18n="ex_label">Fast Examples</label>
+                        <select id="examples" onchange="loadExample()" class="w-full bg-white border border-gray-200 rounded-md py-2 px-3 text-sm focus:outline-none focus:border-chainmail transition-colors"></select>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-birch/50 p-4 rounded-md border border-limetree/20">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-xs font-semibold text-chainmail uppercase tracking-wider" data-i18n="slider_label">Search Width (Top-K)</label>
+                            <span id="topkValue" class="text-sm font-bold text-cinnabar">5</span>
+                        </div>
+                        <input type="range" id="topkSlider" min="1" max="20" value="5" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-cinnabar" oninput="document.getElementById('topkValue').innerText = this.value">
+                    </div>
+
+                    <div class="bg-birch/50 p-4 rounded-md border border-limetree/20">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-xs font-semibold text-chainmail uppercase tracking-wider" data-i18n="temp_label">Temperature</label>
+                            <span id="tempValue" class="text-sm font-bold text-cinnabar">1.0</span>
+                        </div>
+                        <input type="range" id="tempSlider" min="0.1" max="2.0" step="0.1" value="1.0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-cinnabar" oninput="document.getElementById('tempValue').innerText = parseFloat(this.value).toFixed(1)">
+                    </div>
+                </div>
+                <p class="text-xs text-chainmail mt-2" data-i18n="slider_desc">Increase Top-K for deeper search. Adjust Temperature: lower for strict formulas, higher for creative/diverse words.</p>
+            </div>
+            <div class="bg-birch/50 p-3 rounded-t-lg border border-limetree/20 border-b-0">
+                <div class="flex justify-between items-center mb-2">
+                    <label class="block text-xs font-semibold text-chainmail uppercase tracking-wider" data-i18n="keyboard_label">Древнерусская клавиатура</label>
+                </div>
+                <div class="flex flex-wrap gap-1.5" id="virtualKeyboard">
+                    </div>
+            </div>
+            <div>
+                <textarea id="inputText" rows="6" class="w-full bg-birch border-none rounded-lg p-4 text-lg font-medium resize-none focus:ring-2 focus:ring-limetree/50 transition-shadow placeholder-chainmail/50" placeholder="..."></textarea>
+                <div class="text-right mt-1 text-xs text-chainmail" id="charCount">0/1000</div>
+            </div>
+
+            <button onclick="runRestoration()" class="w-full bg-charcoal hover:bg-charcoal/90 text-white font-medium py-3 rounded-lg transition-colors flex justify-center items-center">
+                <span data-i18n="btn_restore">Contextualise & Restore</span>
+            </button>
+        </div>
+
+        <div class="bg-gray-50 rounded-xl p-8 border border-gray-100 shadow-sm relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cinnabar via-gold to-limetree"></div>
+            <h3 class="text-xl font-semibold mb-6" data-i18n="res_title">Restoration Hypotheses</h3>
+            
+            <div id="loading" class="hidden flex flex-col items-center justify-center py-12">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-cinnabar mb-4"></div>
+                <p class="text-chainmail text-sm" data-i18n="loading">DOBRYNYA is analyzing text...</p>
+            </div>
+
+            <div id="resultsContent" class="space-y-8 text-charcoal">
+                <div class="text-chainmail text-sm italic text-center mt-10" data-i18n="res_empty">
+                    Hypotheses will appear here.<br>You can restore multiple gaps simultaneously.
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const dict = {
+            en: {
+                subtitle: "AI Epigraphy Tool", title: "Use Dobrynya for your research",
+                desc1: "Enter ancient text to restore missing characters:",
+                desc2: "Use an <strong>asterisk (*)</strong> for each hidden <strong>token (syllable or short word)</strong>.",
+                desc3: "If the missing word is long, use multiple asterisks (e.g. <code>**</code> or <code>***</code>).",
+                desc4: "Use a <strong>dash (-)</strong> for completely unreadable sections <code>[GAP]</code>.",
+                keyboard_label: "Ancient Cyrillic Keyboard",
+                cat_label: "Text Category", ex_label: "Fast Examples",
+                temp_label: "Temperature", slider_desc: "Increase Top-K for deeper search. Adjust Temperature: lower for strict formulas, higher for creative/diverse words.",
+                slider_label: "Search Width (Top-K)", slider_desc: "Increase the value to calculate rarer historical terms (slower but deeper search).",
+                btn_restore: "Contextualise & Restore", res_title: "Restoration Hypotheses",
+                loading: "DOBRYNYA is analyzing text...", res_empty: "Hypotheses will appear here.<br>You can restore multiple gaps simultaneously.",
+                placeholder: "e.g. а с * села шло ӏ позема - дару...",
+                cats: [
+                    {val: "CTX_DAILY", txt: "Birch Bark (Everyday)"}, {val: "CTX_LEGAL", txt: "Legal Acts"},
+                    {val: "CTX_LIT", txt: "Chronicles & Literature"}, {val: "CTX_CHURCH", txt: "Church Texts"},
+                    {val: "CTX_EPIC", txt: "Epics & Bylinas"}, {val: "CTX_SCIENCE", txt: "Military & Science"}
+                ],
+                examples: [
+                    {val: "", txt: "-- Select example --"}, 
+                    {val: "ex1", txt: "Birch bark №43 (Daily)"}, 
+                    {val: "ex2", txt: "Birch bark №43 (Daily, 2 tokens)"},
+                    {val: "ex3", txt: "Russkaya Pravda (Legal)"},
+                    {val: "ex4", txt: "Bylina of Vladimir (Epic)"},
+                    {val: "ex5", txt: "Tale of Bygone Years (Lit)"},
+                    {val: "ex6", txt: "Gospel (Church)"},
+                    {val: "ex7", txt: "Medical Book (Science)"}
+                ],
+                loss_word: "GAP #"
+            },
+            ru: {
+                subtitle: "ИИ-Инструмент Эпиграфики", title: "Исследуйте тексты с Добрыней",
+                desc1: "Введите древнерусский текст для восстановления утрат:",
+                desc2: "Используйте <strong>звездочку (*)</strong> для каждого скрытого <strong>токена (слога/короткого слова)</strong>.",
+                desc3: "Если утраченное слово длинное, ставьте несколько звездочек подряд (напр. <code>**</code> или <code>***</code>).",
+                desc4: "Используйте <strong>дефис (-)</strong> для полностью стертых секций <code>[GAP]</code>.",
+                keyboard_label: "Древнерусская клавиатура",
+                cat_label: "Категория текста", ex_label: "Быстрые примеры",
+                temp_label: "Температура", slider_desc: "Увеличьте Top-K для глубокого поиска. Температура: ниже для строгих формул, выше для креативных/редких гипотез.",
+                slider_label: "Ширина поиска (Top-K)", slider_desc: "Увеличьте значение, чтобы ИИ просчитывал более редкие исторические термины.",
+                btn_restore: "Восстановить текст", res_title: "Гипотезы реставрации",
+                loading: "ДОБРЫНЯ анализирует текст...", res_empty: "Здесь появятся гипотезы нейросети.<br>Вы можете запросить восстановление нескольких пропусков.",
+                placeholder: "напр. а с * села шло ӏ позема - дару...",
+                cats: [
+                    {val: "CTX_DAILY", txt: "Берестяные грамоты (Бытовые)"}, {val: "CTX_LEGAL", txt: "Юридические своды"},
+                    {val: "CTX_LIT", txt: "Летописи и литература"}, {val: "CTX_CHURCH", txt: "Церковные тексты"},
+                    {val: "CTX_EPIC", txt: "Эпос и былины"}, {val: "CTX_SCIENCE", txt: "Военные и тех. уставы"}
+                ],
+                examples: [
+                    {val: "", txt: "-- Выбрать пример --"}, 
+                    {val: "ex1", txt: "Грамота №43 (Быт)"}, 
+                    {val: "ex2", txt: "Грамота №43 (Быт, 2 токена)"},
+                    {val: "ex3", txt: "Русская Правда (Юр)"},
+                    {val: "ex4", txt: "Былина о Владимире (Эпос)"},
+                    {val: "ex5", txt: "Повесть временных лет (Лит)"},
+                    {val: "ex6", txt: "Евангелие (Церк)"},
+                    {val: "ex7", txt: "Лечебник (Наука)"}
+                ],
+                loss_word: "УТРАТА #"
+            },
+            pl: {
+                subtitle: "Narzędzie Epigraficzne AI", title: "Użyj Dobryni do swoich badań",
+                desc1: "Wprowadź starożytny tekst, aby przywrócić brakujące znaki:",
+                desc2: "Użyj <strong>gwiazdki (*)</strong> dla każdego ukrytego <strong>tokena (sylaby lub krótkiego słowa)</strong>.",
+                desc3: "Jeśli brakujące słowo jest długie, użyj kilku gwiazdek (np. <code>**</code> lub <code>***</code>).",
+                desc4: "Użyj <strong>myślnika (-)</strong> dla całkowicie nieczytelnych sekcji <code>[GAP]</code>.",
+                keyboard_label: "Klawiatura staroruska",
+                cat_label: "Kategoria tekstu", ex_label: "Szybkie przykłady",
+                temp_label: "Temperatura", slider_desc: "Zwiększ Top-K, aby szukać głębiej. Temperatura: niższa dla ścisłych formuł, wyższa dla rzadszych hipotez.",
+                slider_label: "Szerokość wyszukiwania (Top-K)", slider_desc: "Zwiększ wartość, aby obliczyć rzadsze terminy historyczne.",
+                btn_restore: "Kontekstualizuj i przywróć", res_title: "Hipotezy restauracji",
+                loading: "DOBRYNYA analizuje tekst...", res_empty: "Tutaj pojawią się hipotezy sieci neuronowej.<br>Możesz przywrócić kilka luk jednocześnie.",
+                placeholder: "np. а с * села шло ӏ позема - дару...",
+                cats: [
+                    {val: "CTX_DAILY", txt: "Gramoty na korze (Codzienne)"}, {val: "CTX_LEGAL", txt: "Akty prawne"},
+                    {val: "CTX_LIT", txt: "Kroniki i literatura"}, {val: "CTX_CHURCH", txt: "Teksty kościelne"},
+                    {val: "CTX_EPIC", txt: "Eposy i byliny"}, {val: "CTX_SCIENCE", txt: "Teksty wojskowe"}
+                ],
+                examples: [
+                    {val: "", txt: "-- Wybierz przykład --"}, 
+                    {val: "ex1", txt: "Gramota №43 (Codzienne)"}, 
+                    {val: "ex2", txt: "Gramota №43 (Codzienne, 2 tokeny)"},
+                    {val: "ex3", txt: "Ruska Prawda (Prawo)"},
+                    {val: "ex4", txt: "Bylina o Włodzimierzu (Epos)"},
+                    {val: "ex5", txt: "Powieść minionych lat (Lit)"},
+                    {val: "ex6", txt: "Ewangelia (Kościół)"},
+                    {val: "ex7", txt: "Księga medyczna (Nauka)"}
+                ],
+                loss_word: "LUKA #"
+            }
+        };
+
+        let currentLang = 'en';
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            const d = dict[lang];
+            
+         
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (d[key]) el.innerHTML = d[key];
+            });
+
+           
+            document.getElementById('inputText').placeholder = d.placeholder;
+
+           
+            const catSelect = document.getElementById('category');
+            const currentCat = catSelect.value;
+            catSelect.innerHTML = d.cats.map(c => `<option value="${c.val}">${c.txt}</option>`).join('');
+            if(currentCat) catSelect.value = currentCat;
+
+            const exSelect = document.getElementById('examples');
+            const currentEx = exSelect.value;
+            exSelect.innerHTML = d.examples.map(e => `<option value="${e.val}">${e.txt}</option>`).join('');
+            if(currentEx) exSelect.value = currentEx;
+        }
+
+
+        const examplesData = {
+            "ex1": { text: "поклоне ѿ бориса ко настасии како приде ти грамота та * пришли ми чловѣка", cat: "CTX_DAILY" },
+            "ex2": { text: "да пришли сороцицю ** -", cat: "CTX_DAILY" },
+            "ex3": { text: "платити виру 40 **", cat: "CTX_LEGAL" },
+            "ex4": { text: "У ласкового * у владимира пиръ идетъ.", cat: "CTX_EPIC" },
+            "ex5": { text: "И пошелъ князь игорь на * землю со своею дружиною.", cat: "CTX_LIT" },
+            "ex6": { text: "И рече господь къ * своимъ.", cat: "CTX_CHURCH" },
+            "ex7": { text: "Аще кто боленъ главою, дай пити ему * от травы.", cat: "CTX_SCIENCE" }
+        };
+
+        function loadExample() {
+            const val = document.getElementById("examples").value;
+            if (val && examplesData[val]) {
+                document.getElementById("inputText").value = examplesData[val].text;
+                document.getElementById("category").value = examplesData[val].cat;
+                updateCounter();
+            }
+        }
+
+        const inputEl = document.getElementById('inputText');
+        const countEl = document.getElementById('charCount');
+        inputEl.addEventListener('input', updateCounter);
+        function updateCounter() { countEl.textContent = `${inputEl.value.length}/1000`; }
+
+        async function runRestoration() {
+            const text = inputEl.value;
+            const category = document.getElementById('category').value;
+            const topK = parseInt(document.getElementById('topkSlider').value);
+            const temp = parseFloat(document.getElementById('tempSlider').value);
+
+            if (!text.includes("*")) {
+                alert(currentLang === 'ru' ? "Добавьте хотя бы одну звездочку (*)" : (currentLang === 'pl' ? "Dodaj co najmniej jedną gwiazdkę (*)" : "Please add at least one asterisk (*)"));
+                return;
+            }
+
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('resultsContent').innerHTML = '';
+
+            try {
+                const response = await fetch('/api/restore', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text, category: category, top_k: topK, temperature: temp }) 
+                });
+                
+                const data = await response.json();
+                document.getElementById('loading').classList.add('hidden');
+
+                if (data.status === 'success') {
+                    renderResults(data.results);
+                } else {
+                    document.getElementById('resultsContent').innerHTML = `<p class="text-cinnabar">Error: ${data.message}</p>`;
+                }
+            } catch (err) {
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('resultsContent').innerHTML = `<p class="text-cinnabar">Network error.</p>`;
+            }
+        }
+
+        function renderResults(masksResults) {
+            const container = document.getElementById('resultsContent');
+            container.innerHTML = '';
+
+            masksResults.forEach((maskVariants, index) => {
+                const maskBlock = document.createElement('div');
+                maskBlock.className = 'bg-white border border-gray-100 rounded-lg p-5 shadow-sm mb-6';
+                
+                let title = document.createElement('h4');
+                title.className = 'text-xs font-bold text-chainmail uppercase mb-4 tracking-wider';
+                title.innerText = `${dict[currentLang].loss_word}${index + 1}`;
+                maskBlock.appendChild(title);
+
+                maskVariants.forEach((variant, vIdx) => {
+                    const variantRow = document.createElement('div');
+                    variantRow.className = 'mb-4 last:mb-0';
+                    const barWidth = Math.min(variant.score, 100) + '%';
+                    const isTop = vIdx === 0;
+                    
+                    const safeWord = variant.word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const regex = new RegExp(`(^|\\s|[.,:;!?\\-()\\[\\]])(${safeWord})(?=\\s|[.,:;!?\\-()\\[\\]]|$)`, 'i');
+                    let highlightedSentence = variant.full_sentence.replace(regex, `$1<span class="highlight-restored">$2</span>`);
+                    highlightedSentence = highlightedSentence.replace(/&lt;mask\s*&gt;/g, '<span class="text-chainmail font-bold">[*]</span>');
+
+                    variantRow.innerHTML = `
+                        <div class="flex justify-between items-end mb-1">
+                            <span class="font-semibold ${isTop ? 'text-cinnabar' : 'text-charcoal'} text-lg">${variant.word}</span>
+                            <span class="text-xs font-medium text-chainmail">${variant.score}%</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-1.5 mb-2">
+                            <div class="bg-${isTop ? 'cinnabar' : 'gold'} h-1.5 rounded-full" style="width: ${barWidth}"></div>
+                        </div>
+                        <p class="text-sm text-gray-600 leading-relaxed">${highlightedSentence}</p>
+                    `;
+                    maskBlock.appendChild(variantRow);
+                });
+                container.appendChild(maskBlock);
+            });
+        }
+        changeLanguage('en');
+
+        // Сгруппировано логически: Ять, Юсы, Йотурованные, Уки, Специфические согласные/греческие, Титло, Цифры
+        const ancientChars = [
+            'ѣ', 'ѧ', 'ѫ', 'ѩ', 'ѭ', 'ꙗ', 'ѥ', 
+            'ѹ', 'ꙋ', 'ꙑ', 'ӏ', 'ѕ', 
+            'ѡ', 'ѿ', 'ѯ', 'ѱ', 'ѳ', 'ѵ', 
+            '҃', '҂', '·'
+        ];
+        function initKeyboard() {
+            const kbContainer = document.getElementById('virtualKeyboard');
+            ancientChars.forEach(char => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.innerText = char;
+                btn.className = 'px-3 py-1.5 bg-white border border-gray-200 rounded-md hover:bg-cinnabar hover:text-white hover:border-cinnabar transition-colors text-charcoal font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-cinnabar/50';
+                
+                btn.onclick = () => insertChar(char);
+                kbContainer.appendChild(btn);
+            });
+        }
+        function insertChar(char) {
+            const input = document.getElementById('inputText');
+          
+            const startPos = input.selectionStart;
+            const endPos = input.selectionEnd;
+            
+           
+            input.value = input.value.substring(0, startPos) + char + input.value.substring(endPos, input.value.length);
+            
+        
+            input.selectionStart = startPos + char.length;
+            input.selectionEnd = startPos + char.length;
+            input.focus();
+            
+           
+            updateCounter();
+        }
+        initKeyboard();
+    </script>
+</body>
+</html>
