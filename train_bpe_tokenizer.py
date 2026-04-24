@@ -1,6 +1,7 @@
 import os
+
 from tokenizers import ByteLevelBPETokenizer
-from transformers import RobertaTokenizerFast
+from transformers import PreTrainedTokenizerFast
 
 CORPUS_FILE = "data/ancient_rus_ready_for_bert.txt"
 VOCAB_SIZE = 50000
@@ -13,7 +14,6 @@ def main():
         return
 
     print("⏳ Инициализация BPE токенизатора...")
-
     bpe_tokenizer = ByteLevelBPETokenizer()
 
     special_tokens = [
@@ -29,11 +29,11 @@ def main():
         "[CTX_EPIC]",
         "[CTX_SCIENCE]",
         "[GAP]",
+        "·",
+        ":",
     ]
 
-    print(f"🧠 Начинаем обучение токенизатора на файле {CORPUS_FILE}...")
-    print(f"Размер словаря: {VOCAB_SIZE} токенов")
-
+    print(f"🧠 Обучение на {CORPUS_FILE} (vocab size: {VOCAB_SIZE})...")
     bpe_tokenizer.train(
         files=[CORPUS_FILE],
         vocab_size=VOCAB_SIZE,
@@ -43,54 +43,62 @@ def main():
     )
 
     os.makedirs(SAVE_DIR, exist_ok=True)
-    bpe_tokenizer.save_model(SAVE_DIR)
+
+    # 🔥 ИСПРАВЛЕНИЕ 1: Сохраняем в единый монолитный формат tokenizer.json
+    tokenizer_path = os.path.join(SAVE_DIR, "tokenizer.json")
+    bpe_tokenizer.save(tokenizer_path)
+
+    print("⏳ Настройка обертки Transformers...")
+    # 🔥 ИСПРАВЛЕНИЕ 2: Используем универсальный PreTrainedTokenizerFast
+    fast_tokenizer = PreTrainedTokenizerFast(
+        tokenizer_file=tokenizer_path,
+        max_len=512,
+        bos_token="<s>",
+        eos_token="</s>",
+        sep_token="</s>",
+        cls_token="<s>",
+        unk_token="<unk>",
+        pad_token="<pad>",
+        mask_token="<mask>",
+    )
+
+    # Регистрируем теги
+    fast_tokenizer.add_special_tokens(
+        {
+            "additional_special_tokens": [
+                "[CTX_CHURCH]",
+                "[CTX_DAILY]",
+                "[CTX_LEGAL]",
+                "[CTX_LIT]",
+                "[CTX_EPIC]",
+                "[CTX_SCIENCE]",
+                "[GAP]",
+                "·",
+                ":",
+            ]
+        }
+    )
+
+    # Сохраняем HF конфиг
+    fast_tokenizer.save_pretrained(SAVE_DIR)
 
     print("\n" + "=" * 50)
-    print("✨ ТОКЕНИЗАТОР УСПЕШНО ОБУЧЕН И СОХРАНЕН ✨")
-    print(f"Папка с файлами: {SAVE_DIR}/")
-    print(
-        "Внутри лежат файлы 'vocab.json' (словарь) и 'merges.txt' (правила слияния байтов)"
-    )
+    print("✨ BPE ТОКЕНИЗАТОР УСПЕШНО ОБУЧЕН И СОХРАНЕН ✨")
+    print(f"Путь: {SAVE_DIR}/")
     print("=" * 50)
 
     print("\n🔍 ТЕСТИРОВАНИЕ:")
     test_texts = [
-        "[CTX_DAILY] Поклонъ ѿ бориса [GAP] настасии съ бг҃омъ.",
-        "[CTX_SCIENCE] И царь самодержецъ повелѣлъ шанцы копати.",
-        "[CTX_CHURCH] Преподобноисповѣдникъ моляшеся непрестанно.",
+        "[CTX_DAILY] поклонъ · ѿ · бориса · [GAP] · настасии",
+        "[CTX_LEGAL] · ꙅ҃ · десѧ · коуно ·",
     ]
 
-    # Загружаем через интерфейс Transformers (clean_up_tokenization_spaces убирает варнинг)
-    fast_tokenizer = RobertaTokenizerFast.from_pretrained(
-        SAVE_DIR, max_len=512, clean_up_tokenization_spaces=True
-    )
-
-    # 🔥 ВАЖНО: Явно сообщаем обертке Hugging Face о наших неделимых тегах
-    special_tokens_dict = {
-        "additional_special_tokens": [
-            "[CTX_CHURCH]",
-            "[CTX_DAILY]",
-            "[CTX_LEGAL]",
-            "[CTX_LIT]",
-            "[CTX_EPIC]",
-            "[CTX_SCIENCE]",
-            "[GAP]",
-        ]
-    }
-    fast_tokenizer.add_special_tokens(special_tokens_dict)
-
     for i, text in enumerate(test_texts, 1):
-        print(f"\n--- Тест {i} ---")
-        print(f"Оригинал: {text}")
-
-        # Токенизация (разбивка на подслова)
+        print(f"\nТест {i}: {text}")
         tokens = fast_tokenizer.tokenize(text)
-        print(f"Токены:   {tokens}")
-
-        # Кодирование и декодирование
-        encoded_ids = fast_tokenizer.encode(text)
-        decoded_text = fast_tokenizer.decode(encoded_ids)
-        print(f"Декодинг: {decoded_text}")
+        print(f"Токены: {tokens}")
+        ids = fast_tokenizer.encode(text)
+        print(f"Декодинг: {fast_tokenizer.decode(ids)}")
 
 
 if __name__ == "__main__":

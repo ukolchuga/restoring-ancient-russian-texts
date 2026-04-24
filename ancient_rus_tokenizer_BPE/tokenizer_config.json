@@ -1,0 +1,24 @@
+{
+  "backend": "tokenizers",
+  "bos_token": "<s>",
+  "cls_token": "<s>",
+  "eos_token": "</s>",
+  "extra_special_tokens": [
+    "[CTX_CHURCH]",
+    "[CTX_DAILY]",
+    "[CTX_LEGAL]",
+    "[CTX_LIT]",
+    "[CTX_EPIC]",
+    "[CTX_SCIENCE]",
+    "[GAP]",
+    "·",
+    ":"
+  ],
+  "mask_token": "<mask>",
+  "max_len": 512,
+  "model_max_length": 512,
+  "pad_token": "<pad>",
+  "sep_token": "</s>",
+  "tokenizer_class": "TokenizersBackend",
+  "unk_token": "<unk>"
+}

@@ -1,6 +1,7 @@
 import pandas as pd
 import re
 import os
+import unicodedata
 
 INPUT_CSV = "data/epigraphica/epigraphica_full_data.csv"
 OUTPUT_CSV = "data/epigraphica/epigraphica_clean_metadata.csv"
@@ -23,28 +24,43 @@ def clean_epigraphy_text(text):
     if not isinstance(text, str) or not text:
         return ""
     
-    # 1. Удаляем технические маркеры (im, vac, text, текст) в любых комбинациях
+    # 0. NFC нормализация (Критично для титл и BPE)
+    text = unicodedata.normalize('NFC', text)
+
+    # 1. Предварительная маркировка лакун (кириллицей, чтобы не съела очистка латиницы)
+    # vac. (пустое место) и im. (рисунок) — это по сути исторические лакуны
+    text = re.sub(r'(?i)\|?im\.|\|?vac\.', ' МАРКЕРГАП ', text)
+    # Ловим (...), [---], ..., и множественные тире
+    text = re.sub(r'(\.[\s·]*){3,}|…|\([\.…\-]+\)|\[[\.…\-]+\]|([\-‐‑–—−][\s·]*){2,}|·-·', ' МАРКЕРГАП ', text)
+
+    # 2. Убираем технические маркеры сайта Epigraphica
     text = re.sub(r'(?i)(text|текст)\s*\d*[:：\s]*', ' ', text)
-    text = re.sub(r'(?i)im\.|vac\.', ' ', text)
     
-    # 2. Разделители и спецсимволы -> Пробел
-    for char in ['|', '/', '¦', '*', '+', '~', '⁓', ':', '：']:
-        text = text.replace(char, ' ')
+    # 3. Разделяем слипшиеся слова ( Scriptio Continua )
+    # Окружаем древние разделители и переносы строк (|) пробелами
+    text = re.sub(r'([·⁘⋮✝+])', r' \1 ', text)
+    text = text.replace('|', ' ').replace('/', ' ').replace('¦', ' ')
+
+    # 4. Раскрываем скобки восстановления и удаления
+    text = re.sub(r'⟦.*?⟧', '', text) # Удаляем зачеркнутое
+    text = re.sub(r'[\[\]\(\)\{\}<>]', '', text)
     
-    # 3. Лакуны -> [GAP]
-    text = re.sub(r'\(…\)|…|\(-\)|-{2,}', ' [GAP] ', text)
-    
-    # 4. Удаляем зачеркнутое ⟦...⟧
-    text = re.sub(r'⟦.*?⟧', '', text)
-    
-    # 5. Склейка слов (переносы)
+    # Склейка разорванных слов (переносы)
     text = text.replace('⸗', '').replace('=', '')
+
+    # 5. Очистка от мусора
+    text = re.sub(r'[a-zA-Z]', '', text) # Удаляем латиницу (маркер МАРКЕРГАП выживет)
+    text = re.sub(r'\d', '', text)       # Современные цифры
+    # Греческий алфавит вырезаем, если он встречается фрагментарно
+    text = re.sub(r'[\u0370-\u03FF]', '', text) 
+
+    # 6. ФИНАЛЬНЫЙ ЭТАП: ВОЗВРАЩАЕМ [GAP]
+    text = text.replace("МАРКЕРГАП", " [GAP] ")
     
-    # 6. Раскрываем скобки [ ], ( ), { }
-    text = re.sub(r'[\[\]\(\)\{\}]', '', text)
-    
-    # 7. Финальная чистка пробелов
+    # Схлопываем идущие подряд [GAP] и лишние пробелы
+    text = re.sub(r'(\s*\[GAP\]\s*)+', ' [GAP] ', text)
     text = re.sub(r'\s+', ' ', text).strip()
+
     return text
 
 def is_quality_data(text):
@@ -52,25 +68,21 @@ def is_quality_data(text):
     
     # Считаем буквы (кириллица + глаголица)
     letters = re.findall(r'[а-яА-ЯёЁ\u0400-\u052F\uA640-\uA69F\u2C00-\u2C5F]', text)
-    if len(letters) < 15:
+    if len(letters) < 12: # Слегка снизили порог для коротких граффити
         return False
         
-    # Убираем цифровой мусор (если цифр больше чем букв)
-    digits = re.findall(r'\d', text)
-    if len(digits) > len(letters):
-        return False
-
-    # Убираем греческий шум
-    if re.search(r'[\u0370-\u03FF]', text):
-        return False
-
     # Убираем "азбуки" (много одиночных букв)
     words = text.split()
-    if len([w for w in words if len(w) == 1 and w not in 'аив']) > 3:
+    if len([w for w in words if len(w) == 1 and w not in 'аив·:']) > 4:
         return False
         
     # Убираем повторы (З З З)
     if re.search(r'(.)\s\1\s\1', text):
+        return False
+
+    # Проверка на "дырявость"
+    gap_count = text.count("[GAP]")
+    if gap_count > 0 and gap_count >= len(words) * 0.7:
         return False
 
     return True
@@ -83,15 +95,17 @@ def main():
     print(f"Reading {INPUT_CSV}...")
     df = pd.read_csv(INPUT_CSV)
 
-    print("Cleaning and Filtering...")
+    print("🔧 Cleaning epigraphica texts for BPE...")
     df['clean_text'] = df['text'].apply(clean_epigraphy_text)
     
     # Парсим даты
+    print("⏳ Processing dates...")
     df[['start_year', 'end_year', 'century']] = df['date'].apply(
         lambda x: pd.Series(parse_years(x))
     )
     
     # Применяем фильтры
+    print("🎯 Filtering low quality entries...")
     df_valid = df[df['clean_text'].apply(is_quality_data)].copy()
     
     # Сохраняем результат
@@ -101,9 +115,11 @@ def main():
         for _, row in df_valid.iterrows():
             f.write(f"{row['clean_text']}\n")
     
-    print(f"Total entries before: {len(df)}")
-    print(f"Total entries after: {len(df_valid)}")
-    print(f"Cleanup finished. Data saved to {OUTPUT_TXT}")
+    print("\n" + "=" * 50)
+    print(f"✅ Total entries before: {len(df)}")
+    print(f"🚀 Total entries after:  {len(df_valid)}")
+    print(f"💾 Clean text saved to: {OUTPUT_TXT}")
+    print("=" * 50)
 
 if __name__ == "__main__":
     main()

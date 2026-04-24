@@ -1,10 +1,11 @@
 import os
 import re
+import unicodedata
 
 from tqdm import tqdm
 
-INPUT_FILE = "final_ancient_rus_dataset.txt"  # Твой собранный мега-корпус
-OUTPUT_FILE = "ancient_rus_ready_for_bert.txt"  # Финальный, отполированный файл
+INPUT_FILE = "final_ancient_rus_dataset.txt"
+OUTPUT_FILE = "ancient_rus_ready_for_bert.txt"
 
 
 def safe_clean_text(line):
@@ -21,61 +22,46 @@ def safe_clean_text(line):
         tag = ""
         text = line
 
-    # 2. УДАЛЯЕМ НЕВИДИМЫЙ МУСОР
+    # 2. NFC НОРМАЛИЗАЦИЯ (Критично для правильных титл)
+    text = unicodedata.normalize("NFC", text)
+
+    # 3. УДАЛЯЕМ НЕВИДИМЫЙ МУСОР И КАВЫЧКИ
     text = text.replace("\ufeff", "").replace("\u200b", "")
     text = re.sub(r"[\ue000-\uf8ff]", "", text)  # Private Use Area
-
-    # 2.5. УДАЛЯЕМ ВСЕ ВИДЫ КАВЫЧЕК (Новый шаг!)
-    # Убираем елочки, лапки, прямые двойные и одинарные кавычки
     text = re.sub(r'["\'«»„“]', "", text)
 
-    # 3. УДАЛЯЕМ УДАРЕНИЯ
+    # 4. УДАЛЯЕМ СОВРЕМЕННЫЕ УДАРЕНИЯ (Диапазон 0300-036F)
+    # Знак титла (0483-0489) сюда не попадает, он в безопасности!
     text = re.sub(r"[\u0300-\u036f]", "", text)
 
-    # 4. БЕЗОПАСНАЯ ЗАМЕНА ЛАТИНИЦЫ НА КИРИЛЛИЦУ
+    # 5. БЕЗОПАСНАЯ ЗАМЕНА ЛАТИНИЦЫ НА КИРИЛЛИЦУ
+    # Прячем наш GAP, чтобы латинские G, A, P не заменились
     text = text.replace("[GAP]", "___999999___")
 
     replacements = {
-        "A": "А",
-        "a": "а",
-        "B": "В",
-        "E": "Е",
-        "e": "е",
-        "K": "К",
-        "k": "к",
-        "M": "М",
-        "H": "Н",
-        "O": "О",
-        "o": "о",
-        "P": "Р",
-        "p": "р",
-        "C": "С",
-        "c": "с",
-        "T": "Т",
-        "y": "у",
-        "X": "Х",
-        "x": "х",
-        "i": "і",
-        "I": "І",
+        "A": "А", "a": "а",
+        "B": "В", "b": "в",
+        "E": "Е", "e": "е",
+        "K": "К", "k": "к",
+        "M": "М", "m": "м",
+        "H": "Н", "n": "н",
+        "O": "О", "o": "о",
+        "P": "Р", "p": "р",
+        "C": "С", "c": "с",
+        "T": "Т", "t": "т",
+        "y": "у", "x": "х", "X": "Х",
+        "i": "і", "I": "І",
     }
     for lat, cyr in replacements.items():
         text = text.replace(lat, cyr)
 
     text = text.replace("___999999___", "[GAP]")
 
-    # 5. РАЗВЕРТЫВАНИЕ ПОТЕРЯННЫХ ТИТЛ
-    TITLO = r"[\u0483-\u0489]"
-    abbrev_map = {
-        rf"\bбг\b(?!{TITLO})": "богъ",
-        rf"\bгд\b(?!{TITLO})": "господь",
-        rf"\bсн\b(?!{TITLO})": "сынъ",
-        rf"\bхс\b(?!{TITLO})": "христосъ",
-        rf"\bгн\b(?!{TITLO})": "господинъ",
-    }
-    for pattern, repl in abbrev_map.items():
-        text = re.sub(pattern, repl, text, flags=re.IGNORECASE)
+    # 6. ГЛОБАЛЬНАЯ ИЗОЛЯЦИЯ ДРЕВНЕЙ ПУНКТУАЦИИ
+    text = re.sub(r"([·:⁘])", r" \1 ", text)
 
-    # 6. ФИНАЛЬНАЯ ЧИСТКА ПРОБЕЛОВ
+    # 7. ФИНАЛЬНАЯ ЧИСТКА ПРОБЕЛОВ
+    text = re.sub(r"(\s*\[GAP\]\s*)+", " [GAP] ", text)
     text = re.sub(r"\s+", " ", text).strip()
 
     # Собираем обратно
@@ -91,16 +77,16 @@ def main():
 
     print("🧹 Начинаем финальную полировку Мега-Корпуса...")
 
-    with (
-        open(INPUT_FILE, "r", encoding="utf-8") as f_in,
-        open(OUTPUT_FILE, "w", encoding="utf-8") as f_out,
-    ):
+    with open(INPUT_FILE, "r", encoding="utf-8") as f_in:
         lines = f_in.readlines()
-        cleaned_count = 0
 
+    cleaned_count = 0
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f_out:
         for line in tqdm(lines, desc="Очистка строк"):
             cleaned = safe_clean_text(line)
-            if len(cleaned) > 5:
+            # Проверяем наличие букв
+            letters = re.findall(r"[а-яА-ЯёЁ\u0400-\u052F\uA640-\uA69F]", cleaned)
+            if len(letters) >= 3:
                 f_out.write(cleaned + "\n")
                 cleaned_count += 1
 

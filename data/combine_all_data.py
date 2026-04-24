@@ -34,6 +34,12 @@ SOURCES_CONFIG = [
         "tag": "[CTX_DAILY]",
         "weight": 15,
     },
+    {
+        "type": "file",
+        "path": "epigraphica/epigraphica_ready_for_bert.txt",
+        "tag": "[CTX_DAILY]",
+        "weight": 20,
+    },
     # Church
     {
         "type": "file",
@@ -153,8 +159,8 @@ def load_and_process_source(config, tokenizer, bpe_tokenizer):
     weight = config["weight"]
 
     if not os.path.exists(path):
-        print(f"Error: {path} was not found! Skip.")
-        return [], 0
+        print(f"⚠️ Warning: {path} was not found! Skip.")
+        return [], 0, 0
 
     unique_lines = set()
     if src_type == "file":
@@ -164,6 +170,9 @@ def load_and_process_source(config, tokenizer, bpe_tokenizer):
                 if clean_line:
                     unique_lines.add(clean_line)
     elif src_type == "folder":
+        if not os.path.isdir(path):
+             print(f"⚠️ Warning: {path} is not a directory! Skip.")
+             return [], 0, 0
         files = [os.path.join(path, f) for f in os.listdir(path) if f.endswith(".txt")]
         for filepath in files:
             with open(filepath, "r", encoding="utf-8") as f:
@@ -176,34 +185,47 @@ def load_and_process_source(config, tokenizer, bpe_tokenizer):
     source_tokens = 0
     source_tokens_bpe = 0
 
-    print(f"Calculating tokens for {path}...")
+    print(f"Processing {path}...")
     for line in unique_lines:
-        # Also counting tags
         full_text = f"{tag} {line}"
-        # Fast tokenization
-        tokens_count = len(tokenizer.encode(full_text, add_special_tokens=False))
-        tokens_count_bpe = len(
-            bpe_tokenizer.encode(full_text, add_special_tokens=False)
-        )
-        source_tokens += tokens_count * weight
-        source_tokens_bpe += tokens_count_bpe * weight
+        
+        # Считаем токены только если токенизаторы загружены
+        if tokenizer:
+            tokens_count = len(tokenizer.encode(full_text, add_special_tokens=False))
+            source_tokens += tokens_count * weight
+            
+        if bpe_tokenizer:
+            tokens_count_bpe = len(bpe_tokenizer.encode(full_text, add_special_tokens=False))
+            source_tokens_bpe += tokens_count_bpe * weight
+            
         tagged_lines.extend([full_text] * weight)
-
-    total_tokens_with_weight = source_tokens * weight
-    total_tokens_with_weight_bpe = source_tokens_bpe * weight
-    print(
-        f"Path {path}: {len(unique_lines)} lines -> {total_tokens_with_weight:,} tokens, {total_tokens_with_weight_bpe:,} BPE tokens (with weight {weight})"
-    )
 
     return tagged_lines, source_tokens, source_tokens_bpe
 
 
 def main():
     print("Tokenizers loading...")
-    tokenizer = BertTokenizerFast.from_pretrained(TOKENIZER_DIR)
-    bpe_tokenizer = RobertaTokenizerFast.from_pretrained(BPE_TOKENIZER_DIR)
+    tokenizer = None
+    bpe_tokenizer = None
+    
+    try:
+        if os.path.exists(TOKENIZER_DIR):
+            tokenizer = BertTokenizerFast.from_pretrained(TOKENIZER_DIR)
+            print("✅ BERT Tokenizer loaded.")
+    except Exception as e:
+        print(f"⚠️ BERT Tokenizer could not be loaded: {e}")
 
-    print("Combining the data and tokens calculation...")
+    try:
+        if os.path.exists(BPE_TOKENIZER_DIR):
+            bpe_tokenizer = RobertaTokenizerFast.from_pretrained(BPE_TOKENIZER_DIR)
+            print("✅ BPE Tokenizer loaded.")
+    except Exception as e:
+        print(f"⚠️ BPE Tokenizer could not be loaded: {e}")
+
+    if not tokenizer and not bpe_tokenizer:
+        print("💡 Bootstrap mode: creating dataset without token statistics.")
+
+    print("Combining the data...")
     all_final_lines = []
     stats = {}
     stats_bpe = {}
@@ -215,36 +237,35 @@ def main():
         )
         all_final_lines.extend(lines)
 
-        stats[tag] = stats.get(tag, 0) + token_count
-        stats_bpe[tag] = stats_bpe.get(tag, 0) + token_count_bpe
+        if tokenizer:
+            stats[tag] = stats.get(tag, 0) + token_count
+        if bpe_tokenizer:
+            stats_bpe[tag] = stats_bpe.get(tag, 0) + token_count_bpe
 
-    print("\n" + "=" * 50)
-    print("Total tokens statistics (BERT / BPE):")
-    total_tokens = sum(stats.values())
-    total_tokens_bpe = sum(stats_bpe.values())
+    if stats or stats_bpe:
+        print("\n" + "=" * 50)
+        if stats:
+            print("BERT tokens statistics: ")
+            total_tokens = sum(stats.values())
+            for tag, count in stats.items():
+                percentage = (count / total_tokens) * 100 if total_tokens > 0 else 0
+                print(f"{tag:<15}: {count:>12,} tokens ({percentage:>5.2f}%)")
+            print(f"Total BERT tokens: {total_tokens:,}")
+        
+        if stats_bpe:
+            print("\nBPE tokens statistics:")
+            total_tokens_bpe = sum(stats_bpe.values())
+            for tag, count in stats_bpe.items():
+                percentage = (count / total_tokens_bpe) * 100 if total_tokens_bpe > 0 else 0
+                print(f"{tag:<15}: {count:>12,} BPE tokens ({percentage:>5.2f}%)")
+            print(f"Total BPE tokens: {total_tokens_bpe:,}")
+        print("=" * 50)
 
-    print("BERT tokens statistics: ")
-    for tag, count in stats.items():
-        percentage = (count / total_tokens) * 100 if total_tokens > 0 else 0
-        print(f"{tag:<15}: {count:>12,} tokens ({percentage:>5.2f}%)")
-
-    print(f"\nAll dataset: {total_tokens:,} tokens")
-    print("=" * 50)
-
-    print("BPE tokens statistics")
-
-    for tag, count in stats_bpe.items():
-        percentage = (count / total_tokens_bpe) * 100 if total_tokens_bpe > 0 else 0
-        print(f"{tag:<15}: {count:>12,} BPE tokens ({percentage:>5.2f}%)")
-
-    print(f"\nAll dataset: {total_tokens_bpe:,} BPE tokens")
-    print("=" * 50)
-
-    print("Shuffling lines...")
+    print(f"Shuffling {len(all_final_lines):,} lines...")
     random.seed(42)
     random.shuffle(all_final_lines)
 
-    print(f"Saved {OUTPUT_FILE}...")
+    print(f"Saving to {OUTPUT_FILE}...")
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         f.write("\n".join(all_final_lines))
 

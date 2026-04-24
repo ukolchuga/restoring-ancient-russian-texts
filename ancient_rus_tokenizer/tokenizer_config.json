@@ -1,120 +1,22 @@
 {
-  "added_tokens_decoder": {
-    "0": {
-      "content": "[PAD]",
-      "lstrip": false,
-      "normalized": false,
-      "rstrip": false,
-      "single_word": false,
-      "special": true
-    },
-    "1": {
-      "content": "[UNK]",
-      "lstrip": false,
-      "normalized": false,
-      "rstrip": false,
-      "single_word": false,
-      "special": true
-    },
-    "2": {
-      "content": "[CLS]",
-      "lstrip": false,
-      "normalized": false,
-      "rstrip": false,
-      "single_word": false,
-      "special": true
-    },
-    "3": {
-      "content": "[SEP]",
-      "lstrip": false,
-      "normalized": false,
-      "rstrip": false,
-      "single_word": false,
-      "special": true
-    },
-    "4": {
-      "content": "[MASK]",
-      "lstrip": false,
-      "normalized": false,
-      "rstrip": false,
-      "single_word": false,
-      "special": true
-    },
-    "5": {
-      "content": "[CTX_DAILY]",
-      "lstrip": false,
-      "normalized": false,
-      "rstrip": false,
-      "single_word": false,
-      "special": true
-    },
-    "6": {
-      "content": "[CTX_EPIC]",
-      "lstrip": false,
-      "normalized": false,
-      "rstrip": false,
-      "single_word": false,
-      "special": true
-    },
-    "7": {
-      "content": "[CTX_LIT]",
-      "lstrip": false,
-      "normalized": false,
-      "rstrip": false,
-      "single_word": false,
-      "special": true
-    },
-    "8": {
-      "content": "[CTX_LEGAL]",
-      "lstrip": false,
-      "normalized": false,
-      "rstrip": false,
-      "single_word": false,
-      "special": true
-    },
-    "9": {
-      "content": "[CTX_CHURCH]",
-      "lstrip": false,
-      "normalized": false,
-      "rstrip": false,
-      "single_word": false,
-      "special": true
-    },
-    "30000": {
-      "content": "[CTX_TOROT]",
-      "lstrip": false,
-      "normalized": false,
-      "rstrip": false,
-      "single_word": false,
-      "special": true
-    },
-    "30001": {
-      "content": "[CTX_BOOK]",
-      "lstrip": false,
-      "normalized": false,
-      "rstrip": false,
-      "single_word": false,
-      "special": true
-    }
-  },
-  "additional_special_tokens": [
+  "backend": "tokenizers",
+  "clean_text": false,
+  "cls_token": "[CLS]",
+  "do_lower_case": true,
+  "extra_special_tokens": [
     "[CTX_DAILY]",
     "[CTX_EPIC]",
     "[CTX_LIT]",
     "[CTX_LEGAL]",
     "[CTX_CHURCH]",
-    "[CTX_TOROT]",
-    "[CTX_BOOK]"
+    "[CTX_SCIENCE]",
+    "[GAP]",
+    "·",
+    ":"
   ],
-  "clean_text": false,
-  "clean_up_tokenization_spaces": true,
-  "cls_token": "[CLS]",
-  "do_basic_tokenize": true,
-  "do_lower_case": true,
   "lowercase": false,
   "mask_token": "[MASK]",
   "model_max_length": 1000000000000000019884624838656,
-  "never_split": null,
   "pad_token": "[PAD]",
   "sep_token": "[SEP]",
   "strip_accents": false,

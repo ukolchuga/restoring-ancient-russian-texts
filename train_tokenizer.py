@@ -1,6 +1,7 @@
 import os
-from tokenizers import BertWordPieceTokenizer
 
+from tokenizers import BertWordPieceTokenizer
+from transformers import BertTokenizerFast
 
 CORPUS_FILE = "data/ancient_rus_ready_for_bert.txt"
 VOCAB_SIZE = 50000
@@ -16,7 +17,7 @@ def main():
 
     # clean_text=False -> мы уже сами всё идеально почистили
     # strip_accents=False -> ЗАПРЕЩАЕМ удалять титла!
-    # lowercase=False -> мы уже сделали Sentence case (Первая буква заглавная)
+    # lowercase=False -> мы уже сделали Sentence case
     tokenizer = BertWordPieceTokenizer(
         clean_text=False,
         handle_chinese_chars=False,
@@ -37,6 +38,8 @@ def main():
         "[CTX_LEGAL]",
         "[CTX_CHURCH]",
         "[CTX_SCIENCE]",
+        "·",
+        ":",  # Защита пунктуации
     ]
 
     print(f"🧠 Начинаем обучение токенизатора на файле {CORPUS_FILE}...")
@@ -51,27 +54,16 @@ def main():
         wordpieces_prefix="##",
     )
 
-    # Создаем папку и сохраняем
     os.makedirs(SAVE_DIR, exist_ok=True)
     tokenizer.save_model(SAVE_DIR)
 
-    print("\n" + "=" * 50)
-    print("✨ ТОКЕНИЗАТОР УСПЕШНО ОБУЧЕН И СОХРАНЕН ✨")
-    print(f"Папка с файлами: {SAVE_DIR}/")
-    print("Внутри лежат файлы 'vocab.txt' (твой уникальный словарь)")
-    print("=" * 50)
-
-    print("\n🔍 ТЕСТИРОВАНИЕ:")
-    test_texts = [
-        "[CTX_DAILY] Поклонъ ѿ бориса [GAP] настасии съ бг҃омъ.",
-        "[CTX_SCIENCE] И царь самодержецъ повелѣлъ шанцы копати.",
-        "[CTX_CHURCH] Преподобноисповѣдникъ моляшеся непрестанно.",
-    ]
-
-    from transformers import BertTokenizerFast
-
-    fast_tokenizer = BertTokenizerFast.from_pretrained(
-        SAVE_DIR, strip_accents=False, lowercase=False
+    print("⏳ Настройка обертки Transformers...")
+    # Явно указываем путь к vocab.txt, который сгенерировал tokenizers
+    fast_tokenizer = BertTokenizerFast(
+        vocab_file=f"{SAVE_DIR}/vocab.txt",
+        strip_accents=False,
+        lowercase=False,
+        clean_text=False,  # Не даем HF портить нашу чистку
     )
 
     special_tokens_dict = {
@@ -83,22 +75,33 @@ def main():
             "[CTX_CHURCH]",
             "[CTX_SCIENCE]",
             "[GAP]",
+            "·",
+            ":",
         ]
     }
     fast_tokenizer.add_special_tokens(special_tokens_dict)
 
+    # Сохраняем HF конфиг
+    fast_tokenizer.save_pretrained(SAVE_DIR)
+
+    print("\n" + "=" * 50)
+    print("✨ WORDPIECE ТОКЕНИЗАТОР УСПЕШНО ОБУЧЕН ✨")
+    print(f"Папка с файлами: {SAVE_DIR}/")
+    print("=" * 50)
+
+    print("\n🔍 ТЕСТИРОВАНИЕ:")
+    test_texts = [
+        "[CTX_DAILY] Поклонъ · ѿ · бориса · [GAP] · настасии съ бг҃омъ.",
+        "[CTX_CHURCH] Преподобноисповѣдникъ моляшеся непрестанно.",
+    ]
+
     for i, text in enumerate(test_texts, 1):
         print(f"\n--- Тест {i} ---")
         print(f"Оригинал: {text}")
-
-        # Токенизация (разбивка на подслова)
         tokens = fast_tokenizer.tokenize(text)
         print(f"Токены:   {tokens}")
-
-        # Обрати внимание, что у WordPiece подслова начинаются с ##
         encoded_ids = fast_tokenizer.encode(text)
-        decoded_text = fast_tokenizer.decode(encoded_ids)
-        print(f"Декодинг: {decoded_text}")
+        print(f"Декодинг: {fast_tokenizer.decode(encoded_ids)}")
 
 
 if __name__ == "__main__":
