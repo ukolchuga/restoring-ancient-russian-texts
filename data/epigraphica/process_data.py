@@ -1,125 +1,117 @@
-import pandas as pd
-import re
 import os
+import re
 import unicodedata
 
-INPUT_CSV = "data/epigraphica/epigraphica_full_data.csv"
-OUTPUT_CSV = "data/epigraphica/epigraphica_clean_metadata.csv"
-OUTPUT_TXT = "data/epigraphica/epigraphica_ready_for_bert.txt"
+import pandas as pd
 
-def parse_years(date_str):
-    if not isinstance(date_str, str) or not date_str:
-        return None, None, None
-    years = re.findall(r'\d{3,4}', date_str)
-    if not years:
-        return None, None, None
-    years = [int(y) for y in years]
-    start_year = min(years)
-    end_year = max(years)
-    mean_year = sum(years) // len(years)
-    century = (mean_year - 1) // 100 + 1
-    return start_year, end_year, century
+# ==========================================
+# 📂 НАСТРОЙКИ
+# ==========================================
+INPUT_CSV = "data/epigraphica/epigraphica_full_data.csv"
+OUTPUT_TXT = "gramoty_final_cleaned.txt"
+
 
 def clean_epigraphy_text(text):
-    if not isinstance(text, str) or not text:
+    if pd.isna(text) or not isinstance(text, str):
         return ""
-    
-    # 0. NFC нормализация (Критично для титл и BPE)
-    text = unicodedata.normalize('NFC', text)
 
-    # 1. Предварительная маркировка лакун (кириллицей, чтобы не съела очистка латиницы)
-    # vac. (пустое место) и im. (рисунок) — это по сути исторические лакуны
-    text = re.sub(r'(?i)\|?im\.|\|?vac\.', ' МАРКЕРГАП ', text)
-    # Ловим (...), [---], ..., и множественные тире
-    text = re.sub(r'(\.[\s·]*){3,}|…|\([\.…\-]+\)|\[[\.…\-]+\]|([\-‐‑–—−][\s·]*){2,}|·-·', ' МАРКЕРГАП ', text)
+    # 0. Юникод-нормализация
+    text = unicodedata.normalize("NFC", text)
 
-    # 2. Убираем технические маркеры сайта Epigraphica
-    text = re.sub(r'(?i)(text|текст)\s*\d*[:：\s]*', ' ', text)
-    
-    # 3. Разделяем слипшиеся слова ( Scriptio Continua )
-    # Окружаем древние разделители и переносы строк (|) пробелами
-    text = re.sub(r'([·⁘⋮✝+])', r' \1 ', text)
-    text = text.replace('|', ' ').replace('/', ' ').replace('¦', ' ')
+    # 1. Специфический мусор эпиграфики
+    # Убиваем вставки вроде "text 1:", "text 2:" и т.д.
+    text = re.sub(r"(?i)text\s*\d+\s*:", "", text)
 
-    # 4. Раскрываем скобки восстановления и удаления
-    text = re.sub(r'⟦.*?⟧', '', text) # Удаляем зачеркнутое
-    text = re.sub(r'[\[\]\(\)\{\}<>]', '', text)
-    
-    # Склейка разорванных слов (переносы)
-    text = text.replace('⸗', '').replace('=', '')
+    # Склеиваем слова, разбитые переносом строки (символы ⸗, =, ~, ̴)
+    # Например: "Ми⸗ халу" -> "Михалу"
+    text = re.sub(r"[⸗=~̴]\s*", "", text)
 
-    # 5. Очистка от мусора
-    text = re.sub(r'[a-zA-Z]', '', text) # Удаляем латиницу (маркер МАРКЕРГАП выживет)
-    text = re.sub(r'\d', '', text)       # Современные цифры
-    # Греческий алфавит вырезаем, если он встречается фрагментарно
-    text = re.sub(r'[\u0370-\u03FF]', '', text) 
+    # 2. Лакуны: превращаем многоточия, в т.ч. в скобках (...), и длинные тире в [GAP]
+    text = re.sub(r"\([\.…-]+\)", "[GAP]", text)
+    text = re.sub(r"\[[\.…-]+\]", "[GAP]", text)
+    text = re.sub(r"(?:…|\.{2,}|[-‐‑–—−]{2,})", "[GAP]", text)
 
-    # 6. ФИНАЛЬНЫЙ ЭТАП: ВОЗВРАЩАЕМ [GAP]
-    text = text.replace("МАРКЕРГАП", " [GAP] ")
-    
-    # Схлопываем идущие подряд [GAP] и лишние пробелы
-    text = re.sub(r'(\s*\[GAP\]\s*)+', ' [GAP] ', text)
-    text = re.sub(r'\s+', ' ', text).strip()
+    # 3. Реконструкция: убираем ВСЕ виды скобок, оставляя сам восстановленный текст
+    text = re.sub(r"[\[\]\(\)\{\}\<\>⟦⟧⟨⟩]", "", text)
+
+    # 4. Удаляем пунктуацию и разделители (как договорились для MLM)
+    text = re.sub(r"[·:×|¦⁞]", " ", text)
+
+    # 5. Одиночные дефисы-обрывки "приклеиваем" как [GAP]
+    text = re.sub(r"(?<=\s)[-‐‑](?=\w)", "[GAP]", text)
+    text = re.sub(r"(?<=\w)[-‐‑](?=\s)", "[GAP]", text)
+    text = re.sub(r"^[-‐‑](?=\w)", "[GAP]", text)
+    text = re.sub(r"(?<=\w)[-‐‑]$", "[GAP]", text)
+
+    # 6. Убиваем дефисы, которые прилипли к [GAP]
+    text = re.sub(r"[-‐‑]+\[GAP\]", "[GAP]", text)
+    text = re.sub(r"\[GAP\][-‐‑]+", "[GAP]", text)
+
+    # 7. Тотальная зачистка поломанных скобок вокруг GAP
+    text = re.sub(r"\[*GAP\]*", "[GAP]", text)
+
+    # 8. Безопасное схлопывание дублей GAP
+    while "[GAP][GAP]" in text or "[GAP] [GAP]" in text:
+        text = text.replace("[GAP][GAP]", "[GAP]").replace("[GAP] [GAP]", "[GAP]")
+
+    # 9. Финальная чистка лишних пробелов
+    text = re.sub(r"\s+", " ", text).strip()
 
     return text
 
-def is_quality_data(text):
-    if not text: return False
-    
-    # Считаем буквы (кириллица + глаголица)
-    letters = re.findall(r'[а-яА-ЯёЁ\u0400-\u052F\uA640-\uA69F\u2C00-\u2C5F]', text)
-    if len(letters) < 12: # Слегка снизили порог для коротких граффити
-        return False
-        
-    # Убираем "азбуки" (много одиночных букв)
-    words = text.split()
-    if len([w for w in words if len(w) == 1 and w not in 'аив·:']) > 4:
-        return False
-        
-    # Убираем повторы (З З З)
-    if re.search(r'(.)\s\1\s\1', text):
+
+def is_valid_for_training(text):
+    if not text or len(text) < 10:
         return False
 
-    # Проверка на "дырявость"
+    words = text.split()
+    content_words = [w for w in words if w != "[GAP]"]
+
+    # Минимум 3 реальных слова для контекста
+    if len(content_words) < 3:
+        return False
+
+    # Слишком "дырявый" текст отбрасываем (больше 60% масок)
     gap_count = text.count("[GAP]")
-    if gap_count > 0 and gap_count >= len(words) * 0.7:
+    if gap_count >= len(words) * 0.6:
         return False
 
     return True
 
+
 def main():
     if not os.path.exists(INPUT_CSV):
-        print(f"Error: {INPUT_CSV} not found!")
+        print(f"❌ Файл {INPUT_CSV} не найден!")
         return
 
-    print(f"Reading {INPUT_CSV}...")
+    print("🚀 Загрузка данных эпиграфики...")
     df = pd.read_csv(INPUT_CSV)
 
-    print("🔧 Cleaning epigraphica texts for BPE...")
-    df['clean_text'] = df['text'].apply(clean_epigraphy_text)
-    
-    # Парсим даты
-    print("⏳ Processing dates...")
-    df[['start_year', 'end_year', 'century']] = df['date'].apply(
-        lambda x: pd.Series(parse_years(x))
-    )
-    
-    # Применяем фильтры
-    print("🎯 Filtering low quality entries...")
-    df_valid = df[df['clean_text'].apply(is_quality_data)].copy()
-    
-    # Сохраняем результат
-    df_valid.to_csv(OUTPUT_CSV, index=False, encoding='utf-8-sig')
-    
-    with open(OUTPUT_TXT, 'w', encoding='utf-8') as f:
-        for _, row in df_valid.iterrows():
-            f.write(f"{row['clean_text']}\n")
-    
-    print("\n" + "=" * 50)
-    print(f"✅ Total entries before: {len(df)}")
-    print(f"🚀 Total entries after:  {len(df_valid)}")
-    print(f"💾 Clean text saved to: {OUTPUT_TXT}")
-    print("=" * 50)
+    cleaned_inscriptions = []
+
+    print("✨ Очистка и фильтрация...")
+    for index, row in df.iterrows():
+        # Берем оригинальный текст. Если его нет — берем реконструкцию
+        raw_text = row.get("text", "")
+        if pd.isna(raw_text) or str(raw_text).strip() == "":
+            raw_text = row.get("reconstruction", "")
+
+        clean_text = clean_epigraphy_text(str(raw_text))
+
+        if is_valid_for_training(clean_text):
+            # Добавляем наш спец-токен контекста церкви/эпиграфики, если хочешь
+            # (Можно закомментировать строку ниже, если не хочешь использовать тег)
+            clean_text = f"[CTX_CHURCH] {clean_text}"
+            cleaned_inscriptions.append(clean_text)
+
+    # Добавляем в конец нашего основного файла
+    print(f"💾 Добавление {len(cleaned_inscriptions)} новых строк в {OUTPUT_TXT}...")
+    with open(OUTPUT_TXT, "a", encoding="utf-8") as f:
+        f.write("\n")  # Отбиваем пустой строкой на всякий случай
+        f.write("\n".join(cleaned_inscriptions))
+
+    print("✅ Готово! Эпиграфика успешно интегрирована в датасет.")
+
 
 if __name__ == "__main__":
     main()
