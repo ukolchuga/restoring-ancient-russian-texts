@@ -94,8 +94,26 @@ def main():
 
     df["clean"] = df[text_col].apply(unified_clean_pipeline)
 
-    # Фильтруем слишком короткий мусор
-    valid_rows = df[df["clean"].str.len() > 15].copy()
+    def is_valid_line(text):
+        if not text or len(text) < 15:
+            return False
+        
+        # Считаем только кириллические буквы (древнерусские и обычные)
+        letters = re.findall(r"[а-яА-ЯёЁ\u0400-\u052F\uA640-\uA69F]", text)
+        if len(letters) < 12: # Если меньше 12 букв - это обрывок
+            return False
+            
+        words = text.split()
+        gap_count = text.count("[GAP]")
+        
+        # Если [GAP] больше или равно половине "слов", строка слишком дырявая
+        if gap_count > 1 and gap_count >= len(words) / 2:
+            return False
+            
+        return True
+
+    # Фильтруем мусор
+    valid_rows = df[df["clean"].apply(is_valid_line)].copy()
     valid_rows["tokens"] = valid_rows["clean"].apply(count_tokens)
 
     # 2. Обработка дат

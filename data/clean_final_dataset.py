@@ -1,5 +1,6 @@
-import re
 import os
+import re
+
 from tqdm import tqdm
 
 INPUT_FILE = "final_ancient_rus_dataset.txt"  # Твой собранный мега-корпус
@@ -54,6 +55,8 @@ def safe_clean_text(line):
         "y": "у",
         "X": "Х",
         "x": "х",
+        "i": "і",
+        "I": "І",
     }
     for lat, cyr in replacements.items():
         text = text.replace(lat, cyr)
@@ -86,12 +89,12 @@ def main():
         print(f"❌ Ошибка: Файл {INPUT_FILE} не найден!")
         return
 
-    print(f"🧹 Начинаем финальную полировку Мега-Корпуса...")
+    print("🧹 Начинаем финальную полировку Мега-Корпуса...")
 
-    with open(INPUT_FILE, "r", encoding="utf-8") as f_in, open(
-        OUTPUT_FILE, "w", encoding="utf-8"
-    ) as f_out:
-
+    with (
+        open(INPUT_FILE, "r", encoding="utf-8") as f_in,
+        open(OUTPUT_FILE, "w", encoding="utf-8") as f_out,
+    ):
         lines = f_in.readlines()
         cleaned_count = 0
 
