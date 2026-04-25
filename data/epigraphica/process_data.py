@@ -35,10 +35,11 @@ def clean_epigraphy_text(text):
     text = re.sub(r"[\[\]\(\)\{\}\<\>⟦⟧⟨⟩]", "", text)
 
     # 4. Удаляем пунктуацию и разделители (как договорились для MLM)
-    text = re.sub(r"[·:×|¦⁞]", " ", text)
+    text = re.sub(r"[·:×|¦⁞⁘+*/\\]", " ", text)
+    text = re.sub(r"\bvac\.\s*", "", text)
 
     # 5. Превращаем любые оставшиеся дефисы-обрывки в лакуны
-    text = re.sub(r"[-‐‑]", "[GAP]", text)
+    text = re.sub(r"[-‐‑–—−]", "[GAP]", text)
 
     # 6. Тотальная зачистка поломанных скобок вокруг GAP
     text = re.sub(r"\[*GAP\]*", "[GAP]", text)
