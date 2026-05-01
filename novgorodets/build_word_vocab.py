@@ -9,6 +9,8 @@ SPECIAL_WORD_TOKENS = [
     "[CLS]", "[SEP]", "[MASK]", "[GAP]",
     "[CTX_CHURCH]", "[CTX_DAILY]", "[CTX_LEGAL]",
     "[CTX_LIT]", "[CTX_EPIC]", "[CTX_SCIENCE]",
+    " ",
+    "+", ":", "·"
 ]
 SPECIAL_RE = re.compile(r"(\[CTX_[A-Z_]+\]|\[GAP\]|\[MASK\]|\[PAD\]|\[UNK\]|\[CLS\]|\[SEP\])")
 
