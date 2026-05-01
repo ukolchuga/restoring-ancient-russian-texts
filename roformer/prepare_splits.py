@@ -24,6 +24,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 # SOURCES CONFIGURATION
 # ============================================================================
 
+
 SOURCES_CONFIG = [
     # -- Daily ----------------------------------------------------------------
     {
@@ -283,6 +284,21 @@ _DELETE_CHARS = {
 _DELETE_RE = re.compile("[" + re.escape("".join(_DELETE_CHARS)) + "]")
 _LEGACY_GAP_RE = re.compile(r"___G[АA][РP]___")
 
+CYR_NUMERALS = "авгдєѕзиѳіклмнѯопрстуфхѱѡцчшщъыьѣюѧѩѯѱѳѵ"
+NUM_PATTERN = re.compile(rf"([:+·])([{CYR_NUMERALS}]+҃)\1")
+
+
+def _protect_numerals(text: str):
+    protected_nums = {}
+
+    def repl(m):
+        key = f"PNUM{len(protected_nums)}PNUM"
+        protected_nums[key] = m.group(0)
+        return key
+
+    # Защищаем конструкции типа :л҃: или ·в·
+    return NUM_PATTERN.sub(repl, text), protected_nums
+
 
 def _protect_special_tokens(text: str):
     protected = {}
@@ -305,27 +321,42 @@ def safe_clean_text(line: str) -> str:
     line = line.strip()
     if not line:
         return ""
+
     m = re.match(r"^(\[CTX_[A-Z_]+\])\s+(.*)", line, re.DOTALL)
     tag, text = (m.group(1), m.group(2)) if m else ("", line)
+
     text = unicodedata.normalize("NFC", text)
     text = text.replace("\ufeff", "").replace("\u200b", "")
+
     text = re.sub(r"[\ue000-\uf8ff]", "", text)
     text = re.sub(r'["\'«»„“”]', "", text)
-    text = re.sub(r"[\u0300-\u036f]", "", text)
+
+    text = re.sub(r"[\u0300-\u0482\u0484-\u036f]", "", text)
+
     for src, dst in _RARE_CHAR_MAP.items():
         text = text.replace(src, dst)
+
     text = _LEGACY_GAP_RE.sub("[GAP]", text)
+
     text, protected = _protect_special_tokens(text)
+    text, protected_nums = _protect_numerals(text)
+
     for lat, cyr in _LAT_TO_CYR.items():
         text = text.replace(lat, cyr)
+
     text = _DELETE_RE.sub(" ", text)
     text = re.sub(r"[^\w\s:\[\]·+҃()]", " ", text)
     text = re.sub(r"\s*([:+·])\s*", r" \1 ", text)
+    for key, val in protected_nums.items():
+        text = text.replace(key, val)
+
     text = _unprotect_special_tokens(text, protected)
+
     text = re.sub(r"(\s*\[GAP\]\s*)+", " [GAP] ", text)
     text = re.sub(r"([+:·])([^\s])", r"\1 \2", text)
     text = re.sub(r"([^\s])([+:·])", r"\1 \2", text)
     text = re.sub(r"\s+", " ", text).strip()
+
     return f"{tag} {text}" if tag else text
 
 
