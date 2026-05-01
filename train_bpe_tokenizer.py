@@ -1,21 +1,30 @@
+#!/usr/bin/env python3
+"""
+Script for training a custom Byte-Level BPE tokenizer on Ancient Russian text.
+Produces a Hugging Face compatible tokenizer with context-specific tags and historical punctuation.
+"""
+
 import os
 
 from tokenizers import ByteLevelBPETokenizer
 from transformers import PreTrainedTokenizerFast
 
-CORPUS_FILE = "data/ancient_rus_ready_for_bert.txt"
+# Configuration
+CORPUS_FILE = "splits/train.txt"
 VOCAB_SIZE = 50000
 SAVE_DIR = "ancient_rus_tokenizer_BPE"
 
 
 def main():
+    """Trains the BPE tokenizer and saves it in Hugging Face format."""
     if not os.path.exists(CORPUS_FILE):
-        print(f"❌ Ошибка: Файл {CORPUS_FILE} не найден!")
+        print(f"Error: Training corpus {CORPUS_FILE} not found!")
         return
 
-    print("⏳ Инициализация BPE токенизатора...")
+    print("Initializing Byte-Level BPE Tokenizer...")
     bpe_tokenizer = ByteLevelBPETokenizer()
 
+    # Define standard and domain-specific special tokens
     special_tokens = [
         "<s>",
         "<pad>",
@@ -33,7 +42,7 @@ def main():
         ":",
     ]
 
-    print(f"🧠 Обучение на {CORPUS_FILE} (vocab size: {VOCAB_SIZE})...")
+    print(f"Training tokenizer on {CORPUS_FILE} with vocab size {VOCAB_SIZE}...")
     bpe_tokenizer.train(
         files=[CORPUS_FILE],
         vocab_size=VOCAB_SIZE,
@@ -42,14 +51,13 @@ def main():
         special_tokens=special_tokens,
     )
 
+    # Save the base tokenizer state
     os.makedirs(SAVE_DIR, exist_ok=True)
-
-    # 🔥 ИСПРАВЛЕНИЕ 1: Сохраняем в единый монолитный формат tokenizer.json
     tokenizer_path = os.path.join(SAVE_DIR, "tokenizer.json")
     bpe_tokenizer.save(tokenizer_path)
 
-    print("⏳ Настройка обертки Transformers...")
-    # 🔥 ИСПРАВЛЕНИЕ 2: Используем универсальный PreTrainedTokenizerFast
+    print("Configuring PreTrainedTokenizerFast wrapper...")
+    # Wrap the BPE model into a Transformers-compatible fast tokenizer
     fast_tokenizer = PreTrainedTokenizerFast(
         tokenizer_file=tokenizer_path,
         max_len=512,
@@ -62,7 +70,7 @@ def main():
         mask_token="<mask>",
     )
 
-    # Регистрируем теги
+    # Explicitly register additional special tokens to ensure correct handling
     fast_tokenizer.add_special_tokens(
         {
             "additional_special_tokens": [
@@ -79,26 +87,23 @@ def main():
         }
     )
 
-    # Сохраняем HF конфиг
+    # Save final tokenizer artifacts for model training
     fast_tokenizer.save_pretrained(SAVE_DIR)
+    print(f"BPE Tokenizer successfully trained and saved to: {SAVE_DIR}/")
 
-    print("\n" + "=" * 50)
-    print("✨ BPE ТОКЕНИЗАТОР УСПЕШНО ОБУЧЕН И СОХРАНЕН ✨")
-    print(f"Путь: {SAVE_DIR}/")
-    print("=" * 50)
-
-    print("\n🔍 ТЕСТИРОВАНИЕ:")
+    # Run quick validation tests
+    print("\n--- Tokenization Validation ---")
     test_texts = [
         "[CTX_DAILY] поклонъ · ѿ · бориса · [GAP] · настасии",
         "[CTX_LEGAL] · ꙅ҃ · десѧ · коуно ·",
     ]
 
     for i, text in enumerate(test_texts, 1):
-        print(f"\nТест {i}: {text}")
+        print(f"\nTest Case {i}: {text}")
         tokens = fast_tokenizer.tokenize(text)
-        print(f"Токены: {tokens}")
+        print(f"  Tokens:   {tokens}")
         ids = fast_tokenizer.encode(text)
-        print(f"Декодинг: {fast_tokenizer.decode(ids)}")
+        print(f"  Decoding: {fast_tokenizer.decode(ids)}")
 
 
 if __name__ == "__main__":

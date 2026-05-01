@@ -154,7 +154,7 @@
                     {val: "ex6", txt: "Gospel (Church)"},
                     {val: "ex7", txt: "Medical Book (Science)"}
                 ],
-                loss_word: "GAP #"
+                loss_word: "RESTORED SEQUENCE"
             },
             ru: {
                 subtitle: "ИИ-Инструмент Эпиграфики", title: "Исследуйте тексты с Добрыней",
@@ -184,7 +184,7 @@
                     {val: "ex6", txt: "Евангелие (Церк)"},
                     {val: "ex7", txt: "Лечебник (Наука)"}
                 ],
-                loss_word: "УТРАТА #"
+                loss_word: "ВОССТАНОВЛЕННЫЙ ТЕКСТ"
             },
             pl: {
                 subtitle: "Narzędzie Epigraficzne AI", title: "Użyj Dobryni do swoich badań",
@@ -214,7 +214,7 @@
                     {val: "ex6", txt: "Ewangelia (Kościół)"},
                     {val: "ex7", txt: "Księga medyczna (Nauka)"}
                 ],
-                loss_word: "LUKA #"
+                loss_word: "ZREKONSTRUOWANY TEKST"
             }
         };
 
@@ -301,7 +301,14 @@
                 }
             } catch (err) {
                 document.getElementById('loading').classList.add('hidden');
-                document.getElementById('resultsContent').innerHTML = `<p class="text-cinnabar">Network error.</p>`;
+             
+                document.getElementById('resultsContent').innerHTML = `
+                    <div class="bg-red-50 border border-red-200 p-4 rounded-lg">
+                        <p class="text-cinnabar font-bold">JavaScript / Parse Error:</p>
+                        <p class="text-charcoal font-mono text-sm mt-2">${err.name}: ${err.message}</p>
+                    </div>
+                `;
+                console.error("Full error details:", err);
             }
         }
 

@@ -1,4 +1,5 @@
 import html
+import math
 import re
 from typing import Any, Dict, List
 
@@ -12,20 +13,24 @@ from transformers import AutoModelForMaskedLM, AutoTokenizer
 
 app = FastAPI(title="Dobrynya Text Restoration")
 
+# Static files and templates configuration
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-
+# Model configuration
 MODEL_PATH = "AlexSychovUN/mini-roformer-ancient-rus-v2"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+# Load model and tokenizer once on startup
 tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
 model = AutoModelForMaskedLM.from_pretrained(MODEL_PATH).to(device)
 model.eval()
 
 
 class RestoreRequest(BaseModel):
-    """Data Model (scheme) of the user input"""
+    """
+    Validation schema for the restoration API request.
+    """
 
     text: str
     category: str
@@ -33,118 +38,99 @@ class RestoreRequest(BaseModel):
     temperature: float = 1.0
 
 
-def get_mask_predictions(
-    text: str, top_k: int = 5, temperature: float = 1.0
-) -> List[Dict[str, Any]]:
-    """
-    Inference function for prediction ONLY for the first mask
-
-    Args:
-        text (str): input text with tokens <mask>.
-        top_k (int): Number of output examples.
-        temperature (float): Softmax probability smoothing coefficient.
-
-    Returns:
-        List[Dict[str, Any]]: List of dicts [{"token_str": str, "score": float}, ...]
-    """
-    # Text tokenization
-    inputs = tokenizer(text, return_tensors="pt").to(device)
-
-    # Find indexes for all mask tokens
-    mask_indices = torch.where(inputs["input_ids"] == tokenizer.mask_token_id)[1]
-
-    if len(mask_indices) == 0:
-        return []
-
-    with torch.no_grad():
-        outputs = model(**inputs)
-
-    # Logits only for the first mask
-    first_mask_index = mask_indices[0]
-    logits = outputs.logits[0, first_mask_index, :]
-
-    temp = max(0.01, float(temperature))
-    scaled_logits = logits / temp
-
-    probs = torch.nn.functional.softmax(
-        scaled_logits, dim=-1
-    )  # Sum of probabilities = 1.0
-    top_k_probs, top_k_indices = torch.topk(probs, top_k, dim=-1)
-
-    results = []
-    for i in range(top_k):
-        token_id = top_k_indices[i].item()
-        prob = top_k_probs[i].item()
-        token_str = tokenizer.decode([token_id])
-        results.append({"token_str": token_str, "score": prob})
-
-    return results
-
-
 def generate_sequential(
     text: str, category: str, top_k: int = 5, temperature: float = 1.0
-):
-    mask_token = tokenizer.mask_token  # <mask>
-    masks_count = text.count(mask_token)
+) -> List[List[Dict[str, Any]]]:
+    """
+    Performs sequential decoding (simplified beam search) for multiple mask tokens.
+    Iteratively fills masks based on model confidence and contextual probability.
+    """
+    inputs = tokenizer(text, return_tensors="pt").to(device)
+    input_ids = inputs["input_ids"][0]
 
-    if masks_count == 0:
+    mask_token_id = tokenizer.mask_token_id
+    mask_indices = torch.where(input_ids == mask_token_id)[0].tolist()
+
+    if not mask_indices:
         return []
 
-    # Start state: one node with the possibility 1.0 (100%)
-    current_states = [{"text": text, "prob": 1.0, "inserted": []}]
+    # State tracking: (tensor, accumulated log probability, list of inserted token IDs)
+    current_states = [
+        {"input_ids": input_ids.clone(), "log_prob": 0.0, "inserted_ids": []}
+    ]
 
-    # Iteration through all masks
-    for step in range(masks_count):
-        new_candidates = []
+    with torch.no_grad():
+        for mask_idx in mask_indices:
+            new_candidates = []
 
-        # Unfold hypotheses for each current state (beam)
-        for state in current_states:
-            step_results = get_mask_predictions(
-                state["text"], top_k=top_k, temperature=temperature
-            )
+            for state in current_states:
+                model_inputs = {"input_ids": state["input_ids"].unsqueeze(0).to(device)}
+                outputs = model(**model_inputs)
 
-            for res in step_results:
-                # Cleaning tokens from special tokens BPE (Ġ - space before word)
-                clean_token = res["token_str"].replace("Ġ", "")
-                if not clean_token.strip():
-                    continue
+                logits = outputs.logits[0, mask_idx, :]
+                scaled_logits = logits / max(0.01, float(temperature))
+                probs = torch.nn.functional.softmax(scaled_logits, dim=-1)
 
-                # Prediction for the first mask
-                new_text = state["text"].replace(mask_token, clean_token, 1)
+                top_k_probs, top_k_indices = torch.topk(probs, top_k, dim=-1)
 
-                # Chain rule
-                new_prob = state["prob"] * res["score"]
+                for i in range(top_k):
+                    token_id = top_k_indices[i].item()
+                    prob = top_k_probs[i].item()
 
-                new_inserted = list(state["inserted"])
-                new_inserted.append(clean_token)
+                    new_input_ids = state["input_ids"].clone()
+                    new_input_ids[mask_idx] = token_id
 
-                new_candidates.append(
-                    {"text": new_text, "prob": new_prob, "inserted": new_inserted}
-                )
-        # Sorting the branches and saving only the best ones (Beam Width)
-        current_states = sorted(new_candidates, key=lambda x: x["prob"], reverse=True)[
-            : top_k * 2
-        ]
-    # Save only top_k variants
-    current_states = current_states[:top_k]
+                    new_inserted_ids = list(state["inserted_ids"])
+                    new_inserted_ids.append(token_id)
 
+                    new_log_prob = state["log_prob"] + math.log(prob)
+
+                    new_candidates.append(
+                        {
+                            "input_ids": new_input_ids,
+                            "log_prob": new_log_prob,
+                            "inserted_ids": new_inserted_ids,
+                        }
+                    )
+
+            # Retain top-K candidates for the next mask position
+            current_states = sorted(
+                new_candidates, key=lambda x: x["log_prob"], reverse=True
+            )[:top_k]
+
+    # Decode predictions back to text
     variants = []
+    mask_token = tokenizer.mask_token
+
+    escaped_mask = html.escape(mask_token)
+    escaped_category = html.escape(f"[{category}]")
+
     for state in current_states:
-        inserted_phrase = "".join(state["inserted"]).strip()
-        full_sentence = (
-            state["text"]
-            .replace(f"[{category}]", "")
-            .replace(tokenizer.cls_token, "")  # <s>
-            .replace(tokenizer.sep_token, "")  # </s>
-            .strip()
-        )
+        inserted_phrase = tokenizer.decode(
+            state["inserted_ids"], clean_up_tokenization_spaces=True
+        ).strip()
+
+        full_sentence = html.escape(text)
+
+        for token_id in state["inserted_ids"]:
+            token_str = tokenizer.decode([token_id])
+
+            clean_token = token_str.replace("Ġ", "").replace("##", "").replace(" ", "")
+
+            replacement = (
+                f'<span class="highlight-restored">{html.escape(clean_token)}</span>'
+            )
+            full_sentence = full_sentence.replace(escaped_mask, replacement, 1)
+
+        full_sentence = full_sentence.replace(escaped_category, "").strip()
         full_sentence = re.sub(r"\s+", " ", full_sentence)
-        full_sentence = html.escape(full_sentence)
+
+        final_prob = math.exp(state["log_prob"])
 
         variants.append(
             {
                 "word": inserted_phrase if inserted_phrase else "...",
-                "score": round(state["prob"] * 100, 2),
+                "score": round(final_prob * 100, 2),
                 "full_sentence": full_sentence,
             }
         )
@@ -154,18 +140,23 @@ def generate_sequential(
 
 @app.get("/")
 async def read_root(request: Request):
+    """
+    Renders the main frontend page.
+    """
     return templates.TemplateResponse("index.html", {"request": request})
 
 
 @app.post("/api/restore")
 async def restore_text(req: RestoreRequest) -> Dict[str, Any]:
-    # Input normalization: * -> <mask >, - -> [GAP]
-    formatted_text = req.text.replace("*", f" {tokenizer.mask_token} ").replace(
-        "-", " [GAP] "
-    )
+    """
+    Main API endpoint for text restoration.
+    Normalizes input symbols (* and -) and processes through the sequential generator.
+    """
+    # Normalize input: * -> <mask>, - -> [GAP]
+    formatted_text = req.text.replace("*", tokenizer.mask_token).replace("-", "[GAP]")
     formatted_text = re.sub(r"\s+", " ", formatted_text).strip()
 
-    # TAG + TEXT
+    # Prepend category tag
     full_query = f"[{req.category}] {formatted_text}"
 
     try:
@@ -179,6 +170,7 @@ async def restore_text(req: RestoreRequest) -> Dict[str, Any]:
 
 
 if __name__ == "__main__":
+    # Start the development server
     uvicorn.run(app, host="127.0.0.1", port=8000)
 
     # Settings for deploy hugging spaces

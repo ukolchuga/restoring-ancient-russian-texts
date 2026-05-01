@@ -27,6 +27,7 @@ dependencies = [
     "requests>=2.32.5",
     "lxml>=6.1.0",
     "protobuf>=7.34.1",
+    "accelerate>=1.13.0",
 ]
 
 [[tool.uv.index]]
