@@ -21,12 +21,12 @@ import numpy as np
 import pandas as pd
 import torch
 from datasets import load_from_disk
-from transformers import Trainer, TrainingArguments
+from transformers import Trainer, TrainingArguments, TrainerCallback
 
 from config import DualBertConfig
 from model import DualBertForMaskedLM
 from collator import DualPhysicalDegradationCollator
-
+from build_char_tokenizer import SPECIAL_TOKENS
 # ============================================================================
 # ЛОГИРОВАНИЕ
 # ============================================================================
@@ -116,167 +116,283 @@ class LoggingTrainer(Trainer):
             with open(self.log_path, "w", encoding="utf-8") as f:
                 json.dump(self.log_history, f, ensure_ascii=False, indent=2)
 
+# ============================================================================
+# ДОПОЛНИТЕЛЬНЫЙ ПРОГОН НА ТЕСТЕ B
+# ============================================================================
+
+class TestBEvalCallback(TrainerCallback):
+    """
+    Callback, который при каждом обычном evaluate (на test_a) дополнительно
+    прогоняет evaluate на test_b и сохраняет метрики в output_dir.
+    Защищён от рекурсии (чтобы не зациклиться).
+    """
+
+    def __init__(self, test_b_dataset, output_dir: Path, max_samples: int | None = None):
+        self.test_b_dataset = test_b_dataset
+        self.output_dir = Path(output_dir)
+        self.max_samples = max_samples
+        self._in_eval = False
+
+    def on_evaluate(self, args, state, control, **kwargs):
+        # trainer приходит в kwargs
+        trainer = kwargs.get("trainer")
+        if trainer is None:
+            return
+
+        # Защита от рекурсивного вызова (evaluate -> on_evaluate -> evaluate -> ...)
+        if self._in_eval:
+            return
+
+        if self.test_b_dataset is None:
+            return
+
+        # Запускаем дополнительную оценку
+        try:
+            self._in_eval = True
+            # при желании ограничиваем число сэмплов для ускорения
+            ds = self.test_b_dataset
+            if self.max_samples is not None and hasattr(ds, "select"):
+                n = min(self.max_samples, len(ds))
+                ds = ds.select(range(n))
+
+            metrics = trainer.evaluate(eval_dataset=ds)
+
+            # сохраняем отдельно с шагом (если есть)
+            step = getattr(state, "global_step", None) or "final"
+            fname = self.output_dir / f"eval_metrics_test_b_step{step}.json"
+
+            # save_json определён выше в файле
+            save_json(metrics, fname)
+            log.info(f"Saved Test B metrics: {fname}")
+
+        finally:
+            self._in_eval = False
 
 # ============================================================================
 # РЕПОРТ ПРЕДСКАЗАНИЙ
 # ============================================================================
 
-def decode_one_token(tokenizer, token_id: int) -> str:
-    """Декодирует один токен в символ."""
-    if token_id < 0 or token_id >= len(tokenizer):
-        return "[UNK]"
-    token = tokenizer.convert_ids_to_tokens([token_id])[0]
-    # Убираем префиксы BPE/WordPiece если есть
-    if token.startswith("##"):
-        token = token[2:]
-    return token
-
-
 def generate_predictions_report(
     model,
-    tokenizer,
     char_vocab: dict,
-    word_vocab: dict,
     dataset,
     output_path: Path,
     max_samples: int = 100,
     k_values: tuple = (1, 3, 5),
     device: Optional[torch.device] = None,
+    collator=None,
+    batch_size: int = 8,
+    context_window: int = 20,  # количество символов до/после
 ) -> dict:
     """
-    Генерирует детальный репорт предсказаний модели.
+    Универсальный репорт для test_a и test_b.
 
-    Args:
-        model: Обученная модель
-        tokenizer: Токенизатор
-        char_vocab: Словарь символов
-        word_vocab: Словарь слов
-        dataset: Датасет для оценки
-        output_path: Путь для сохранения CSV
-        max_samples: Максимум примеров для анализа
-        k_values: Значения k для метрик hit@k
-        device: Устройство (gpu/cpu)
+    - test_b: в dataset уже есть labels
+    - test_a: labels нет, поэтому нужен collator, который создаст маскирование
 
-    Returns:
-        dict с метриками
+    context_window: количество символов слева и справа для контекста
     """
     if device is None:
         device = next(model.parameters()).device
 
+    id_to_char = {int(v): k for k, v in char_vocab.items()}
+
+    def decode_one_token(token_id: int) -> str:
+        return id_to_char.get(int(token_id), "[UNK]")
+
+    def get_context(input_ids: list, pos: int, context_window: int = 20) -> str:
+        """Извлекает текстовый контекст вокруг позиции с правильным выделением."""
+        start = max(0, pos - context_window)
+        end = min(len(input_ids), pos + context_window + 1)
+
+        # Декодируем части отдельно для точного позиционирования
+        before = "".join(decode_one_token(int(cid)) for cid in input_ids[start:pos])
+        target = decode_one_token(int(input_ids[pos]))
+        after = "".join(decode_one_token(int(cid)) for cid in input_ids[pos+1:end])
+
+        return before + ">>>" + target + "<<<" + after
+
     model.eval()
     rows = []
-
-    total_samples = min(len(dataset), max_samples)
-    top_k_max = max(k_values)
-
-    log.info(f"Generating predictions report for {total_samples} samples...")
-
     hit_accum = {f"hit@{k}": 0 for k in k_values}
     correct = 0
     used = 0
+    top_k_max = max(k_values)
 
-    for i, sample in enumerate(dataset.select(range(total_samples))):
-        if i % 20 == 0:
-            log.info(f"  Processing {i}/{total_samples}...")
+    total_samples = min(len(dataset), max_samples)
+    log.info(f"Generating predictions report for {total_samples} samples...")
 
-        # Подготовка данных
-        input_ids = torch.tensor([sample["input_ids"]], dtype=torch.long, device=device)
-        word_ids = torch.tensor([sample["word_ids"]], dtype=torch.long, device=device)
-        attention_mask = torch.tensor(
-            [sample["attention_mask"]], dtype=torch.long, device=device
-        )
-        labels = sample.get("labels", None)
+    # --- test_b: labels уже есть ---
+    if "labels" in dataset.column_names:
+        for i, sample in enumerate(dataset.select(range(total_samples))):
+            if i % 20 == 0:
+                log.info(f"  Processing {i}/{total_samples}...")
 
-        if labels is None or -100 not in labels:
-            continue
+            input_ids = torch.tensor(sample["input_ids"], dtype=torch.long, device=device)
+            word_ids = torch.tensor(sample["word_ids"], dtype=torch.long, device=device)
+            attention_mask = torch.tensor(sample["attention_mask"], dtype=torch.long, device=device)
+            labels = sample.get("labels", None)
 
-        # Позиции с маской
-        mask_positions = [j for j, l in enumerate(labels) if l != -100]
-        if not mask_positions:
-            continue
-
-        with torch.no_grad():
-            outputs = model(
-                input_ids=input_ids,
-                word_ids=word_ids,
-                attention_mask=attention_mask,
-            )
-            logits = outputs.logits[0]  # [seq_len, vocab_size]
-
-        # Обработка каждой маскированной позиции
-        for pos in mask_positions:
-            true_id = labels[pos]
-            if true_id < 0:
+            if labels is None or -100 not in labels:
                 continue
 
-            pred_logits = logits[pos]
-            top_ids = torch.topk(pred_logits, k=min(top_k_max, len(char_vocab))).indices
-            top_ids = top_ids.cpu().numpy()
-
-            # Декодируем топ предсказания
-            pred_id = int(top_ids[0])
-            true_char = decode_one_token(tokenizer, true_id)
-            pred_char = decode_one_token(tokenizer, pred_id)
-
-            # Пропускаем специальные токены в оценке
-            if pred_char.startswith("[") or true_char.startswith("["):
+            mask_positions = [j for j, l in enumerate(labels) if l != -100]
+            if not mask_positions:
                 continue
 
-            used += 1
-            is_correct = (pred_id == true_id)
-            if is_correct:
-                correct += 1
+            with torch.no_grad():
+                outputs = model(
+                    input_ids=input_ids.unsqueeze(0),
+                    word_ids=word_ids.unsqueeze(0),
+                    attention_mask=attention_mask.unsqueeze(0),
+                )
+                logits = outputs.logits[0]
 
-            # Вероятность лучшего предсказания
-            probs = torch.softmax(pred_logits, dim=-1)
-            top1_prob = float(probs[pred_id].item())
+            input_ids_list = input_ids.cpu().numpy().tolist()
 
-            # Ранг истинного символа
-            true_rank = None
-            for rank, tid in enumerate(top_ids):
-                if tid == true_id:
-                    true_rank = rank + 1
-                    break
+            for pos in mask_positions:
+                true_id = int(labels[pos])
+                if true_id < 0:
+                    continue
 
-            # Топ-5 предсказаний
-            top_chars = [decode_one_token(tokenizer, int(tid)) for tid in top_ids[:5]]
+                pred_logits = logits[pos]
+                top_ids = torch.topk(pred_logits, k=min(top_k_max, len(char_vocab))).indices.cpu().numpy()
 
-            # Проверяем hit@k
-            for k in k_values:
-                if any(decode_one_token(tokenizer, int(tid)) == true_char
-                       for tid in top_ids[:k]):
-                    hit_accum[f"hit@{k}"] += 1
+                pred_id = int(top_ids[0])
+                true_char = decode_one_token(true_id)
+                pred_char = decode_one_token(pred_id)
 
-            rows.append({
-                "sample_idx": i,
-                "position": pos,
-                "true_char": true_char,
-                "pred_char": pred_char,
-                "is_correct": is_correct,
-                "true_rank": true_rank,
-                "top1_prob": round(top1_prob, 4),
-                "top5_preds": "|".join(top_chars),
-            })
+                if pred_char.startswith("[") or true_char.startswith("["):
+                    continue
 
-    # Сохраняем репорт
+                used += 1
+                is_correct = pred_id == true_id
+                if is_correct:
+                    correct += 1
+
+                probs = torch.softmax(pred_logits, dim=-1)
+                top1_prob = float(probs[pred_id].item())
+
+                true_rank = next(
+                    (r + 1 for r, tid in enumerate(top_ids) if int(tid) == true_id),
+                    None,
+                )
+                top_chars = [decode_one_token(int(tid)) for tid in top_ids[:5]]
+
+                # Контекст вокруг позиции
+                context = get_context(input_ids_list, pos, context_window)
+
+                for k in k_values:
+                    if any(decode_one_token(int(tid)) == true_char for tid in top_ids[:k]):
+                        hit_accum[f"hit@{k}"] += 1
+
+                rows.append({
+                    "sample_idx": i,
+                    "position": pos,
+                    "context": context,
+                    "true_char": true_char,
+                    "pred_char": pred_char,
+                    "is_correct": is_correct,
+                    "true_rank": true_rank,
+                    "top1_prob": round(top1_prob, 4),
+                    "top5_preds": "|".join(top_chars),
+                })
+
+    # --- test_a: labels создаём через collator ---
+    else:
+        if collator is None:
+            raise ValueError("For dataset without labels (test_a), collator must be provided.")
+
+        for start in range(0, total_samples, batch_size):
+            end = min(start + batch_size, total_samples)
+            batch_raw = [dataset[j] for j in range(start, end)]
+
+            if start % (batch_size * 10) == 0:
+                log.info(f"  Processing {start}/{total_samples}...")
+
+            batch = collator(batch_raw)
+
+            input_ids = batch["input_ids"].to(device)
+            word_ids = batch["word_ids"].to(device)
+            attention_mask = batch["attention_mask"].to(device)
+            labels_batch = batch["labels"]
+
+            with torch.no_grad():
+                outputs = model(
+                    input_ids=input_ids,
+                    word_ids=word_ids,
+                    attention_mask=attention_mask,
+                )
+                logits = outputs.logits
+
+            for b, labels in enumerate(labels_batch):
+                labels = labels.tolist() if isinstance(labels, torch.Tensor) else labels
+                mask_positions = [j for j, l in enumerate(labels) if l != -100]
+                if not mask_positions:
+                    continue
+
+                sample_input_ids = input_ids[b].cpu().numpy().tolist()
+                sample_logits = logits[b]
+
+                for pos in mask_positions:
+                    true_id = int(labels[pos])
+                    if true_id < 0:
+                        continue
+
+                    pred_logits = sample_logits[pos]
+                    top_ids = torch.topk(pred_logits, k=min(top_k_max, len(char_vocab))).indices.cpu().numpy()
+
+                    pred_id = int(top_ids[0])
+                    true_char = decode_one_token(true_id)
+                    pred_char = decode_one_token(pred_id)
+
+                    if pred_char.startswith("[") or true_char.startswith("["):
+                        continue
+
+                    used += 1
+                    is_correct = pred_id == true_id
+                    if is_correct:
+                        correct += 1
+
+                    probs = torch.softmax(pred_logits, dim=-1)
+                    top1_prob = float(probs[pred_id].item())
+
+                    true_rank = next(
+                        (r + 1 for r, tid in enumerate(top_ids) if int(tid) == true_id),
+                        None,
+                    )
+                    top_chars = [decode_one_token(int(tid)) for tid in top_ids[:5]]
+
+                    # Контекст вокруг позиции
+                    context = get_context(sample_input_ids, pos, context_window)
+
+                    for k in k_values:
+                        if any(decode_one_token(int(tid)) == true_char for tid in top_ids[:k]):
+                            hit_accum[f"hit@{k}"] += 1
+
+                    rows.append({
+                        "sample_idx": start + b,
+                        "position": pos,
+                        "context": context,
+                        "true_char": true_char,
+                        "pred_char": pred_char,
+                        "is_correct": is_correct,
+                        "true_rank": true_rank,
+                        "top1_prob": round(top1_prob, 4),
+                        "top5_preds": "|".join(top_chars),
+                    })
+
     if rows:
-        df = pd.DataFrame(rows)
-        df.to_csv(output_path, index=False, encoding="utf-8-sig")
+        pd.DataFrame(rows).to_csv(output_path, index=False, encoding="utf-8-sig")
         log.info(f"Saved predictions report: {output_path}")
 
-    # Итоговые метрики
     metrics = {
         "total_predictions": used,
         "correct": correct,
         "accuracy": round(correct / used, 4) if used > 0 else 0.0,
-        **{
-            k: round(v / used, 4) if used > 0 else 0.0
-            for k, v in hit_accum.items()
-        },
+        **{k: round(v / used, 4) if used > 0 else 0.0 for k, v in hit_accum.items()},
     }
-
     return metrics
-
 
 # ============================================================================
 # MAIN
@@ -320,13 +436,18 @@ def main():
     parser.add_argument("--train_bs", type=int, default=32)
     parser.add_argument("--eval_bs", type=int, default=32)
     parser.add_argument("--grad_accum", type=int, default=4)
-    parser.add_argument("--lr", type=float, default=5e-4)
+    parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--warmup_steps", type=int, default=1000)
     parser.add_argument("--eval_steps", type=int, default=400)
     parser.add_argument("--fp16", action="store_true")
     parser.add_argument("--seed", type=int, default=42)
 
     # Репорт
+    parser.add_argument(
+        "--report_test_a",
+        action="store_true",
+        help="Репорт на test_a",
+    )
     parser.add_argument(
         "--report_test_b",
         action="store_true",
@@ -392,10 +513,8 @@ def main():
     # КОЛЛАТОР
     # ========================================================================
 
-    special_ids = [
-        tid for tok, tid in char_vocab.items()
-        if tok.startswith("[") and tok.endswith("]")
-    ]
+    special_ids = [char_vocab[tok] for tok in SPECIAL_TOKENS if tok in char_vocab]
+
     collator = DualPhysicalDegradationCollator(
         mask_token_id=char_vocab["[MASK]"],
         pad_token_id=char_vocab["[PAD]"],
@@ -428,7 +547,7 @@ def main():
         per_device_train_batch_size=args.train_bs,
         per_device_eval_batch_size=args.eval_bs,
         gradient_accumulation_steps=args.grad_accum,
-        eval_strategy="steps",
+        evaluation_strategy="steps",
         eval_steps=args.eval_steps,
         save_steps=args.eval_steps,
         save_total_limit=3,
@@ -437,7 +556,12 @@ def main():
         lr_scheduler_type="cosine",
         warmup_steps=args.warmup_steps,
         weight_decay=0.01,
-        fp16=args.fp16,
+
+        # fp16=args.fp16,
+        fp16=False,
+        # bf16=torch.cuda.is_available() and torch.cuda.is_bf16_supported(),
+        max_grad_norm=1.0, #  gradient clipping
+
         dataloader_num_workers=4,
         report_to=[],  # Отключаем wandb/tensorboard
         load_best_model_at_end=True,
@@ -452,6 +576,18 @@ def main():
     # ========================================================================
 
     log.info("Creating trainer...")
+
+    callbacks = []
+
+    # callback для автоматического evaluate на test_b
+    if "test_b" in dataset:
+        tb_cb = TestBEvalCallback(
+            test_b_dataset=dataset["test_b"],
+            output_dir=output_dir,
+            max_samples=args.max_report_samples
+        )
+        callbacks.append(tb_cb)
+
     trainer = LoggingTrainer(
         model=model,
         args=training_args,
@@ -461,6 +597,7 @@ def main():
         compute_metrics=compute_metrics,
         preprocess_logits_for_metrics=preprocess_logits_for_metrics,
         log_path=log_path,
+        callbacks=callbacks if callbacks else None,
     )
 
     # ========================================================================
@@ -501,28 +638,48 @@ def main():
     # РЕПОРТ ПРЕДСКАЗАНИЙ
     # ========================================================================
 
-    if args.report_test_b and "test_b" in dataset:
-        log.info("Generating predictions report on test_b...")
-        test_b_ds = dataset["test_b"]
+    report_specs = [
+        (
+            args.report_test_a,
+            "test_a",
+            dataset["test_a"] if "test_a" in dataset else None,
+            output_dir / f"predictions_report_test_a_{timestamp}.csv",
+            collator,
+        ),
+        (
+            args.report_test_b,
+            "test_b",
+            dataset["test_b"] if "test_b" in dataset else None,
+            output_dir / f"predictions_report_test_b_{timestamp}.csv",
+            None,
+        ),
+    ]
 
-        report_path = output_dir / f"predictions_report_{timestamp}.csv"
-        report_metrics = generate_predictions_report(
+    report_metrics = {}
+
+    for enabled, name, ds, report_path, report_collator in report_specs:
+        if not enabled or ds is None:
+            continue
+
+        log.info(f"Generating predictions report on {name}...")
+        metrics = generate_predictions_report(
             model=model,
-            tokenizer=collator,
             char_vocab=char_vocab,
-            word_vocab=word_vocab,
-            dataset=test_b_ds,
+            dataset=ds,
             output_path=report_path,
             max_samples=args.max_report_samples,
+            collator=report_collator,
+            batch_size=8,
         )
 
-        # Сохраняем метрики репорта
-        report_metrics_path = output_dir / f"predictions_report_metrics_{timestamp}.json"
-        save_json(report_metrics, report_metrics_path)
+        metrics_path = output_dir / f"predictions_report_{name}_metrics_{timestamp}.json"
+        save_json(metrics, metrics_path)
 
-        log.info("Predictions Report Summary:")
-        for key, val in report_metrics.items():
+        log.info(f"{name} report summary:")
+        for key, val in metrics.items():
             log.info(f"  {key}: {val:.4f}")
+
+        report_metrics[name] = metrics
 
     # ========================================================================
     # СОХРАНЕНИЕ МОДЕЛИ
@@ -548,8 +705,11 @@ def main():
         "args": vars(args),
     }
 
-    if args.report_test_b and "test_b" in dataset:
-        final_report["test_b_metrics"] = report_metrics
+    if "test_a" in report_metrics:
+        final_report["test_a_metrics"] = report_metrics["test_a"]
+
+    if "test_b" in report_metrics:
+        final_report["test_b_metrics"] = report_metrics["test_b"]
 
     report_path = output_dir / f"final_report_{timestamp}.json"
     save_json(final_report, report_path)
