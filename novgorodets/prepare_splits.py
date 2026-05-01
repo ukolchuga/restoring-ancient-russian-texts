@@ -450,6 +450,40 @@ def get_tag(line: str) -> str:
     return m.group(0) if m else "[CTX_UNKNOWN]"
 
 
+def is_maskable_test_b_char(ch: str) -> bool:
+    """
+    Возвращает True только для символов, которые реально стоит маскировать в test_b.
+    Пробелы и пунктуация не маскируются.
+    """
+    if not ch or ch.isspace():
+        return False
+    cat = unicodedata.category(ch)
+    if cat.startswith("P"):  # punctuation
+        return False
+    return True
+
+
+def mask_test_b_span(text: str) -> tuple[str, int]:
+    """
+    Маскирует только 'содержательные' символы внутри span.
+    Пробелы и пунктуация сохраняются как есть.
+
+    Returns:
+        masked_text, n_masked
+    """
+    masked_parts = []
+    n_masked = 0
+
+    for ch in text:
+        if is_maskable_test_b_char(ch):
+            masked_parts.append("[MASK]")
+            n_masked += 1
+        else:
+            masked_parts.append(ch)
+
+    return "".join(masked_parts), n_masked
+
+
 def process_test_b_line(line: str, include_square: bool = True):
     line = line.strip()
     if not line:
@@ -464,19 +498,34 @@ def process_test_b_line(line: str, include_square: bool = True):
     if include_square:
         target = SQUARE_PAT.sub(r"\1", target)
 
-    def mask_span(m):
-        return "[MASK]" * len(m.group(1))
+    masked = line
+    total_masked = 0
+    spans = []
 
-    masked = ROUND_PAT.sub(mask_span, line)
+    # Сначала круглые скобки
+    def replace_round(m):
+        nonlocal total_masked
+        inner = m.group(1)
+        masked_inner, n_masked = mask_test_b_span(inner)
+        total_masked += n_masked
+        spans.append({"text": inner, "type": "round"})
+        return masked_inner
+
+    masked = ROUND_PAT.sub(replace_round, masked)
+
+    # Потом квадратные скобки, если включены
     if include_square:
-        masked = SQUARE_PAT.sub(mask_span, masked)
+        def replace_square(m):
+            nonlocal total_masked
+            inner = m.group(1)
+            masked_inner, n_masked = mask_test_b_span(inner)
+            total_masked += n_masked
+            spans.append({"text": inner, "type": "square"})
+            return masked_inner
 
-    spans = [{"text": m.group(1), "type": "round"} for m in ROUND_PAT.finditer(line)]
-    if include_square:
-        spans += [{"text": m.group(1), "type": "square"} for m in SQUARE_PAT.finditer(line)]
+        masked = SQUARE_PAT.sub(replace_square, masked)
 
-    n_masked = sum(len(s["text"]) for s in spans)
-    if n_masked == 0:
+    if total_masked == 0:
         return None
 
     return {
@@ -484,7 +533,7 @@ def process_test_b_line(line: str, include_square: bool = True):
         "masked_input": masked,
         "target": target,
         "tag": get_tag(line),
-        "n_masked_chars": n_masked,
+        "n_masked_chars": total_masked,
         "spans": spans,
     }
 
@@ -539,6 +588,12 @@ def split_train_lines(
 # MAIN
 # ============================================================================
 
+def add_weighted_line(pool: dict[str, int], line: str, weight: int) -> None:
+    """Добавляет строку в пул с весом."""
+    if line and has_enough_cyrillic(line):
+        pool[line] = pool.get(line, 0) + weight
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Формирует train / test_a / test_b из SOURCES_CONFIG"
@@ -556,6 +611,12 @@ def main() -> None:
         action="store_true",
         help="Строки test_b БЕЗ скобок —> train-пул с весами",
     )
+    parser.add_argument(
+        "--test_b_corpus_ratio",
+        type=float,
+        default=0.5,
+        help="Доля test_b, которую добавляем в обычный corpus для train/test_a",
+    )
     args = parser.parse_args()
 
     out = Path(args.out_dir)
@@ -563,47 +624,149 @@ def main() -> None:
     include_square = not args.no_square
 
     print("📂 Загружаем источники...")
-    all_train_lines: list[str] = []
+
+    # Весь обычный корпус (train sources + часть test_b)
+    all_unique_lines: dict[str, int] = {}  # line -> weight
+
+    # Все test_b строки в очищенном виде
     all_test_b_raw: list[tuple[str, int]] = []
 
+    # ------------------------------------------------------------
+    # 1) Сначала читаем ВСЕ источники
+    # ------------------------------------------------------------
     for cfg in SOURCES_CONFIG:
         role = cfg.get("role", "train")
         print(f"  {'[test_b]' if role == 'test_b' else '[train] '}  {cfg['path']}")
-        train_lines, test_b_raw = load_source(cfg)
-        all_train_lines.extend(train_lines)
-        all_test_b_raw.extend(test_b_raw)
 
-    print(f"\n  train-пул (с весами): {len(all_train_lines):,} строк")
-    print(f"  test_b-источники:     {len(all_test_b_raw):,} строк")
+        for raw in iter_raw_lines(cfg):
+            tagged = f"{cfg['tag']} {raw}".strip() if cfg["tag"] else raw
+            cleaned = safe_clean_text(tagged)
 
+            if not cleaned or not has_enough_cyrillic(cleaned):
+                continue
+
+            if role == "test_b":
+                all_test_b_raw.append((cleaned, cfg["weight"]))
+            else:
+                add_weighted_line(all_unique_lines, cleaned, cfg["weight"])
+
+    print(f"\n  train-пул до test_b: {len(all_unique_lines):,} уникальных строк")
+    print(f"  test_b-источники:    {len(all_test_b_raw):,} строк")
+
+    # ------------------------------------------------------------
+    # 2) Делим test_b на corpus/eval
+    #    corpus -> в train/test_a как обычный текст
+    #    eval   -> в test_b.jsonl как real-lacuna
+    # ------------------------------------------------------------
+    rng = random.Random(args.seed)
+    test_b_for_corpus: list[tuple[str, int]] = []
+    test_b_for_eval: list[tuple[str, int]] = []
+
+    for raw, weight in all_test_b_raw:
+        if rng.random() < args.test_b_corpus_ratio:
+            test_b_for_corpus.append((raw, weight))
+        else:
+            test_b_for_eval.append((raw, weight))
+
+    print(f"  test_b -> corpus: {len(test_b_for_corpus):,}")
+    print(f"  test_b -> eval:   {len(test_b_for_eval):,}")
+
+    # ------------------------------------------------------------
+    # 3) Добавляем test_b_for_corpus в обычный corpus
+    #    ВАЖНО: берём target, если есть скобки
+    # ------------------------------------------------------------
+    for raw, weight in test_b_for_corpus:
+        rec = process_test_b_line(raw, include_square=include_square)
+        if rec is None:
+            # строка без скобок / без маскируемых spans
+            add_weighted_line(all_unique_lines, raw, weight)
+        else:
+            # скобки убираем, а восстановленный текст идёт в train/test_a
+            add_weighted_line(all_unique_lines, rec["target"], weight)
+
+    # ------------------------------------------------------------
+    # 4) Если включено, строки без скобок из оставшегося test_b
+    #    тоже можно добавить в corpus
+    # ------------------------------------------------------------
     no_bracket_count = 0
     if args.charters_to_train:
-        for raw, weight in all_test_b_raw:
+        for raw, weight in test_b_for_eval:
             rec = process_test_b_line(raw, include_square=include_square)
             if rec is None:
-                cleaned = safe_clean_text(raw)
-                if cleaned and has_enough_cyrillic(cleaned):
-                    all_train_lines.extend([cleaned] * weight)
-                    no_bracket_count += weight
+                add_weighted_line(all_unique_lines, raw, weight)
+                no_bracket_count += weight
         print(f"  + {no_bracket_count:,} строк без скобок добавлено в train-пул")
 
-    print("\n📊 Разбиваем на train / test_a...")
-    random.Random(args.seed).shuffle(all_train_lines)
-    n_train, n_test_a = split_train_lines(
-        lines=all_train_lines,
-        train_path=out / "train.txt",
-        test_a_path=out / "test_a.txt",
-        test_ratio=args.test_ratio,
-        seed=args.seed,
-    )
-    print(f"\n  Итого: train={n_train:,}  test_a={n_test_a:,}")
+    # ------------------------------------------------------------
+    # 5) Разбиваем уже ОБЩИЙ корпус на train / test_a
+    #    Сплит делаем по УНИКАЛЬНЫМ строкам -> overlap не будет
+    # ------------------------------------------------------------
+    print("\n📊 Разбиваем на train / test_a (NO OVERLAP)...")
 
+    by_tag = defaultdict(list)
+    for line in all_unique_lines.keys():
+        by_tag[get_tag(line)].append(line)
+
+    train_unique: list[str] = []
+    test_a_unique: list[str] = []
+    tag_stats = {}
+
+    rng = random.Random(args.seed)
+
+    for tag, tag_lines in sorted(by_tag.items()):
+        rng.shuffle(tag_lines)
+        n_test = max(1, int(len(tag_lines) * args.test_ratio))
+
+        test_a_unique.extend(tag_lines[:n_test])
+        train_unique.extend(tag_lines[n_test:])
+
+        tag_stats[tag] = {
+            "total": len(tag_lines),
+            "train": len(tag_lines) - n_test,
+            "test_a": n_test,
+        }
+
+    rng.shuffle(train_unique)
+    rng.shuffle(test_a_unique)
+
+    print(f"\n  {'Тег':<20} {'Всего':>9} {'train':>9} {'test_a':>9}")
+    print(f"  {'-' * 52}")
+    for tag, s in sorted(tag_stats.items()):
+        print(f"  {tag:<20} {s['total']:>9,} {s['train']:>9,} {s['test_a']:>9,}")
+
+    # ------------------------------------------------------------
+    # 6) Применяем веса уже ПОСЛЕ split
+    # ------------------------------------------------------------
+    train_lines_with_weights: list[str] = []
+    for line in train_unique:
+        weight = all_unique_lines[line]
+        train_lines_with_weights.extend([line] * weight)
+
+    # Пишем train (с весами)
+    (out / "train.txt").write_text(
+        "\n".join(train_lines_with_weights) + "\n",
+        encoding="utf-8",
+    )
+
+    # test_a — оставляем как уникальные строки (без повторов/весов)
+    (out / "test_a.txt").write_text(
+        "\n".join(test_a_unique) + "\n",
+        encoding="utf-8",
+    )
+
+    print("\n✅ train/test_a записаны")
+    print(f"  train.txt (с весами): {len(train_lines_with_weights):,}")
+    print(f"  test_a.txt (unique):   {len(test_a_unique):,}")
+    # ------------------------------------------------------------
+    # 7) Строим test_b.jsonl только из test_b_for_eval
+    # ------------------------------------------------------------
     print("\n📜 Строим test_b.jsonl...")
     print(f"   Маскировка: (text){'  +  [text]' if include_square else ' только'}")
 
     records = []
     skipped = 0
-    for raw, _weight in all_test_b_raw:
+
+    for raw, _weight in test_b_for_eval:
         rec = process_test_b_line(raw, include_square=include_square)
         if rec:
             records.append(rec)
@@ -632,8 +795,8 @@ def main() -> None:
 
     print("\n" + "=" * 58)
     print("✅ Готово!")
-    print(f"   {out}/train.txt     — {n_train:,} строк")
-    print(f"   {out}/test_a.txt    — {n_test_a:,} строк")
+    print(f"   {out}/train.txt     — {len(train_lines_with_weights):,} строк")
+    print(f"   {out}/test_a.txt    — {len(test_a_unique):,} строк")
     print(f"   {out}/test_b.jsonl  — {len(records):,} записей")
     print("=" * 58)
 
