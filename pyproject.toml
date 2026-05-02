@@ -28,6 +28,9 @@ dependencies = [
     "lxml>=6.1.0",
     "protobuf>=7.34.1",
     "accelerate>=1.13.0",
+    "evaluate>=0.4.6",
+    "jiwer>=4.0.0",
+    "tqdm>=4.67.3",
 ]
 
 [[tool.uv.index]]

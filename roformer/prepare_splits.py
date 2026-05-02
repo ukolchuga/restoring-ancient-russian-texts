@@ -227,8 +227,8 @@ _LAT_TO_CYR = {
     "I": "І",
 }
 
-SPECIAL_RE = re.compile(r"(<s>|<pad>|</s>|<unk>|<mask>|\[CTX_[A-Z_]+\]|\[GAP\]|[·:])")
 
+SPECIAL_RE = re.compile(r"(<s>|<pad>|</s>|<unk>|<mask>|\[CTX_[A-Z_]+\]|\[GAP\])")
 
 _RARE_CHAR_MAP = {
     "†": "+",
@@ -240,7 +240,6 @@ _RARE_CHAR_MAP = {
     "∙": "·",
     "*": "·",
     ".": "·",
-    "҂": "·",
     "\uf13f": "·",
     "҇": "҃",
     "\uf222": "҃",
@@ -267,6 +266,8 @@ _DELETE_CHARS = {
     "\\",
     "|",
     "?",
+    "!",
+    '"',
     ";",
     ",",
     "̇",
@@ -331,7 +332,7 @@ def safe_clean_text(line: str) -> str:
     text = re.sub(r"[\ue000-\uf8ff]", "", text)
     text = re.sub(r'["\'«»„“”]', "", text)
 
-    text = re.sub(r"[\u0300-\u0482\u0484-\u036f]", "", text)
+    text = re.sub(r"[\u0300-\u036f]|[\u0484-\u0489]", "", text)
 
     for src, dst in _RARE_CHAR_MAP.items():
         text = text.replace(src, dst)
@@ -348,7 +349,7 @@ def safe_clean_text(line: str) -> str:
     text = re.sub(r"[^\w\s:\[\]·+҃()]", " ", text)
     text = re.sub(r"\s*([:+·])\s*", r" \1 ", text)
     for key, val in protected_nums.items():
-        text = text.replace(key, val)
+        text = text.replace(key, f" {val} ")
 
     text = _unprotect_special_tokens(text, protected)
 
@@ -421,34 +422,20 @@ def process_test_b_line(line: str, include_square: bool = True):
     line = line.strip()
     if not line:
         return None
+
     has_round = bool(ROUND_PAT.search(line))
     has_square = include_square and bool(SQUARE_PAT.search(line))
     if not has_round and not has_square:
         return None
+
     target = ROUND_PAT.sub(r"\1", line)
     if include_square:
         target = SQUARE_PAT.sub(r"\1", target)
 
-    def mask_span(m):
-        return "[MASK]" * len(m.group(1))
-
-    masked = ROUND_PAT.sub(mask_span, line)
-    if include_square:
-        masked = SQUARE_PAT.sub(mask_span, masked)
-    spans = [{"text": m.group(1), "type": "round"} for m in ROUND_PAT.finditer(line)]
-    if include_square:
-        spans += [
-            {"text": m.group(1), "type": "square"} for m in SQUARE_PAT.finditer(line)
-        ]
-    if not spans:
-        return None
     return {
         "original": line,
-        "masked_input": masked,
         "target": target,
         "tag": get_tag(line),
-        "n_masked_chars": sum(len(s["text"]) for s in spans),
-        "spans": spans,
     }
 
 
