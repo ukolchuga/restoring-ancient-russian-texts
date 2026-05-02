@@ -1,6 +1,5 @@
 import argparse
 import json
-import os
 from pathlib import Path
 
 from datasets import Dataset, DatasetDict
@@ -70,66 +69,66 @@ def group_texts(examples, block_size):
 
 def encode_test_b(records, tokenizer, max_len):
     """
-    Prepares the fixed evaluation set (test_b).
-    Maps character-level masks from the source to BPE tokens.
+    Для Test B мы просто сохраняем оригинальные строки.
+    Вся сложная логика BPE-маскирования лакун происходит
+    динамически во время инференса (evaluate_test_b).
     """
     out = []
     for rec in records:
         original_text = rec.get("original", "")
-        if not original_text:
+        target_text = rec.get("target", "")
+        if not original_text or not target_text:
             continue
 
-        # Encode input (with masks) and target separately
-        enc_in = tokenizer(
-            rec["masked_input"],
-            truncation=True,
-            max_length=max_len,
-            padding="max_length",
+        out.append(
+            {
+                "original": original_text,
+                "target_text": target_text,
+                "tag": rec.get("tag", ""),
+            }
         )
-        enc_tg = tokenizer(
-            rec["target"], truncation=True, max_length=max_len, padding="max_length"
-        )
-
-        ids_in = enc_in["input_ids"]
-        ids_tg = enc_tg["input_ids"]
-        mask_id = tokenizer.mask_token_id
-
-        # Align mask positions to target tokens
-        labels = [-100] * max_len
-        if len(ids_in) == len(ids_tg):
-            for i in range(len(ids_in)):
-                if ids_in[i] == mask_id:
-                    labels[i] = ids_tg[i]
-
-        out.append({
-            "input_ids": ids_in,
-            "attention_mask": enc_in["attention_mask"],
-            "labels": labels,
-            "original": original_text,
-            "target_text": rec.get("target", ""),
-        })
     return out
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Prepare RoFormer datasets with token packing.")
-    parser.add_argument("--splits_dir", default="splits", help="Directory containing split files.")
-    parser.add_argument("--tokenizer_path", default="ancient_rus_tokenizer_BPE", help="Path to the BPE tokenizer.")
-    parser.add_argument("--out_dir", default="artifacts/roformer_dataset", help="Output directory for processed datasets.")
-    parser.add_argument("--max_len", type=int, default=256, help="Block size for token packing.")
-    parser.add_argument("--limit", type=int, default=0, help="Debug mode: limit number of samples.")
+    parser = argparse.ArgumentParser(
+        description="Prepare RoFormer datasets with token packing."
+    )
+    parser.add_argument(
+        "--splits_dir", default="splits", help="Directory containing split files."
+    )
+    parser.add_argument(
+        "--tokenizer_path",
+        default="ancient_rus_tokenizer_BPE",
+        help="Path to the BPE tokenizer.",
+    )
+    parser.add_argument(
+        "--out_dir",
+        default="artifacts/roformer_dataset",
+        help="Output directory for processed datasets.",
+    )
+    parser.add_argument(
+        "--max_len", type=int, default=256, help="Block size for token packing."
+    )
+    parser.add_argument(
+        "--limit", type=int, default=0, help="Debug mode: limit number of samples."
+    )
     args = parser.parse_args()
 
     # Load and configure tokenizer
     print(f"Loading tokenizer from {args.tokenizer_path}...")
     tokenizer = RobertaTokenizerFast.from_pretrained(args.tokenizer_path)
-    
+
     # Define and add all special tokens requested by the user
     special_tokens_dict = {
         "additional_special_tokens": [
-            "[CTX_CHURCH]", "[CTX_DAILY]", "[CTX_LEGAL]", 
-            "[CTX_LIT]", "[CTX_EPIC]", "[CTX_SCIENCE]", "[GAP]",
-            "·", ":"
+            "[CTX_CHURCH]",
+            "[CTX_DAILY]",
+            "[CTX_LEGAL]",
+            "[CTX_LIT]",
+            "[CTX_EPIC]",
+            "[CTX_SCIENCE]",
+            "[GAP]",
         ]
     }
     tokenizer.add_special_tokens(special_tokens_dict)

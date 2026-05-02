@@ -1,22 +1,25 @@
 #!/usr/bin/env python3
 """
 Main training script for the Ancient Russian RoFormer model.
-Features custom MLM collator, stratified evaluation, and detailed prediction reporting.
+Features custom MLM collator, Test A (on-the-fly evaluation), and Test B (CER/EM restoration evaluation).
 """
 
 import argparse
 import json
 import logging
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+import evaluate as hf_evaluate
 import numpy as np
 import pandas as pd
 import torch
 from collator import RoFormerPhysicalDegradationCollator
 from datasets import load_from_disk
 from model import get_model
+from tqdm import tqdm
 from transformers import RobertaTokenizerFast, Trainer, TrainingArguments
 
 # Configure professional logging
@@ -25,12 +28,6 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 log = logging.getLogger(__name__)
-
-
-def load_json(path: str | Path) -> dict:
-    """Load data from a JSON file."""
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
 
 
 def save_json(data: dict, path: str | Path) -> None:
@@ -43,14 +40,14 @@ def save_json(data: dict, path: str | Path) -> None:
 
 
 def preprocess_logits_for_metrics(logits, labels):
-    """Efficiently extract top predictions for metric calculation during training."""
+    """Efficiently extract top predictions for metric calculation during training (Test A)."""
     if isinstance(logits, tuple):
         logits = logits[0]
     return torch.topk(logits, k=5, dim=-1).indices
 
 
 def compute_metrics(eval_preds):
-    """Calculate Top-1, Top-3, and Top-5 accuracy for masked positions."""
+    """Calculate Top-1, Top-3, and Top-5 accuracy for masked positions (Test A)."""
     preds, labels = eval_preds
     mask = labels != -100
     labels = labels[mask]
@@ -91,120 +88,127 @@ class LoggingTrainer(Trainer):
                 json.dump(self.log_history, f, ensure_ascii=False, indent=2)
 
 
-def decode_one_token(tokenizer, token_id: int) -> str:
-    """Decode a single token ID into text, handling BPE-specific space artifacts."""
-    if token_id < 0 or token_id >= len(tokenizer):
-        return "[UNK]"
-    token = tokenizer.convert_ids_to_tokens([token_id])[0]
-    if token.startswith("Ġ"):
-        token = " " + token[1:]
-    return token
-
-
-def generate_predictions_report(
-    model,
-    tokenizer,
-    dataset,
-    output_path: Path,
-    max_samples: int = 100,
-    k_values: tuple = (1, 3, 5),
-    device: Optional[torch.device] = None,
-) -> dict:
+def evaluate_test_b_final(
+    model, tokenizer, test_b_dataset, output_path: Path, device: torch.device
+):
     """
-    Generate a detailed CSV report comparing model predictions against ground truth labels.
-    Calculates hit@k metrics specifically for the evaluation set.
+    Test B: Dynamic Evaluation of Lacunae Restoration.
+    Uses offset_mapping to mask specific BPE tokens corresponding to physical damage.
+    Calculates Exact Match (EM) and Character Error Rate (CER).
     """
-    if device is None:
-        device = next(model.parameters()).device
+    log.info("Running Final Test B (Lacunae Restoration)...")
+    cer_metric = hf_evaluate.load("cer")
+
+    exact_matches = 0
+    total_samples = 0
+    predictions_list = []
+    references_list = []
+    report_rows = []
 
     model.eval()
-    rows = []
-    total_samples = min(len(dataset), max_samples)
-    top_k_max = max(k_values)
 
-    log.info(f"Generating detailed prediction report for {total_samples} samples...")
+    for i, record in enumerate(tqdm(test_b_dataset, desc="Evaluating Test B")):
+        orig_text = record["original"]
+        target_text = record["target_text"]
 
-    hit_accum = {f"hit@{k}": 0 for k in k_values}
-    correct = 0
-    used = 0
-
-    for i, sample in enumerate(dataset.select(range(total_samples))):
-        input_ids = torch.tensor([sample["input_ids"]], dtype=torch.long, device=device)
-        attention_mask = torch.tensor(
-            [sample["attention_mask"]], dtype=torch.long, device=device
+        # 1. Tokenize target text with offset mapping
+        encoded = tokenizer(
+            target_text, return_offsets_mapping=True, return_tensors="pt"
         )
-        labels = sample.get("labels", None)
+        input_ids = encoded["input_ids"][0].clone()
+        offsets = encoded["offset_mapping"][0]
 
-        if labels is None or -100 not in labels:
+        # 2. Find spans (character coordinates) of lacunae in target text
+        spans_to_mask = []
+        orig_idx = 0
+        pattern = re.compile(
+            r"\(([^)]+)\)|\[(?!(?:GAP|MASK|PAD|UNK|CLS|SEP)\]|CTX_)([^\]]+)\]"
+        )
+
+        for match in pattern.finditer(orig_text):
+            span_text = match.group(1) or match.group(2)
+            start_idx = target_text.find(span_text, orig_idx)
+            if start_idx != -1:
+                end_idx = start_idx + len(span_text)
+                spans_to_mask.append((start_idx, end_idx))
+                orig_idx = end_idx
+
+        if not spans_to_mask:
             continue
 
-        mask_positions = [j for j, l in enumerate(labels) if l != -100]
-        if not mask_positions:
+        # 3. Identify BPE tokens intersecting with lacunae spans
+        mask_token_indices = []
+        for idx, (tok_start, tok_end) in enumerate(offsets):
+            if tok_start == tok_end:  # Skip special tokens
+                continue
+            for span_start, span_end in spans_to_mask:
+                if max(tok_start, span_start) < min(tok_end, span_end):
+                    mask_token_indices.append(idx)
+                    break
+
+        if not mask_token_indices:
             continue
 
+        # 4. Apply masks
+        masked_input_ids = input_ids.clone()
+        for idx in mask_token_indices:
+            masked_input_ids[idx] = tokenizer.mask_token_id
+
+        # 5. Model Inference
+        masked_input_ids = masked_input_ids.unsqueeze(0).to(device)
         with torch.no_grad():
-            outputs = model(input_ids=input_ids, attention_mask=attention_mask)
-            logits = outputs.logits[0]
+            outputs = model(masked_input_ids)
+            predictions = torch.argmax(outputs.logits, dim=-1)[0].cpu()
 
-        for pos in mask_positions:
-            true_id = labels[pos]
-            if true_id < 0:
-                continue
+        # 6. Reconstruct text with predicted tokens
+        final_ids = input_ids.clone()
+        for idx in mask_token_indices:
+            final_ids[idx] = predictions[idx]
 
-            pred_logits = logits[pos]
-            top_ids = (
-                torch.topk(pred_logits, k=min(top_k_max, len(tokenizer)))
-                .indices.cpu()
-                .numpy()
-            )
+        predicted_text = tokenizer.decode(final_ids, skip_special_tokens=True)
+        # Target text also decoded to ensure spacing aligns perfectly with prediction
+        clean_target = tokenizer.decode(input_ids, skip_special_tokens=True)
 
-            pred_id = int(top_ids[0])
-            true_token = decode_one_token(tokenizer, true_id)
-            pred_token = decode_one_token(tokenizer, pred_id)
+        predictions_list.append(predicted_text)
+        references_list.append(clean_target)
 
-            if pred_token.strip().startswith("[") or true_token.strip().startswith("["):
-                continue
+        is_exact = predicted_text == clean_target
+        if is_exact:
+            exact_matches += 1
+        total_samples += 1
 
-            used += 1
-            is_correct = pred_id == true_id
-            if is_correct:
-                correct += 1
+        # Save to report
+        report_rows.append(
+            {
+                "sample_idx": i,
+                "original_annotated": orig_text,
+                "target": clean_target,
+                "predicted": predicted_text,
+                "exact_match": is_exact,
+            }
+        )
 
-            probs = torch.softmax(pred_logits, dim=-1)
-            top1_prob = float(probs[pred_id].item())
+    # 7. Compute Metrics
+    metrics = {"total_samples": total_samples, "exact_match_pct": 0.0, "cer_pct": 0.0}
+    if total_samples > 0:
+        metrics["exact_match_pct"] = round((exact_matches / total_samples) * 100, 2)
+        metrics["cer_pct"] = round(
+            cer_metric.compute(predictions=predictions_list, references=references_list)
+            * 100,
+            2,
+        )
 
-            true_rank = next(
-                (rank + 1 for rank, tid in enumerate(top_ids) if tid == true_id), None
-            )
-            top_tokens = [decode_one_token(tokenizer, int(tid)) for tid in top_ids[:5]]
+        log.info(f"✅ Test B - Total Evaluated: {total_samples}")
+        log.info(f"✅ Test B - Exact Match: {metrics['exact_match_pct']}%")
+        log.info(f"✅ Test B - CER: {metrics['cer_pct']}%")
 
-            for k in k_values:
-                if any(int(tid) == true_id for tid in top_ids[:k]):
-                    hit_accum[f"hit@{k}"] += 1
+        # Save detailed report
+        pd.DataFrame(report_rows).to_csv(output_path, index=False, encoding="utf-8-sig")
+        log.info(f"Detailed Test B report saved to {output_path}")
+    else:
+        log.warning("❌ No valid lacunae found for Test B evaluation.")
 
-            rows.append(
-                {
-                    "sample_idx": i,
-                    "position": pos,
-                    "true_token": true_token,
-                    "pred_token": pred_token,
-                    "is_correct": is_correct,
-                    "true_rank": true_rank,
-                    "top1_prob": round(top1_prob, 4),
-                    "top5_preds": "|".join(top_tokens),
-                }
-            )
-
-    if rows:
-        pd.DataFrame(rows).to_csv(output_path, index=False, encoding="utf-8-sig")
-        log.info(f"Prediction report saved: {output_path}")
-
-    return {
-        "total_predictions": used,
-        "correct": correct,
-        "accuracy": round(correct / used, 4) if used > 0 else 0.0,
-        **{k: round(v / used, 4) if used > 0 else 0.0 for k, v in hit_accum.items()},
-    }
+    return metrics
 
 
 def main():
@@ -223,20 +227,19 @@ def main():
     parser.add_argument("--eval_steps", type=int, default=400)
     parser.add_argument("--fp16", action="store_true", default=True)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--report_test_b", action="store_true")
-    parser.add_argument("--max_report_samples", type=int, default=1000)
+    parser.add_argument("--report_test_b", action="store_true", default=True)
     args = parser.parse_args()
 
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    log.info("Starting RoFormer Training Pipeline")
+    log.info(f"Starting RoFormer Training Pipeline on {device}")
 
     # Load dataset and tokenizer
     dataset = load_from_disk(args.dataset_dir)
     tokenizer = RobertaTokenizerFast.from_pretrained(args.tokenizer_path)
 
-    # Define and add all special tokens requested by the user
     special_tokens_dict = {
         "additional_special_tokens": [
             "[CTX_CHURCH]",
@@ -246,20 +249,18 @@ def main():
             "[CTX_EPIC]",
             "[CTX_SCIENCE]",
             "[GAP]",
-            "·",
-            ":",
         ]
     }
     tokenizer.add_special_tokens(special_tokens_dict)
 
-    log.info(f"Training samples: {len(dataset['train']):,}")
+    log.info(f"Training blocks: {len(dataset['train']):,}")
+    log.info(f"Test A blocks: {len(dataset['test_a']):,}")
     log.info(f"Vocab size: {len(tokenizer):,}")
 
     # Initialize model
     model = get_model(len(tokenizer), tokenizer.pad_token_id)
     model.resize_token_embeddings(len(tokenizer))
 
-    # Configure training arguments
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     log_path = output_dir / f"training_log_{timestamp}.json"
 
@@ -273,7 +274,7 @@ def main():
         eval_steps=args.eval_steps,
         save_steps=args.eval_steps,
         save_total_limit=3,
-        logging_steps=100,
+        logging_steps=50,
         learning_rate=args.lr,
         lr_scheduler_type="cosine",
         warmup_steps=args.warmup_steps,
@@ -288,45 +289,46 @@ def main():
         seed=args.seed,
     )
 
-    # Initialize Trainer
     trainer = LoggingTrainer(
         model=model,
         args=training_args,
         train_dataset=dataset["train"],
-        eval_dataset=dataset["test_a"],
+        eval_dataset=dataset["test_a"],  # Test A evaluated continually
         data_collator=RoFormerPhysicalDegradationCollator(
-            tokenizer=tokenizer, mlm_prob=0.12, max_span=3, edge_prob=0.15
+            tokenizer=tokenizer, mlm_prob=0.15, max_span=3, edge_prob=0.15
         ),
         compute_metrics=compute_metrics,
         preprocess_logits_for_metrics=preprocess_logits_for_metrics,
         log_path=log_path,
     )
 
-    # Start training
+    # 1. Start training
     trainer.train()
 
-    # Final evaluation and reporting
-    log.info("Computing final metrics...")
-    trainer.data_collator.add_random_gaps = False  # Disable augmentation for final eval
+    # 2. Final Evaluation of Test A
+    log.info("Computing final metrics for Test A (Perplexity & Accuracy)...")
+    trainer.data_collator.add_random_gaps = False  # Cleaner evaluation
     eval_metrics = trainer.evaluate()
-    save_json(eval_metrics, output_dir / f"eval_metrics_{timestamp}.json")
+    # Add Perplexity calculation
+    eval_metrics["eval_perplexity"] = round(np.exp(eval_metrics["eval_loss"]), 4)
+    save_json(eval_metrics, output_dir / f"eval_metrics_test_a_{timestamp}.json")
+    log.info(f"Final Test A Perplexity: {eval_metrics['eval_perplexity']}")
 
+    # 3. Final Evaluation of Test B (Business Metrics)
     if args.report_test_b and "test_b" in dataset:
-        report_metrics = generate_predictions_report(
+        test_b_metrics = evaluate_test_b_final(
             model=model,
             tokenizer=tokenizer,
-            dataset=dataset["test_b"],
-            output_path=output_dir / f"predictions_report_{timestamp}.csv",
-            max_samples=args.max_report_samples,
+            test_b_dataset=dataset["test_b"],
+            output_path=output_dir / f"test_b_predictions_{timestamp}.csv",
+            device=device,
         )
-        save_json(
-            report_metrics, output_dir / f"predictions_report_metrics_{timestamp}.json"
-        )
+        save_json(test_b_metrics, output_dir / f"metrics_test_b_{timestamp}.json")
 
-    # Save final artifacts
+    # 4. Save final artifacts
     trainer.save_model(str(output_dir / "final_model"))
     tokenizer.save_pretrained(str(output_dir / "final_model"))
-    log.info("Training complete. Models and logs saved.")
+    log.info("🎉 Training complete. Models, logs, and reports saved.")
 
 
 if __name__ == "__main__":

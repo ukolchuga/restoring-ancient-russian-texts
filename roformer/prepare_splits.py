@@ -200,31 +200,19 @@ SOURCES_CONFIG = [
 # ============================================================================
 
 _LAT_TO_CYR = {
-    "A": "А",
     "a": "а",
-    "B": "В",
     "b": "в",
-    "E": "Е",
     "e": "е",
-    "K": "К",
     "k": "к",
-    "M": "М",
     "m": "м",
-    "H": "Н",
     "n": "н",
-    "O": "О",
     "o": "о",
-    "P": "Р",
     "p": "р",
-    "C": "С",
     "c": "с",
-    "T": "Т",
     "t": "т",
     "y": "у",
     "x": "х",
-    "X": "Х",
     "i": "і",
-    "I": "І",
 }
 
 
@@ -325,6 +313,9 @@ def safe_clean_text(line: str) -> str:
 
     m = re.match(r"^(\[CTX_[A-Z_]+\])\s+(.*)", line, re.DOTALL)
     tag, text = (m.group(1), m.group(2)) if m else ("", line)
+
+    text = text.lower()
+    text = re.sub(r"___g[аa][рp]___|\[gap\]", "[GAP]", text)
 
     text = unicodedata.normalize("NFC", text)
     text = text.replace("\ufeff", "").replace("\u200b", "")
