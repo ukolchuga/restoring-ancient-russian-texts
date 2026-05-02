@@ -7,36 +7,56 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 from transformers import AutoTokenizer, RoFormerForMaskedLM
 
+from roformer.collator import RoFormerPhysicalDegradationCollator
+
 
 def evaluate_test_a(model, tokenizer, test_a_path, device, batch_size=8):
     """
-    Test A: Считаем Perplexity на чистом тексте.
-    Оценивает базовое знание древнерусского языка.
+    Test A: Считаем Perplexity на тексте, маскированном под физическую деградацию.
+    Оценивает базовое знание языка и способность справляться со сложными лакунами (спаны, края).
     """
-    print("\n--- Запуск Test A (Perplexity) ---")
+    print("\n--- Запуск Test A (Physical Degradation Perplexity) ---")
     with open(test_a_path, "r", encoding="utf-8") as f:
         lines = [line.strip() for line in f if line.strip()]
 
-    encodings = tokenizer(
-        lines, truncation=True, padding=True, max_length=512, return_tensors="pt"
+    # Токенизируем
+    encodings = tokenizer(lines, truncation=True, max_length=512)
+
+    dataset = []
+    for i in range(len(encodings["input_ids"])):
+        dataset.append(
+            {
+                "input_ids": encodings["input_ids"][i],
+                "attention_mask": encodings["attention_mask"][i],
+            }
+        )
+
+    # ИСПОЛЬЗУЕМ ТВОЙ КАСТОМНЫЙ КОЛЛАТОР!
+    # Выставляем add_random_gaps=False для теста, чтобы оценивать
+    # только предсказание масок, а не угадывание, что было до [GAP]
+    # (но если хочешь хардкора, можешь включить)
+    data_collator = RoFormerPhysicalDegradationCollator(
+        tokenizer=tokenizer,
+        mlm_prob=0.15,
+        max_span=3,
+        edge_prob=0.1,
+        add_random_gaps=False,  # Для стабильного подсчета лосса лучше выключить [GAP] в тесте
     )
-    dataset = torch.utils.data.TensorDataset(
-        encodings["input_ids"], encodings["attention_mask"]
-    )
-    loader = DataLoader(dataset, batch_size=batch_size)
+
+    loader = DataLoader(dataset, batch_size=batch_size, collate_fn=data_collator)
 
     total_loss = 0.0
+    total_batches = 0
     model.eval()
 
     with torch.no_grad():
         for batch in tqdm(loader, desc="Оценка Test A"):
-            input_ids, attention_mask = [b.to(device) for b in batch]
-            outputs = model(
-                input_ids=input_ids, attention_mask=attention_mask, labels=input_ids
-            )
-            total_loss += outputs.loss.item() * input_ids.size(0)
+            batch = {k: v.to(device) for k, v in batch.items()}
+            outputs = model(**batch)
+            total_loss += outputs.loss.item()
+            total_batches += 1
 
-    avg_loss = total_loss / len(lines)
+    avg_loss = total_loss / total_batches
     perplexity = torch.exp(torch.tensor(avg_loss)).item()
 
     print(f"✅ Test A Loss: {avg_loss:.4f}")
