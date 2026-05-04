@@ -259,6 +259,7 @@ _LAT_TO_CYR = {
 # почистить эпиграфика левый столбец / правый столбец
 # комментарии всё ещё местами (За слогом ба следовал слог га, но последнии затем был зачеркнут киноварью)
 
+# нормализация символов ᲂу
 
 # Теперь здесь только системные токены и GAP
 SPECIAL_RE = re.compile(r"(<s>|<pad>|</s>|<unk>|<mask>|\[CTX_[A-Z_]+\]|\[GAP\])")
@@ -397,6 +398,9 @@ def safe_clean_text(line: str) -> str:
     text = re.sub(r"([+:·])([^\s])", r"\1 \2", text)  # отделяем справа
     text = re.sub(r"([^\s])([+:·])", r"\1 \2", text)  # отделяем слева
 
+    text = re.sub(r"([\(\[])\s*([+:·])", r"\1\2", text)  # убираем пробел после открывающей скобки перед пунктуацией
+    text = re.sub(r"([+:·])\s*([\)\]])", r"\1\2", text)  # убираем пробел перед закрывающей скобкой после пунктуации
+
     # 11) Сжимаем пробелы
     text = re.sub(r"\s+", " ", text).strip()
 
@@ -488,11 +492,11 @@ def is_maskable_test_b_char(ch: str) -> bool:
     Возвращает True только для символов, которые реально стоит маскировать в test_b.
     Пробелы и пунктуация не маскируются.
     """
-    if not ch or ch.isspace():
-        return False
-    cat = unicodedata.category(ch)
-    if cat.startswith("P"):  # punctuation
-        return False
+    # if not ch or ch.isspace():
+    #     return False
+    # cat = unicodedata.category(ch)
+    # if cat.startswith("P"):  # punctuation
+    #     return False
     return True
 
 
