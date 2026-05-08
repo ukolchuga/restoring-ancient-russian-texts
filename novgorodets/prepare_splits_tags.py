@@ -92,6 +92,13 @@ SOURCES_CONFIG = [
         "weight": 15,
         "role": "train",
     },
+    {
+        "type": "file",
+        "path": "cleaned_data/nkrya/OND_final_cleaned.txt",
+        "tag": "[CTX_DAILY]",
+        "weight": 15,
+        "role": "train",
+    },
     # -- Church ---------------------------------------------------------------
     {
         "type": "file",
@@ -666,7 +673,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Формирует train / test_a / test_b из SOURCES_CONFIG"
     )
-    parser.add_argument("--out_dir", default="splits")
+    parser.add_argument("--out_dir", default="splits_tags")
     parser.add_argument("--test_ratio", type=float, default=0.05)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument(
