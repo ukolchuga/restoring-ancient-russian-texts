@@ -1,4 +1,5 @@
 import json
+import math
 import re
 
 import evaluate
@@ -64,17 +65,19 @@ def evaluate_test_a(model, tokenizer, test_a_path, device, batch_size=8):
     return perplexity
 
 
-def evaluate_test_b(model, tokenizer, test_b_path, device):
+def evaluate_test_b(model, tokenizer, test_b_path, device, top_k=5):
     """
-    Test B: Восстановление лакун.
-    Считаем CER (Character Error Rate) и Exact Match (EM).
+    Test B: Восстановление лакун с использованием Sequential Decoding (Beam Search).
+    Считаем CER, Exact Match @ 1 и Exact Match @ Top-5.
     """
-    print("\n--- Запуск Test B (Lacunae Restoration) ---")
+    print(f"\n--- Запуск Test B (Sequential Decoding, Top-K={top_k}) ---")
     cer_metric = evaluate.load("cer")
 
-    exact_matches = 0
+    exact_matches_top1 = 0
+    exact_matches_top5 = 0
     total_samples = 0
-    predictions_list = []
+
+    predictions_list = []  # Для CER берем только лучший вариант
     references_list = []
 
     with open(test_b_path, "r", encoding="utf-8") as f:
@@ -86,18 +89,15 @@ def evaluate_test_b(model, tokenizer, test_b_path, device):
         orig_text = record["original"]
         target_text = record["target"]
 
-        # 1. Токенизируем target_text и получаем координаты (offsets) токенов
+        # 1. Токенизация и поиск спанов
         encoded = tokenizer(
             target_text, return_offsets_mapping=True, return_tensors="pt"
         )
-        input_ids = encoded["input_ids"][0].clone()
+        base_input_ids = encoded["input_ids"][0].clone()
         offsets = encoded["offset_mapping"][0]
 
-        # 2. Ищем спаны (координаты символов), которые были в скобках
         spans_to_mask = []
         orig_idx = 0
-
-        # Регулярка игнорирует системные теги [GAP], [CTX_*] и ищет только наши лакуны
         pattern = re.compile(
             r"\(([^)]+)\)|\[(?!(?:GAP|MASK|PAD|UNK|CLS|SEP)\]|CTX_)([^\]]+)\]"
         )
@@ -113,10 +113,10 @@ def evaluate_test_b(model, tokenizer, test_b_path, device):
         if not spans_to_mask:
             continue
 
-        # 3. Определяем BPE-токены, пересекающиеся с лакунами
+        # 2. Поиск токенов для маскирования
         mask_token_indices = []
         for i, (tok_start, tok_end) in enumerate(offsets):
-            if tok_start == tok_end:  # Пропускаем спецтокены (CLS, SEP)
+            if tok_start == tok_end:
                 continue
             for span_start, span_end in spans_to_mask:
                 if max(tok_start, span_start) < min(tok_end, span_end):
@@ -126,44 +126,111 @@ def evaluate_test_b(model, tokenizer, test_b_path, device):
         if not mask_token_indices:
             continue
 
-        # 4. Маскируем нужные токены
-        masked_input_ids = input_ids.clone()
+        # 3. Подготовка стартового состояния (маскируем токены)
+        masked_input_ids = base_input_ids.clone()
         for idx in mask_token_indices:
             masked_input_ids[idx] = tokenizer.mask_token_id
 
-        # 5. Инференс
-        masked_input_ids = masked_input_ids.unsqueeze(0).to(device)
+        # 4. EASY-FIRST SEQUENTIAL DECODING
+        current_states = [{"input_ids": masked_input_ids, "log_prob": 0.0}]
+        unfilled_masks = mask_token_indices.copy()
+
         with torch.no_grad():
-            outputs = model(masked_input_ids)
-            predictions = torch.argmax(outputs.logits, dim=-1)[0].cpu()
+            while unfilled_masks:
+                # ШАГ 1: Ищем самую "простую" маску, используя лучшую текущую гипотезу
+                best_state_ids = current_states[0]["input_ids"].unsqueeze(0).to(device)
+                outputs = model(input_ids=best_state_ids)
+                logits = outputs.logits[0]
 
-        # 6. Подставляем предсказанные токены на места масок
-        final_ids = input_ids.clone()
-        for idx in mask_token_indices:
-            final_ids[idx] = predictions[idx]
+                best_mask_idx = None
+                highest_prob = -1.0
 
-        predicted_text = tokenizer.decode(final_ids, skip_special_tokens=True)
+                for m_idx in unfilled_masks:
+                    probs = torch.nn.functional.softmax(logits[m_idx], dim=-1)
+                    max_prob = torch.max(probs).item()
+                    if max_prob > highest_prob:
+                        highest_prob = max_prob
+                        best_mask_idx = m_idx
 
-        predictions_list.append(predicted_text)
-        references_list.append(target_text)
+                # Удаляем найденную маску из списка незаполненных
+                unfilled_masks.remove(best_mask_idx)
 
-        if predicted_text == target_text:
-            exact_matches += 1
+                # ШАГ 2: Батч-прогон и ветвление лучей (Beam Search) для выбранной маски
+                new_candidates = []
+                batch_inputs = torch.stack(
+                    [state["input_ids"] for state in current_states]
+                ).to(device)
+                outputs = model(input_ids=batch_inputs)
+
+                # Получаем логиты только для выбранной (самой простой) маски
+                mask_logits = outputs.logits[:, best_mask_idx, :]
+                mask_probs = torch.nn.functional.softmax(mask_logits, dim=-1)
+                top_k_probs, top_k_indices = torch.topk(mask_probs, top_k, dim=-1)
+
+                for state_idx, state in enumerate(current_states):
+                    for i in range(top_k):
+                        token_id = top_k_indices[state_idx, i].item()
+                        prob = top_k_probs[state_idx, i].item()
+
+                        new_input_ids = state["input_ids"].clone()
+                        new_input_ids[best_mask_idx] = token_id
+                        new_log_prob = state["log_prob"] + math.log(max(prob, 1e-9))
+
+                        new_candidates.append(
+                            {"input_ids": new_input_ids, "log_prob": new_log_prob}
+                        )
+
+                # Оставляем только лучшие Top-K гипотез
+                current_states = sorted(
+                    new_candidates, key=lambda x: x["log_prob"], reverse=True
+                )[:top_k]
+
+        # 5. Оценка результатов
+        # Декодируем чистый таргет для точного сравнения
+        clean_target = tokenizer.decode(base_input_ids, skip_special_tokens=True)
+
+        # Декодируем сгенерированные гипотезы
+        generated_texts = []
+        for state in current_states:
+            gen_text = tokenizer.decode(state["input_ids"], skip_special_tokens=True)
+            generated_texts.append(gen_text)
+
+        best_prediction = generated_texts[0]
+
+        predictions_list.append(best_prediction)
+        references_list.append(clean_target)
+
+        # Считаем Exact Match
+        if clean_target == best_prediction:
+            exact_matches_top1 += 1
+
+        if clean_target in generated_texts:
+            exact_matches_top5 += 1
+
         total_samples += 1
 
-    # 7. Считаем метрики
+    # 6. Итоговые метрики
     if total_samples > 0:
-        em_score = (exact_matches / total_samples) * 100
+        em1_score = (exact_matches_top1 / total_samples) * 100
+        em5_score = (exact_matches_top5 / total_samples) * 100
         cer_score = (
             cer_metric.compute(predictions=predictions_list, references=references_list)
             * 100
         )
 
         print(f"✅ Обработано лакун: {total_samples}")
-        print(f"✅ Exact Match (EM): {em_score:.2f}%")
-        print(f"✅ Character Error Rate (CER): {cer_score:.2f}%")
+        print(
+            f"✅ Exact Match @ 1: {em1_score:.2f}% (Идеальное совпадение лучшего варианта)"
+        )
+        print(
+            f"✅ Exact Match @ {top_k}: {em5_score:.2f}% (Правильный ответ есть в топ-{top_k})"
+        )
+        print(f"✅ Character Error Rate (CER): {cer_score:.2f}% (Чем ниже, тем лучше)")
+
+        return {"em_1": em1_score, "em_5": em5_score, "cer": cer_score}
     else:
         print("❌ Не найдено валидных лакун для тестирования.")
+        return {}
 
 
 if __name__ == "__main__":
