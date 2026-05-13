@@ -7,12 +7,12 @@ prepare_splits.py
 
   splits/train.txt     — основной корпус (95%), стратифицировано по CTX-тегу
   splits/test_a.txt    — основной корпус (5%), искусственные пропуски генерирует коллатор
-  splits/test_b.jsonl  — источники со скобками; (text) и [text] -> [MASK]xlen
+  splits/test_b.jsonl  — источники со скобками; (text) и [text] → [MASK]×len
 
 Поле "role" в SOURCES_CONFIG:
   "train"  — строки идут в train/test_a (веса применяются)
   "test_b" — строки со скобками идут в test_b; без скобок — опционально в train
-             (при --charters_to_train строки без скобок добавляются в train с weight)
+             (веса НЕ применяются: реальных грамот мало, дублирование бессмысленно)
 
 Формат test_b.jsonl:
   {
@@ -25,57 +25,76 @@ prepare_splits.py
   }
 
 Запуск:
-  python data/prepare_splits.py --out_dir splits
-  python data/prepare_splits.py --out_dir splits --no_square --charters_to_train
+  python prepare_splits.py --out_dir splits
+  python prepare_splits.py --out_dir splits --no_square --charters_to_train
 """
 
-import argparse
-import json
-import random
+import os
 import re
+import random
 import unicodedata
-from collections import defaultdict
+import json
+import argparse
 from pathlib import Path
+from collections import defaultdict
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-# ============================================================================
+# ══════════════════════════════════════════════════════════════════════════════
 # КОНФИГУРАЦИЯ ИСТОЧНИКОВ
-# ============================================================================
+# role="train"  → строки идут в train/test_a (с учётом weight)
+# role="test_b" → строки со скобками → test_b.jsonl (weight игнорируется)
+# ══════════════════════════════════════════════════════════════════════════════
 
 SOURCES_CONFIG = [
-    # -- Daily ----------------------------------------------------------------
+    # -- Birchbark (теги уже прописаны в файле) -------------------------------
     {
         "type": "file",
-        "path": "data/birch_bark/gramoty_final_categories_with_brackets.txt",
+        "path": "cleaned_data/birchbark/birchbark_final_cleaned_with_brackets.txt",
         "tag": "",
         "weight": 40,
         "role": "test_b",
     },
+    # -- Epigraphica -----------------------------------------------------------
     {
-        "type": "folder",
-        "path": "data/json_data/diacu_DAILY",
+        "type": "file",
+        "path": "cleaned_data/epigraphica/epigraphica_final_cleaned_with_brackets.txt",
+        "tag": "[CTX_CHURCH]",
+        "weight": 20,
+        "role": "test_b",
+    },
+    # -- Daily ----------------------------------------------------------------
+    {
+        "type": "file",
+        "path": "cleaned_data/diacu/diacu_DAILY.txt",
         "tag": "[CTX_DAILY]",
         "weight": 15,
         "role": "train",
     },
     {
-        "type": "folder",
-        "path": "data/torot/torot_DAILY",
+        "type": "file",
+        "path": "cleaned_data/torot/torot_DAILY.txt",
         "tag": "[CTX_DAILY]",
         "weight": 15,
         "role": "train",
     },
     {
-        "type": "folder",
-        "path": "data/pushkinskij_texts/clean_texts/DAILY",
+        "type": "file",
+        "path": "cleaned_data/pushkinskij_texts/pushkinskij_DAILY.txt",
         "tag": "[CTX_DAILY]",
         "weight": 15,
         "role": "train",
     },
     {
-        "type": "folder",
-        "path": "data/NKRYA/NKRYA_TEXTS/DAILY",
+        "type": "file",
+        "path": "cleaned_data/nkrya/nkrya_DAILY.txt",
+        "tag": "[CTX_DAILY]",
+        "weight": 15,
+        "role": "train",
+    },
+    {
+        "type": "file",
+        "path": "cleaned_data/nkrya/OND_final_cleaned.txt",
         "tag": "[CTX_DAILY]",
         "weight": 15,
         "role": "train",
@@ -83,135 +102,136 @@ SOURCES_CONFIG = [
     # -- Church ---------------------------------------------------------------
     {
         "type": "file",
-        "path": "data/epigraphica/epigraphica_final_cleaned_with_brackets.txt",
-        "tag": "",
-        "weight": 20,
-        "role": "test_b",
+        "path": "cleaned_data/bible/bible_final_cleaned.txt",
+        "tag": "[CTX_CHURCH]",
+        "weight": 1,
+        "role": "train",
     },
     {
         "type": "file",
-        "path": "data/bible/bible_full_clean.txt",
+        "path": "cleaned_data/diacu/diacu_CHURCH.txt",
         "tag": "[CTX_CHURCH]",
         "weight": 1,
         "role": "train",
     },
     {
-        "type": "folder",
-        "path": "data/json_data/diacu_CHURCH",
+        "type": "file",
+        "path": "cleaned_data/torot/torot_CHURCH.txt",
         "tag": "[CTX_CHURCH]",
         "weight": 1,
         "role": "train",
     },
     {
-        "type": "folder",
-        "path": "data/torot/torot_CHURCH",
-        "tag": "[CTX_CHURCH]",
-        "weight": 1,
-        "role": "train",
-    },
-    {
-        "type": "folder",
-        "path": "data/pushkinskij_texts/clean_texts/CHURCH",
+        "type": "file",
+        "path": "cleaned_data/pushkinskij_texts/pushkinskij_CHURCH.txt",
         "tag": "[CTX_CHURCH]",
         "weight": 1,
         "role": "train",
     },
     # -- Literature -----------------------------------------------------------
     {
-        "type": "folder",
-        "path": "data/json_data/diacu_LIT",
+        "type": "file",
+        "path": "cleaned_data/diacu/diacu_LIT.txt",
         "tag": "[CTX_LIT]",
         "weight": 3,
         "role": "train",
     },
     {
-        "type": "folder",
-        "path": "data/torot/torot_LIT",
+        "type": "file",
+        "path": "cleaned_data/torot/torot_LIT.txt",
         "tag": "[CTX_LIT]",
         "weight": 5,
         "role": "train",
     },
     {
-        "type": "folder",
-        "path": "data/pushkinskij_texts/clean_texts/LIT",
+        "type": "file",
+        "path": "cleaned_data/pushkinskij_texts/pushkinskij_LIT.txt",
         "tag": "[CTX_LIT]",
         "weight": 4,
         "role": "train",
     },
     {
-        "type": "folder",
-        "path": "data/NKRYA/NKRYA_TEXTS/LIT",
+        "type": "file",
+        "path": "cleaned_data/nkrya/nkrya_LIT.txt",
         "tag": "[CTX_LIT]",
         "weight": 4,
         "role": "train",
     },
     # -- Legal ----------------------------------------------------------------
     {
-        "type": "folder",
-        "path": "data/json_data/diacu_LEGAL",
+        "type": "file",
+        "path": "cleaned_data/diacu/diacu_LEGAL.txt",
         "tag": "[CTX_LEGAL]",
         "weight": 2,
         "role": "train",
     },
     {
-        "type": "folder",
-        "path": "data/torot/torot_LEGAL",
+        "type": "file",
+        "path": "cleaned_data/torot/torot_LEGAL.txt",
         "tag": "[CTX_LEGAL]",
         "weight": 20,
         "role": "train",
     },
     {
-        "type": "folder",
-        "path": "data/pushkinskij_texts/clean_texts/LEGAL",
+        "type": "file",
+        "path": "cleaned_data/pushkinskij_texts/pushkinskij_LEGAL.txt",
         "tag": "[CTX_LEGAL]",
         "weight": 10,
         "role": "train",
     },
     {
-        "type": "folder",
-        "path": "data/NKRYA/NKRYA_TEXTS/LEGAL",
+        "type": "file",
+        "path": "cleaned_data/nkrya/nkrya_LEGAL.txt",
         "tag": "[CTX_LEGAL]",
         "weight": 10,
         "role": "train",
     },
     # -- Epic -----------------------------------------------------------------
     {
-        "type": "folder",
-        "path": "data/bilini",
+        "type": "file",
+        "path": "cleaned_data/bylini/clean_original_novoya_zapis.txt",
         "tag": "[CTX_EPIC]",
         "weight": 10,
         "role": "train",
     },
     {
-        "type": "folder",
-        "path": "data/pushkinskij_texts/clean_texts/EPIC",
+        "type": "file",
+        "path": "cleaned_data/bylini/clean_original_staraya_zapis.txt",
+        "tag": "[CTX_EPIC]",
+        "weight": 10,
+        "role": "train",
+    },
+    {
+        "type": "file",
+        "path": "cleaned_data/pushkinskij_texts/pushkinskij_EPIC.txt",
         "tag": "[CTX_EPIC]",
         "weight": 10,
         "role": "train",
     },
     # -- Science --------------------------------------------------------------
     {
-        "type": "folder",
-        "path": "data/pushkinskij_texts/clean_texts/SCIENCE",
-        "tag": "[CTX_SCIENCE]",
-        "weight": 50,
-        "role": "train",
-    },
-    {
-        "type": "folder",
-        "path": "data/NKRYA/NKRYA_TEXTS/SCIENCE",
+        "type": "file",
+        "path": "cleaned_data/pushkinskij_texts/pushkinskij_SCIENCE.txt",
         "tag": "[CTX_SCIENCE]",
         "weight": 50,
         "role": "train",
     },
     {
         "type": "file",
-        "path": "data/ustav/ustav_for_training_2.txt",
+        "path": "cleaned_data/nkrya/nkrya_SCIENCE.txt",
+        "tag": "[CTX_SCIENCE]",
+        "weight": 50,
+        "role": "train",
+    },
+    {
+        "type": "file",
+        "path": "cleaned_data/ustav/ustav_final_cleaned.txt",
         "tag": "[CTX_SCIENCE]",
         "weight": 15,
         "role": "train",
     },
 ]
+
 
 # ============================================================================
 # ОЧИСТКА ТЕКСТА
@@ -247,6 +267,8 @@ _LAT_TO_CYR = {
     "X": "Х",
     "i": "і",
     "I": "І",
+    "w": "ѡ",
+    "W": "ѡ",
 }
 
 # р.п. —> руку приложил
@@ -315,6 +337,7 @@ _DELETE_CHARS = {
     "̈",
     "̴",
     "͘",
+    "ⸯ",
     "\u200e",  # LRM
     "\uf080",
     "\uf245",
@@ -411,6 +434,15 @@ def has_enough_cyrillic(text: str) -> bool:
     return len(re.findall(r"[а-яА-ЯёЁ\u0400-\u052F\uA640-\uA69F]", text)) >= 3
 
 
+def count_words(text: str) -> int:
+    """
+    Считает "слова" как последовательности непробельных символов.
+    Спецтокены вида [CTX_DAILY], [GAP] считаются одним словом.
+    """
+    if not text:
+        return 0
+    return len(re.findall(r"\S+", text))
+
 # ============================================================================
 # ЗАГРУЗКА ИСТОЧНИКОВ
 # ============================================================================
@@ -500,25 +532,28 @@ def is_maskable_test_b_char(ch: str) -> bool:
     return True
 
 
+# def mask_test_b_span(text: str) -> tuple[str, int]:
+#     """
+#     Маскирует только 'содержательные' символы внутри span.
+#     Пробелы и пунктуация сохраняются как есть.
+#
+#     Returns:
+#         masked_text, n_masked
+#     """
+#     masked_parts = []
+#     n_masked = 0
+#
+#     for ch in text:
+#         if is_maskable_test_b_char(ch):
+#             masked_parts.append("[MASK]")
+#             n_masked += 1
+#         else:
+#             masked_parts.append(ch)
+#
+#     return "".join(masked_parts), n_masked
+
 def mask_test_b_span(text: str) -> tuple[str, int]:
-    """
-    Маскирует только 'содержательные' символы внутри span.
-    Пробелы и пунктуация сохраняются как есть.
-
-    Returns:
-        masked_text, n_masked
-    """
-    masked_parts = []
-    n_masked = 0
-
-    for ch in text:
-        if is_maskable_test_b_char(ch):
-            masked_parts.append("[MASK]")
-            n_masked += 1
-        else:
-            masked_parts.append(ch)
-
-    return "".join(masked_parts), n_masked
+    return "[MASK]" * len(text), len(text)
 
 
 def process_test_b_line(line: str, include_square: bool = True):
@@ -638,7 +673,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Формирует train / test_a / test_b из SOURCES_CONFIG"
     )
-    parser.add_argument("--out_dir", default="splits")
+    parser.add_argument("--out_dir", default="splits_tags")
     parser.add_argument("--test_ratio", type=float, default=0.05)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument(
@@ -671,6 +706,9 @@ def main() -> None:
     # Все test_b строки в очищенном виде
     all_test_b_raw: list[tuple[str, int]] = []
 
+    source_word_stats: dict[str, int] = defaultdict(int)
+    category_word_stats: dict[str, int] = defaultdict(int)
+
     # ------------------------------------------------------------
     # 1) Сначала читаем ВСЕ источники
     # ------------------------------------------------------------
@@ -684,6 +722,14 @@ def main() -> None:
 
             if not cleaned or not has_enough_cyrillic(cleaned):
                 continue
+
+            word_count = count_words(cleaned)
+
+            source_key = cfg["path"]
+            source_word_stats[source_key] += word_count
+
+            tag = cfg["tag"] if cfg["tag"] else "[NO_TAG]"
+            category_word_stats[tag] += word_count
 
             if role == "test_b":
                 all_test_b_raw.append((cleaned, cfg["weight"]))
@@ -797,6 +843,7 @@ def main() -> None:
     print("\n✅ train/test_a записаны")
     print(f"  train.txt (с весами): {len(train_lines_with_weights):,}")
     print(f"  test_a.txt (unique):   {len(test_a_unique):,}")
+
     # ------------------------------------------------------------
     # 7) Строим test_b.jsonl только из test_b_for_eval
     # ------------------------------------------------------------
@@ -823,22 +870,30 @@ def main() -> None:
         + (" (добавлены в train)" if args.charters_to_train else " (пропущены)")
     )
 
-    print("\n  Примеры записей test_b (первые 3):")
-    for i, rec in enumerate(records[:3], start=1):
-        print(f"\n  [{i}] original:     {rec['original'][:90]}")
-        print(f"       masked_input: {rec['masked_input'][:90]}")
-        print(f"       target:       {rec['target'][:90]}")
-        print(
-            f"       n_masked={rec['n_masked_chars']}  "
-            f"spans={[s['text'] for s in rec['spans']]}"
-        )
+    # ------------------------------------------------------------
+    # Подсчёт слов в финальных датасетах
+    # ------------------------------------------------------------
+    train_word_count = sum(count_words(line) for line in train_lines_with_weights)
+    test_a_word_count = sum(count_words(line) for line in test_a_unique)
+    test_b_word_count = sum(count_words(rec["masked_input"]) for rec in records)
+    test_b_target_word_count = sum(count_words(rec["target"]) for rec in records)
+    total_final_word_count = train_word_count + test_a_word_count + test_b_target_word_count
 
-    print("\n" + "=" * 58)
-    print("✅ Готово!")
-    print(f"   {out}/train.txt     — {len(train_lines_with_weights):,} строк")
-    print(f"   {out}/test_a.txt    — {len(test_a_unique):,} строк")
-    print(f"   {out}/test_b.jsonl  — {len(records):,} записей")
-    print("=" * 58)
+    print("\n📊 Подсчёт слов по источникам:")
+    for cfg in SOURCES_CONFIG:
+        path = cfg["path"]
+        print(f"  {path:<70} {source_word_stats.get(path, 0):>10,}")
+
+    print("\n📊 Подсчёт слов по категориям:")
+    for tag in sorted(set(category_word_stats.keys())):
+        print(f"  {tag:<15} {category_word_stats[tag]:>10,}")
+
+    print("\n📊 Подсчёт слов в итоговых датасетах:")
+    print(f"  train.txt        {train_word_count:>10,}")
+    print(f"  test_a.txt       {test_a_word_count:>10,}")
+    print(f"  test_b.jsonl     {test_b_word_count:>10,}  (masked_input)")
+    print(f"  test_b.jsonl     {test_b_target_word_count:>10,}  (target)")
+    print(f"  total            {total_final_word_count:>10,}")
 
 
 if __name__ == "__main__":

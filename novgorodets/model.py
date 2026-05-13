@@ -62,9 +62,18 @@ class DualBertForMaskedLM(BertPreTrainedModel):
         char_emb = self.dual_embeddings.char_embeddings.weight
         logits = x @ char_emb.T + self.mlm_bias
 
+        logits = x @ char_emb.T + self.mlm_bias
+
+        if torch.isnan(logits).any() or torch.isinf(logits).any():
+            emb_norm = self.dual_embeddings.char_embeddings.weight.norm()
+            x_norm = x.norm()
+            raise RuntimeError(
+                f"NaN/Inf in logits! char_emb_norm={emb_norm:.2f}, x_norm={x_norm:.2f}"
+            )
+
         loss = None
         if labels is not None:
-            loss_fct = nn.CrossEntropyLoss(ignore_index=-100)
+            loss_fct = nn.CrossEntropyLoss(ignore_index=-100, label_smoothing=0.1)
             loss = loss_fct(logits.view(-1, self.config.vocab_char_size), labels.view(-1))
 
         if not return_dict:

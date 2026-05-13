@@ -12,7 +12,6 @@
 import argparse
 import json
 import logging
-import os
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -27,6 +26,10 @@ from config import DualBertConfig
 from model import DualBertForMaskedLM
 from collator import DualPhysicalDegradationCollator
 from build_char_tokenizer import SPECIAL_TOKENS
+import unicodedata
+
+ALLOWED_PRED_IDS: set[int] | None = None
+
 # ============================================================================
 # ЛОГИРОВАНИЕ
 # ============================================================================
@@ -62,11 +65,25 @@ def save_json(data: dict, path: str | Path) -> None:
 # ============================================================================
 
 def preprocess_logits_for_metrics(logits, labels):
-    """Подготавливает logits для расчета top-k метрик."""
+    """Подготавливает logits для расчета top-k метрик с учётом ALLOWED_PRED_IDS."""
     if isinstance(logits, tuple):
-        logits = logits[0]
-    return torch.topk(logits, k=5, dim=-1).indices
+        logits = logits[0]  # [batch, seq_len, vocab]
 
+    # Если фильтр не задан — поведение прежнее (берём topk по всем токенам)
+    if ALLOWED_PRED_IDS is None:
+        return torch.topk(logits, k=5, dim=-1).indices
+
+    # Маскируем неподходящие id: ставим очень маленькие логиты
+    vocab_size = logits.size(-1)
+    allowed_mask = torch.zeros(vocab_size, dtype=torch.bool, device=logits.device)
+    allowed_idxs = torch.tensor(list(ALLOWED_PRED_IDS), dtype=torch.long, device=logits.device)
+    allowed_mask[allowed_idxs] = True
+
+    # делаем копию logits и зануляем (вытесняем) дисаллоуед
+    masked_logits = logits.clone()
+    masked_logits[..., ~allowed_mask] = -1e9
+
+    return torch.topk(masked_logits, k=5, dim=-1).indices
 
 def compute_metrics(eval_preds):
     """Расчет top-k точности."""
@@ -200,6 +217,18 @@ def generate_predictions_report(
     def decode_one_token(token_id: int) -> str:
         return id_to_char.get(int(token_id), "[UNK]")
 
+    def _mask_pred_logits_for_allowed(pred_logits: torch.Tensor) -> torch.Tensor:
+        """Возвращает предлоги, где запрещённые id выставлены в -inf (т.е. не будут выбраны)."""
+        if ALLOWED_PRED_IDS is None:
+            return pred_logits
+        vocab_size = pred_logits.size(-1)
+        allowed_mask = torch.zeros(vocab_size, dtype=torch.bool, device=pred_logits.device)
+        allowed_idxs = torch.tensor(list(ALLOWED_PRED_IDS), dtype=torch.long, device=pred_logits.device)
+        allowed_mask[allowed_idxs] = True
+        masked = pred_logits.clone()
+        masked[..., ~allowed_mask] = -1e9
+        return masked
+
     def get_context(input_ids: list, pos: int, context_window: int = 20) -> str:
         """Извлекает текстовый контекст вокруг позиции с правильным выделением."""
         start = max(0, pos - context_window)
@@ -256,7 +285,8 @@ def generate_predictions_report(
                     continue
 
                 pred_logits = logits[pos]
-                top_ids = torch.topk(pred_logits, k=min(top_k_max, len(char_vocab))).indices.cpu().numpy()
+                pred_logits_masked = _mask_pred_logits_for_allowed(pred_logits)
+                top_ids = torch.topk(pred_logits_masked, k=min(top_k_max, len(char_vocab))).indices.cpu().numpy()
 
                 pred_id = int(top_ids[0])
                 true_char = decode_one_token(true_id)
@@ -340,7 +370,8 @@ def generate_predictions_report(
                         continue
 
                     pred_logits = sample_logits[pos]
-                    top_ids = torch.topk(pred_logits, k=min(top_k_max, len(char_vocab))).indices.cpu().numpy()
+                    pred_logits_masked = _mask_pred_logits_for_allowed(pred_logits)
+                    top_ids = torch.topk(pred_logits_masked, k=min(top_k_max, len(char_vocab))).indices.cpu().numpy()
 
                     pred_id = int(top_ids[0])
                     true_char = decode_one_token(true_id)
@@ -480,6 +511,15 @@ def main():
     char_vocab = load_json(args.char_vocab_path)
     word_vocab = load_json(args.word_vocab_path)
 
+    # ----- формируем allowed ids: разрешаем предсказывать буквы и пробелы (категория Zs)
+    global ALLOWED_PRED_IDS
+    ALLOWED_PRED_IDS = {
+        int(v) for k, v in char_vocab.items()
+        if len(k) == 1 and unicodedata.category(k) in ("Ll", "Lu", "Lo", "Zs")
+    }
+
+    special_ids = [char_vocab[tok] for tok in SPECIAL_TOKENS if tok in char_vocab]
+
     log.info(f"  Train samples: {len(dataset['train']):,}")
     log.info(f"  Eval samples:  {len(dataset['test_a']):,}")
     log.info(f"  Char vocab size: {len(char_vocab):,}")
@@ -512,8 +552,6 @@ def main():
     # ========================================================================
     # КОЛЛАТОР
     # ========================================================================
-
-    special_ids = [char_vocab[tok] for tok in SPECIAL_TOKENS if tok in char_vocab]
 
     collator = DualPhysicalDegradationCollator(
         mask_token_id=char_vocab["[MASK]"],
