@@ -11,7 +11,22 @@ OUTPUT_FOLDER = "diacu_cleaned_texts"  # Папка для чистых текс
 CSV_OUTPUT_FILE = "diacu_metadata.csv"  # Файл для Google Таблиц
 
 TITLO_RANGE = range(0x0483, 0x0488)
+CYR_NUMERALS = "авгдєѕзиѳіклмнѯопрстуфхѱѡцчшщъыьѣюѧѩѫѷѵ"
+NUM_PATTERN = re.compile(rf"([:+·])([{CYR_NUMERALS}]+҃)\1")
 
+PUNCT_MAP = {
+    "†": "+",
+    "×": "+",
+    "*": "+",
+    "⁘": ":",
+    "⁙": ":",
+    "⁞": ":",
+    "¦": ":",
+    "∙": "·",
+    ".": "·",
+    "҂": "·",
+    "\uf13f": "·",
+}
 # Обновленный словарь: спасаем опечатки оцифровщиков
 REPLACEMENTS = {
     "A": "А",
@@ -74,6 +89,22 @@ def split_long_line(text, max_len=500):
     return parts
 
 
+def _protect_numerals(text: str):
+    protected_nums = {}
+
+    def repl(m):
+        key = f"PNUM{len(protected_nums)}PNUM"
+        protected_nums[key] = m.group(0)
+        return key
+
+    return NUM_PATTERN.sub(repl, text), protected_nums
+
+
+def _unprotect_numerals(text: str, protected_nums: dict[str, str]) -> str:
+    for key, value in protected_nums.items():
+        text = text.replace(key, value)
+    return text
+
 def clean_diacu_text(text):
     if not text:
         return ""
@@ -102,31 +133,70 @@ def clean_diacu_text(text):
     text = re.sub(r"\d+", "", text)
     text = re.sub(r"[a-zA-Z]", "", text)
 
-    # 7. Удаляем остатки странной пунктуации
-    text = re.sub(r"[@#$%^&*=+<>\/\\~`{}\[\]]", "", text)
+    # 7. Нормализуем пунктуацию:
+    #    - часть знаков сводим к + : ·
+    #    - всю остальную пунктуацию превращаем в пробелы
+    cleaned_chars = []
+    for ch in text:
+        if ch in PUNCT_MAP:
+            cleaned_chars.append(PUNCT_MAP[ch])
+            continue
 
-    # 8. Умная очистка диакритики (оставляем титла)
+        if ch in {"+", ":", "·"}:
+            cleaned_chars.append(ch)
+            continue
+
+        cat = unicodedata.category(ch)
+        if cat[0] in {"L", "N", "M"} or ch.isspace():
+            cleaned_chars.append(ch)
+        else:
+            cleaned_chars.append(" ")
+
+    text = "".join(cleaned_chars)
+
+    # 8. Защищаем древнерусские числительные
+    text, protected_nums = _protect_numerals(text)
+
+    # 9. Отделяем всю пунктуацию пробелами от всего остального
+    #    (числительные уже защищены, так что их это не затронет)
+    text = re.sub(r"\s*([:+·])\s*", r" \1 ", text)
+
+    # 10. Возвращаем числительные обратно
+    text = _unprotect_numerals(text, protected_nums)
+
+    # 11. Умная очистка диакритики:
+    #     оставляем только титло, а все его варианты приводим к одному символу ҃
+    normalized = []
+    for ch in unicodedata.normalize("NFC", text):
+        if ord(ch) in TITLO_RANGE:
+            normalized.append("҃")
+        else:
+            normalized.append(ch)
+    text = "".join(normalized)
+
+    # 12. Ещё раз удалим лишние combining marks, но титло сохраним
     nfd_form = unicodedata.normalize("NFD", text)
     clean_chars = [
-        c for c in nfd_form if unicodedata.category(c) != "Mn" or ord(c) in TITLO_RANGE
+        c for c in nfd_form
+        if unicodedata.category(c) != "Mn" or c == "҃"
     ]
-    clean_text = unicodedata.normalize("NFC", "".join(clean_chars))
-    text = re.sub(r"[\u0300-\u036f]", "", clean_text)
+    text = unicodedata.normalize("NFC", "".join(clean_chars))
 
-    # 9. Переводим всё в нижний регистр
+    # 13. Переводим всё в нижний регистр
     text = text.lower()
 
-    # 10. Схлопываем пробелы
+    # 14. Схлопываем пробелы
     text = text.replace("\t", " ")
     text = re.sub(r"\s+", " ", text).strip()
+
+    # 15. Подчищаем мусор в начале строки
     text = re.sub(r"^[.\s\-\–\—\:]+", "", text)
 
     if not text:
         return ""
 
-    text = text[0].upper() + text[1:]
+    # text = text[0].upper() + text[1:]
     return text
-
 
 def main():
     if not os.path.exists(JSON_PATH):
@@ -171,33 +241,23 @@ def main():
         if not content:
             continue
 
-        # Создаем красивое имя файла: 001_Pouchenie_Vladimira.txt
         safe_title = sanitize_filename(title)
         filename = f"{idx+1:03d}_{safe_title}.txt"
         output_path = os.path.join(OUTPUT_FOLDER, filename)
 
-        # Разбиваем текст на строки
-        sentences = re.split(r"(?<=[.!?|;:\n])\s+", content)
+        clean_line = clean_diacu_text(content)
 
         file_lines_count = 0
         file_tokens_count = 0
 
-        with open(output_path, "w", encoding="utf-8") as outfile:
-            for sent in sentences:
-                clean_line = clean_diacu_text(sent)
-                for chunk in split_long_line(clean_line):
-                    # Отсекаем мусор: минимум 15 символов, 2 слова, наличие кириллицы
-                    if (
-                        len(chunk) > 15
-                        and len(chunk.split()) > 1
-                        and re.search(r"[а-яА-ЯёЁѣѢіІѵѴѫѸѡѠѕЅ]", chunk)
-                    ):
-                        outfile.write(f"{chunk}\n")
-                        file_lines_count += 1
+        if clean_line and len(clean_line) > 15 and len(clean_line.split()) > 1 and re.search(r"[а-яА-ЯёЁѣѢіІѵѴѫѸѡѠѕЅ]", clean_line):
+            with open(output_path, "w", encoding="utf-8") as outfile:
+                outfile.write(clean_line + "\n")
 
-                        # Считаем токены (слова + пунктуация)
-                        tokens_in_chunk = len(re.findall(r"\w+|[^\w\s]", chunk))
-                        file_tokens_count += tokens_in_chunk
+            file_lines_count = 1
+            file_tokens_count = len(re.findall(r"\w+|[^\w\s]", clean_line))
+        else:
+            continue
 
         # Сохраняем стату, если в файле есть полезный текст
         if file_lines_count > 0:
