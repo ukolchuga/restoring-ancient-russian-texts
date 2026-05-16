@@ -1,12 +1,16 @@
-import csv
-import sys
+from pathlib import Path
 import re
 import unicodedata
-from pathlib import Path
-
-csv.field_size_limit(sys.maxsize)
 
 BASE_DIR = Path(__file__).resolve().parent
+INPUT_ROOT = BASE_DIR / "NKRYA_TEXTS"
+
+FOLDERS = [
+    "DAILY",
+    "LEGAL",
+    "LIT",
+    "SCIENCE",
+]
 
 TITLO_RANGE = range(0x0483, 0x0488)
 
@@ -52,7 +56,13 @@ def clean_text(text: str) -> str:
     # Удаляем <...> вместе с содержимым
     text = re.sub(r"(<|‹)[^>]*(›|>)", " ", text)
 
-    # Удаляем скобки (), [], {}, оставляя содержимое
+    # Сначала нормализуем каверзные варианты gap'а в специальный placeholder,
+    # чтобы последующее удаление скобок не уничтожило маркер.
+    # Ловим: gap, GAP PLACEHOLDER, [gap], с любым регистром и с/без слова "placeholder".
+    GAP_PLACEHOLDER = "__GAP_PLACEHOLDER__"
+    text = re.sub(r"\[?\b(?:gap(?:\s*placeholder)?)\b\]?", GAP_PLACEHOLDER, text, flags=re.IGNORECASE)
+
+    # Удаляем скобки (), [], {}, оставляя содержимое (placeholder не содержит скобок, поэтому сохранится)
     text = re.sub(r"[(){}\[\]]", "", text)
 
     text = unicodedata.normalize("NFC", str(text)).lower()
@@ -95,6 +105,10 @@ def clean_text(text: str) -> str:
     text = re.sub(r"\s+", " ", text).strip()
     text = re.sub(r"^[.\s\-\–\—\:]+", "", text)
 
+    # Восстанавливаем placeholder в единый маркер [GAP] (в верхнем регистре),
+    # делаем замену регистронезависимо (placeholder ранее мог быть пониженного регистра).
+    text = re.sub(re.escape(GAP_PLACEHOLDER), "[GAP]", text, flags=re.IGNORECASE)
+
     return text
 
 
@@ -103,72 +117,34 @@ def has_enough_cyrillic(text: str) -> bool:
 
 
 def main():
-    csv_path = BASE_DIR / "OND_dataset_filtered.csv"
-    lit_output_path = BASE_DIR / "OND_LIT.txt"
-    legal_output_path = BASE_DIR / "OND_LEGAL.txt"
+    for folder_name in FOLDERS:
+        folder = INPUT_ROOT / folder_name
+        output_file = INPUT_ROOT / f"NKRYA_{folder_name}.txt"
 
-    if not csv_path.exists():
-        print(f"❌ Файл не найден: {csv_path}")
-        return
+        if not folder.exists():
+            print(f"⚠️ Папка не найдена: {folder}")
+            continue
 
-    print(f"📂 Обработка {csv_path}...")
-    print(f"   corpus == 'npl' → OND_LIT.txt")
-    print(f"   остальные (кроме birchbark) → OND_LEGAL.txt")
+        txt_files = sorted(folder.rglob("*.txt"))
+        print(f"📂 {folder_name}: {len(txt_files)} файлов")
 
-    lit_written = 0
-    legal_written = 0
-    skipped = 0
+        written = 0
+        with output_file.open("w", encoding="utf-8") as out:
+            for file_path in txt_files:
+                text = file_path.read_text(encoding="utf-8", errors="ignore")
+                text = clean_text(text)
 
-    with open(csv_path, "r", encoding="utf-8") as infile, \
-         open(lit_output_path, "w", encoding="utf-8") as lit_file, \
-         open(legal_output_path, "w", encoding="utf-8") as legal_file:
+                if not text:
+                    continue
 
-        reader = csv.DictReader(infile)
+                # Аналогично all.py: отбрасываем мусорные/слишком короткие тексты
+                if len(text) <= 15 or len(text.split()) <= 1 or not has_enough_cyrillic(text):
+                    continue
 
-        for row_idx, row in enumerate(reader, 1):
-            if row_idx % 10000 == 0:
-                print(f"   Обработано: {row_idx} строк...")
+                out.write(text + "\n")
+                written += 1
 
-            # Фильтруем birchbark
-            corpus = row.get("corpus", "").strip().lower()
-            if corpus == "birchbark":
-                skipped += 1
-                continue
-
-            # Ищем столбец с текстом
-            text = None
-            for col in ["text", "content", "data", "body"]:
-                if col in row:
-                    text = row[col]
-                    break
-
-            if not text:
-                skipped += 1
-                continue
-
-            text = clean_text(text)
-
-            if not text:
-                skipped += 1
-                continue
-
-            # Отбрасываем слишком короткие или мусорные
-            if len(text) <= 15 or len(text.split()) <= 1 or not has_enough_cyrillic(text):
-                skipped += 1
-                continue
-
-            # Определяем файл для записи
-            if corpus == "npl":
-                lit_file.write(text + "\n")
-                lit_written += 1
-            else:
-                legal_file.write(text + "\n")
-                legal_written += 1
-
-    print(f"✅ Сохранено:")
-    print(f"   📝 OND_LIT.txt: {lit_written} документов")
-    print(f"   📝 OND_LEGAL.txt: {legal_written} документов")
-    print(f"   ⏭️  Пропущено: {skipped}")
+        print(f"✅ Сохранено: {output_file} — {written} документов")
 
 
 if __name__ == "__main__":
