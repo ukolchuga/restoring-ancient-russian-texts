@@ -1,7 +1,9 @@
 import html
+import json
 import math
 import re
-from typing import Any, Dict, List
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 import torch
 import uvicorn
@@ -17,12 +19,11 @@ app = FastAPI(title="Dobrynya Text Restoration")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cpu")
 
 # Model configuration
-# TODO: Update MODEL_PATH_CHAR when character-level model is available
 MODEL_PATH_BPE = "AlexSychovUN/mini-roformer-ancient-rus-v2"
-MODEL_PATH_CHAR = "AlexSychovUN/mini-roformer-ancient-rus-v2"
+MODEL_PATH_CHAR = "./DualEmb-slav"
 
 print("Loading BPE model...")
 tokenizer_bpe = AutoTokenizer.from_pretrained(MODEL_PATH_BPE)
@@ -30,9 +31,70 @@ model_bpe = AutoModelForMaskedLM.from_pretrained(MODEL_PATH_BPE).to(device)
 model_bpe.eval()
 
 print("Loading character-level model...")
-tokenizer_char = AutoTokenizer.from_pretrained(MODEL_PATH_CHAR)
-model_char = AutoModelForMaskedLM.from_pretrained(MODEL_PATH_CHAR).to(device)
+model_char = AutoModelForMaskedLM.from_pretrained(
+    MODEL_PATH_CHAR, trust_remote_code=True
+).to(device)
 model_char.eval()
+
+char_vocab = json.loads(
+    Path("DualEmb-slav/char_vocab.json").read_text(encoding="utf-8")
+)
+word_vocab = json.loads(
+    Path("DualEmb-slav/word_vocab.json").read_text(encoding="utf-8")
+)
+id_to_char = {v: k for k, v in char_vocab.items()}
+
+SPECIAL_RE = re.compile(r"(\[GAP\]|\[MASK\]|\[PAD\]|\[UNK\]|\[CLS\]|\[SEP\]|[+:·])")
+
+
+def split_special(text: str) -> list[str]:
+    return [p for p in SPECIAL_RE.split(text) if p]
+
+
+def align_char_to_word(text: str, char_v: dict, word_v: dict, max_len: int = 256):
+    c_unk, c_pad, c_cls, c_sep = (
+        char_v["[UNK]"],
+        char_v["[PAD]"],
+        char_v["[CLS]"],
+        char_v["[SEP]"],
+    )
+    w_unk, w_pad = word_v.get("[UNK_WORD]", 0), word_v.get("[PAD_WORD]", 0)
+
+    input_ids, word_ids = [c_cls], [word_v.get("[CLS]", w_unk)]
+
+    for part in split_special(text.strip()):
+        if SPECIAL_RE.fullmatch(part):
+            input_ids.append(char_v.get(part, c_unk))
+            word_ids.append(word_v.get(part, w_unk))
+            continue
+        chunks = re.split(r"(\s+)", part)
+        for chunk in chunks:
+            if not chunk:
+                continue
+            if chunk.isspace():
+                for ch in chunk:
+                    input_ids.append(char_v.get(ch, c_unk))
+                    word_ids.append(w_unk)
+            else:
+                wid = word_v.get(chunk, w_unk)
+                for ch in chunk:
+                    input_ids.append(char_v.get(ch, c_unk))
+                    word_ids.append(wid)
+
+    input_ids.append(c_sep)
+    word_ids.append(word_v.get("[SEP]", w_unk))
+
+    if len(input_ids) > max_len:
+        input_ids, word_ids = input_ids[:max_len], word_ids[:max_len]
+        input_ids[-1], word_ids[-1] = c_sep, word_v.get("[SEP]", w_unk)
+
+    max_char_id = model_char.config.vocab_char_size - 1
+    max_word_id = model_char.config.vocab_word_size - 1
+
+    safe_input_ids = [idx if idx <= max_char_id else c_unk for idx in input_ids]
+    safe_word_ids = [idx if idx <= max_word_id else w_unk for idx in word_ids]
+
+    return {"input_ids": safe_input_ids, "word_ids": safe_word_ids}
 
 
 class RestoreRequest(BaseModel):
@@ -41,7 +103,7 @@ class RestoreRequest(BaseModel):
     """
 
     text: str
-    category: str
+    category: Optional[str] = None
     mode: str = "char"
     top_k: int = 5
     temperature: float = 1.0
@@ -49,10 +111,7 @@ class RestoreRequest(BaseModel):
 
 def generate_sequential(
     text: str,
-    category: str,
-    tokenizer,
-    model,
-    is_char_level: bool,
+    is_char: bool,
     top_k: int = 5,
     temperature: float = 1.0,
 ) -> List[List[Dict[str, Any]]]:
@@ -61,16 +120,25 @@ def generate_sequential(
     Dynamically fills the most confident masks first to provide better context for harder masks.
     Works for both character-level and BPE models.
     """
-    inputs = tokenizer(text, return_tensors="pt").to(device)
-    input_ids = inputs["input_ids"][0]
+    if is_char:
+        encoded = align_char_to_word(text, char_vocab, word_vocab)
+        input_ids = torch.tensor(encoded["input_ids"]).to(device)
+        word_ids = torch.tensor(encoded["word_ids"]).to(device)
+        mask_token_id = char_vocab["[MASK]"]
+        mask_str = "[MASK]"
+        model = model_char
+    else:
+        inputs = tokenizer_bpe(text, return_tensors="pt").to(device)
+        input_ids = inputs["input_ids"][0]
+        word_ids = None
+        mask_token_id = tokenizer_bpe.mask_token_id
+        mask_str = tokenizer_bpe.mask_token
+        model = model_bpe
 
-    mask_token_id = tokenizer.mask_token_id
     original_mask_indices = torch.where(input_ids == mask_token_id)[0].tolist()
-
     if not original_mask_indices:
         return []
 
-    # State tracking: inserted_tokens is now a dict {mask_index: token_id}
     current_states = [
         {"input_ids": input_ids.clone(), "log_prob": 0.0, "inserted_tokens": {}}
     ]
@@ -80,7 +148,13 @@ def generate_sequential(
         while unfilled_masks:
             # 1. FIND THE EASIEST MASK
             best_state_ids = current_states[0]["input_ids"].unsqueeze(0).to(device)
-            outputs = model(input_ids=best_state_ids)
+
+            if is_char:
+                outputs = model(
+                    input_ids=best_state_ids, word_ids=word_ids.unsqueeze(0)
+                )
+            else:
+                outputs = model(input_ids=best_state_ids)
             logits = outputs.logits[0]
 
             best_mask_idx = None
@@ -102,7 +176,14 @@ def generate_sequential(
             batch_input_ids = torch.stack(
                 [state["input_ids"] for state in current_states]
             ).to(device)
-            outputs = model(input_ids=batch_input_ids)
+
+            if is_char:
+                batch_word_ids = (
+                    word_ids.unsqueeze(0).expand(len(current_states), -1).to(device)
+                )
+                outputs = model(input_ids=batch_input_ids, word_ids=batch_word_ids)
+            else:
+                outputs = model(input_ids=batch_input_ids)
 
             mask_logits = outputs.logits[:, best_mask_idx, :]
             scaled_mask_logits = mask_logits / max(0.01, float(temperature))
@@ -139,44 +220,48 @@ def generate_sequential(
 
     # HTML build, different for char-level vs BPE due to tokenization differences
     variants = []
-    mask_token = tokenizer.mask_token
-    escaped_mask = html.escape(mask_token)
-    escaped_category = html.escape(f"[{category}]")
+    escaped_mask = html.escape(mask_str)
+    escaped_cat = html.escape(f"[{category}]")
 
     for state in current_states:
-        # Reconstruct the tokens in their ORIGINAL left-to-right order for the UI
-        ordered_inserted_ids = [
-            state["inserted_tokens"][idx] for idx in original_mask_indices
-        ]
-
-        inserted_phrase = tokenizer.decode(
-            ordered_inserted_ids, clean_up_tokenization_spaces=True
-        ).strip()
-
+        ordered_ids = [state["inserted_tokens"][idx] for idx in original_mask_indices]
         full_sentence = html.escape(text)
+        inserted_phrase = ""
 
-        # Replace asterisks one by one in left-to-right order
-        for token_id in ordered_inserted_ids:
-            token_str = tokenizer.decode([token_id])
-
-            if is_char_level:
-                clean_token = "&nbsp;" if token_str == " " else html.escape(token_str)
-            else:
-                clean_token = (
+        if is_char:
+            inserted_phrase = "".join(
+                [id_to_char.get(tid, "") for tid in ordered_ids]
+            ).strip()
+            for token_id in ordered_ids:
+                char_str = id_to_char.get(token_id, "")
+                clean_token = "&nbsp;" if char_str == " " else html.escape(char_str)
+                full_sentence = full_sentence.replace(
+                    escaped_mask,
+                    f'<span class="highlight-restored">{clean_token}</span>',
+                    1,
+                )
+        else:
+            inserted_phrase = tokenizer_bpe.decode(
+                ordered_ids, clean_up_tokenization_spaces=True
+            ).strip()
+            for token_id in ordered_ids:
+                token_str = tokenizer_bpe.decode([token_id])
+                clean_token = html.escape(
                     token_str.replace("Ġ", "").replace("##", "").replace(" ", "")
                 )
-            replacement = f'<span class="highlight-restored">{clean_token}</span>'
-            full_sentence = full_sentence.replace(escaped_mask, replacement, 1)
+                full_sentence = full_sentence.replace(
+                    escaped_mask,
+                    f'<span class="highlight-restored">{clean_token}</span>',
+                    1,
+                )
 
-        full_sentence = full_sentence.replace(escaped_category, "").strip()
-        full_sentence = re.sub(r"\s+", " ", full_sentence)
-
-        final_prob = math.exp(state["log_prob"])
-
+        full_sentence = re.sub(
+            r"\s+", " ", full_sentence.replace(escaped_cat, "").strip()
+        )
         variants.append(
             {
-                "word": inserted_phrase if inserted_phrase else "...",
-                "score": round(final_prob * 100, 2),
+                "word": inserted_phrase or "...",
+                "score": round(math.exp(state["log_prob"]) * 100, 2),
                 "full_sentence": full_sentence,
                 "raw_log_prob": state["log_prob"],
             }
@@ -201,74 +286,51 @@ async def restore_text(req: RestoreRequest) -> Dict[str, Any]:
     """
     try:
         is_char = req.mode == "char"
-        tokenizer = tokenizer_char if is_char else tokenizer_bpe
-        model = model_char if is_char else model_bpe
-        mask = tokenizer.mask_token
-
+        mask = "[MASK]" if is_char else tokenizer_bpe.mask_token
         text = req.text.replace("#", "[GAP]")
 
         if not is_char:
             # BPE, -, * -> one mask token each because bpe predicts partial words
             text = text.replace("-", mask).replace("*", mask)
-            text = re.sub(r"\s+", " ", text).strip()
-            query = f"[{req.category}] {text}"
-
-            results = generate_sequential(
-                query,
-                req.category,
-                tokenizer,
-                model,
-                is_char,
-                req.top_k,
-                req.temperature,
-            )
-            return {"status": "success", "results": [results]}
+            query = re.sub(r" +", " ", text).strip()
+            return {
+                "status": "success",
+                "results": [
+                    generate_sequential(query, False, req.top_k, req.temperature)
+                ],
+            }
 
         else:
             # Character-level, - -> exactly on mask token
 
             base_text = text.replace("-", mask)
-
             if "*" in base_text:
-                best_results = []
-                best_score = -float("inf")
-
+                best_results, best_score = [], -float("inf")
                 for length in range(1, 6):
                     test_text = base_text.replace("*", mask * length)
-                    test_text = re.sub(r"\s+", " ", test_text).strip()
-                    query = f"[{req.category}] {test_text}"
-
+                    query = re.sub(r" +", " ", test_text).strip()
                     variants = generate_sequential(
-                        query,
-                        req.category,
-                        tokenizer,
-                        model,
-                        is_char,
-                        req.top_k,
-                        req.temperature,
+                        query, True, req.top_k, req.temperature
                     )
 
-                    if variants:
-                        top_variant_score = variants[0]["raw_log_prob"]
-                        if top_variant_score > best_score:
-                            best_score = top_variant_score
-                            best_results = variants
-
+                    if isinstance(variants, list) and variants:
+                        if (
+                            "raw_log_prob" in variants[0]
+                            and variants[0]["raw_log_prob"] > best_score
+                        ):
+                            best_score, best_results = (
+                                variants[0]["raw_log_prob"],
+                                variants,
+                            )
                 return {"status": "success", "results": [best_results]}
-
             else:
-                base_text = re.sub(r"\s+", " ", base_text).strip()
-                query = f"[{req.category}] {base_text}"
-                results = generate_sequential(
-                    query,
-                    req.category,
-                    tokenizer,
-                    model,
-                    is_char,
-                    req.top_k,
-                    req.temperature,
-                )
-                return {"status": "success", "results": [results]}
+                query = re.sub(r" +", " ", base_text).strip()
+                return {
+                    "status": "success",
+                    "results": [
+                        generate_sequential(query, True, req.top_k, req.temperature)
+                    ],
+                }
 
     except Exception as e:
         return {"status": "error", "message": str(e)}
