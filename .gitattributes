@@ -1,2 +1,0 @@
-data/ancient_rus_ready_for_bert.txt filter=lfs diff=lfs merge=lfs -text
-data/final_ancient_rus_dataset.txt filter=lfs diff=lfs merge=lfs -text
