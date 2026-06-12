@@ -6,13 +6,13 @@ from pathlib import Path
 from bertislav_normalize import normalize
 
 # =============================================================================
-# ОПРЕДЕЛЕНИЕ КАТЕГОРИИ
+# CATEGORIZATION LOGIC
 # =============================================================================
 
 CATEGORIES = ["CHURCH", "DAILY", "LIT", "LEGAL"]
 
-
 def get_category(title: str) -> str:
+    """Classifies the document into a specific domain based on title keywords."""
     name = title.lower()
 
     if any(word in name for word in [
@@ -39,18 +39,20 @@ def get_category(title: str) -> str:
         return "LIT"
 
     else:
+        # Default fallback category
         return "LEGAL"
 
 
 # =============================================================================
-# ОЧИСТКА ТЕКСТА
+# TEXT CLEANING & NORMALIZATION
 # =============================================================================
 
+# Maps historical/rare symbols to standard structural punctuation
 PUNCT_MAP = {
     "†": "+", "×": "+", "*": "+",
     "⁘": ":", "⁙": ":", "⁞": ":", "¦": ":",
     "∙": "·", ".": "·", "҂": "·", "\uf13f": "·",
-    # буквы
+    # Specific character normalizations
     "": "ч", "": "с҃", "": "и", "вⷬ": "вр",
 }
 
@@ -72,6 +74,7 @@ TITLE_BLACKLIST = {
     "житие вассиана тиксненского (чудеса 9–29)"
 }
 
+# Fragments indicating the start of modern editorial notes or metadata
 TRUNCATE_AFTER_MARKERS = [
     "С наало  богословленеС",
     "Заглавието е по НБКМ",
@@ -88,12 +91,12 @@ TRUNCATE_AFTER_MARKERS = [
 
 TOROTTREEBANK_PREFIX = "https://github.com/torottreebank/"
 
-# Важно: без цифр — чтобы потом не сломался при удалении чисел
+# Placeholder used to protect gaps from being stripped out during number/symbol removal
 _GAP_PLACEHOLDER = "_GAP_PLACEHOLDER_"
 
 
 def cut_after_first_marker(text: str, markers: list[str]) -> str:
-    """Обрезает текст по первому найденному маркеру."""
+    """Truncates the text at the first occurrence of any known editorial marker."""
     first_pos = None
     for marker in markers:
         m = re.search(re.escape(marker), text, flags=re.IGNORECASE)
@@ -101,12 +104,14 @@ def cut_after_first_marker(text: str, markers: list[str]) -> str:
             pos = m.start()
             if first_pos is None or pos < first_pos:
                 first_pos = pos
+                
     if first_pos is None:
         return text
     return text[:first_pos]
 
 
 def should_skip_doc(doc: dict, title: str) -> bool:
+    """Determines if a document should be excluded from the final dataset."""
     source = str(doc.get("Source", "") or "")
     title_norm = unicodedata.normalize("NFC", str(title)).casefold().strip()
 
@@ -119,69 +124,52 @@ def should_skip_doc(doc: dict, title: str) -> bool:
     return False
 
 
-
 def normalize_text(text: str) -> str:
+    """Cleans, normalizes, and removes artifacts from the raw historical text."""
     if not text:
         return ""
 
     text = str(text)
 
-    # 1) Обрезаем текст после служебных фрагментов
+    # 1) Truncate modern editorial footers/notes
     text = cut_after_first_marker(text, TRUNCATE_AFTER_MARKERS)
 
-    # 2) Убираем "҆"
+    # 2) Remove specific historical diacritics that impede processing (e.g., palatalization mark)
     text = text.replace("҆", "")
 
-    # 3) Удаляем содержимое {} и <>
+    # 3) Remove inline editorial expansions or page reconstructions found in {} or <>
     text = re.sub(r"\{.*?\}", " ", text, flags=re.DOTALL)
     text = re.sub(r"<.*?>", " ", text, flags=re.DOTALL)
 
+    # Normalize Unicode characters and flatten whitespace
     text = unicodedata.normalize("NFC", text)
     text = text.replace("\r", " ").replace("\n", " ").replace("\t", " ").lower()
 
-    # 4) Многоточия -> [GAP]
+    # 4) Standardize ellipses indicating missing text into a distinct [GAP] token
     text = re.sub(r"\.{2,}|…", "[GAP]", text)
 
-    # 5) Защищаем [GAP] перед общими заменами
+    # 5) Protect the [GAP] token from subsequent aggressive regex replacements
     text = text.replace("[GAP]", _GAP_PLACEHOLDER)
 
-    # 6) Убираем числительные/мусор по вашим правилам
+    # 6) Strip structural manuscript metadata and artifact numbers:
+    
+    # 6.1) Remove alphanumeric tags with periods at the end of words (e.g., ѡ...3. -> ѡ...)
+    text = re.sub(r"(?<=[\u0400-\u052F\uA640-\uA69F])[0-9A-Za-z]+\.", "", text)
 
-    # 6.1) цифры/латиница в конце слова с точкой: ѡ...3. -> ѡ...
-    text = re.sub(
-        r"(?<=[\u0400-\u052F\uA640-\uA69F])[0-9A-Za-z]+\.",
-        "",
-        text,
-    )
+    # 6.2) Remove manuscript folio/page numbers (e.g., .162vне -> . не)
+    text = re.sub(r"\.(\d+[rv])(?=[\u0400-\u052F\uA640-\uA69F])", ". ", text)
 
-    # 6.2) .162vне -> . не
-    text = re.sub(
-        r"\.(\d+[rv])(?=[\u0400-\u052F\uA640-\uA69F])",
-        ". ",
-        text,
-    )
+    # 6.3) Remove inline column/folio markers (e.g., въ|57бꙁвѣща́еть -> въꙁвѣща́еть)
+    text = re.sub(r"\|(\d+[абab])(?=[\u0400-\u052F\uA640-\uA69F])", "", text)
 
-    # 6.3) въ|57бꙁвѣща́еть -> въꙁвѣща́еть
-    #      прѣи... . |57аѡ͗ -> прѣи... . ѡ͗
-    text = re.sub(
-        r"\|(\d+[абab])(?=[\u0400-\u052F\uA640-\uA69F])",
-        "",
-        text,
-    )
+    # 6.4) Remove Roman numerals followed by a dot (e.g., ХХХVІ.)
+    text = re.sub(r"(?<!\w)[IVXLCDMХхVvІі]{2,}\.", " ", text)
 
-    # 6.4) Римские числительные с точкой в конце: ХХХVІ. -> ""
-    text = re.sub(
-        r"(?<!\w)[IVXLCDMХхVvІі]{2,}\.",
-        " ",
-        text,
-    )
-
-    # 6.5) Все остальные числа -> пробелы
+    # 6.5) Remove all remaining standard digits (assumed to be archival noise)
     text = re.sub(r"\d+", " ", text)
 
-    # 7) Общая посимвольная фильтрация:
-    #    - сохраняем буквы, цифры (если остались), знаки-маркеры, пробелы
-    #    - всё остальное -> пробел
+    # 7) Character-level filtering:
+    # Keep only letters, mapped punctuation, and whitespace. Replace everything else.
     out = []
     for ch in text:
         if ch in PUNCT_MAP:
@@ -192,39 +180,40 @@ def normalize_text(text: str) -> str:
             continue
 
         cat = unicodedata.category(ch)
+        # Keep Letters (L), Numbers/Digits (N), Marks/Diacritics (M), and Spaces
         if cat[0] in {"L", "N", "M"} or ch.isspace():
             out.append(ch)
         else:
-            # скобки тоже сюда попадут: они удалятся,
-            # а содержимое останется
+            # Replaces unmapped punctuation (like standalone brackets) with spaces
             out.append(" ")
 
     text = "".join(out)
 
-
-    # 8) Возвращаем [GAP]
+    # 8) Restore the protected [GAP] tokens
     text = text.replace(_GAP_PLACEHOLDER, "[GAP]")
 
-    # 9) Убираем лишние пробелы
+    # 9) Collapse multiple spaces into a single space and strip trailing/leading whitespace
     text = re.sub(r"\s+", " ", text).strip()
 
+    # Apply external NLP library normalization (e.g., handling specific orthography)
     text = normalize(text)
 
     return text
 
 
 def has_enough_cyrillic(text: str) -> bool:
+    """Ensures the document contains a minimum threshold of valid historical Cyrillic letters."""
     return len(re.findall(r"[а-яёѣіѵѫѡѕ]", text)) >= 3
 
 
 # =============================================================================
-# MAIN
+# MAIN EXECUTION
 # =============================================================================
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Парсер и категоризатор DIACU")
-    parser.add_argument("--json", default="DIACU_1.0.json")
-    parser.add_argument("--out_dir", default=".")
+    parser = argparse.ArgumentParser(description="DIACU Dataset Parser and Categorizer")
+    parser.add_argument("--json", default="DIACU_1.0.json", help="Path to input JSON dataset")
+    parser.add_argument("--out_dir", default=".", help="Directory for output TXT files")
     args = parser.parse_args()
 
     json_path = Path(args.json)
@@ -232,23 +221,26 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     if not json_path.exists():
-        print(f"Файл не найден: {json_path}")
+        print(f"Error: File not found at {json_path}")
         return
 
-    print(f"Читаем {json_path}...")
+    print(f"Reading dataset: {json_path}...")
     with open(json_path, encoding="utf-8") as f:
         data = json.load(f)
 
     docs = data.get("Documents", [])
-    print(f"  Документов в JSON: {len(docs):,}")
+    print(f"Documents found in JSON: {len(docs):,}")
 
+    # Prepare output file streams for each category
     out_files = {
         cat: (out_dir / f"diacu_{cat}.txt").open("w", encoding="utf-8")
         for cat in CATEGORIES
     }
+    
     stats: dict = {cat: 0 for cat in CATEGORIES}
     skipped = 0
 
+    # Process each document
     for idx, doc in enumerate(docs):
         title = doc.get("Title", "") or doc.get("Original_title", f"doc_{idx}")
 
@@ -259,6 +251,7 @@ def main() -> None:
         content = doc.get("Content", "")
         cleaned = normalize_text(content)
 
+        # Skip empty documents or those that lack sufficient Cyrillic content after cleaning
         if not cleaned or not has_enough_cyrillic(cleaned):
             skipped += 1
             continue
@@ -267,30 +260,33 @@ def main() -> None:
         out_files[cat].write(cleaned + "\n")
         stats[cat] += 1
 
+    # Close all file streams
     for f in out_files.values():
         f.close()
 
-    # Удаляем пустые файлы
+    # Cleanup: Remove any output files that remained empty
     for cat in CATEGORIES:
         p = out_dir / f"diacu_{cat}.txt"
         if p.stat().st_size == 0:
             p.unlink()
 
+    # Print processing summary
     total = sum(stats.values())
     labels = {
-        "CHURCH": "Церковные",
-        "DAILY":  "Бытовые",
-        "LIT":    "Литературные",
-        "LEGAL":  "Юридические",
+        "CHURCH": "Church (Religious)",
+        "DAILY":  "Daily (Everyday)",
+        "LIT":    "Literary",
+        "LEGAL":  "Legal/Admin",
     }
+    
     print("\n" + "=" * 55)
-    print("Готово!")
-    print(f"  Пропущено: {skipped}")
-    print(f"  Записано:  {total:,}")
+    print("Processing Complete!")
+    print(f"  Documents Skipped: {skipped:,}")
+    print(f"  Documents Written: {total:,}")
     print()
     for cat in CATEGORIES:
         if stats[cat]:
-            print(f"  {labels[cat]:<15} ({cat}): {stats[cat]:>5,}  -> diacu_{cat}.txt")
+            print(f"  {labels[cat]:<18} ({cat}): {stats[cat]:>5,}  -> diacu_{cat}.txt")
     print("=" * 55)
 
 
